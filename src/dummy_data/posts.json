@@ -1,0 +1,144 @@
+{
+    "posts": [
+        {
+            "key": "1",
+            "title": "The First Post",
+            "status": "PUBLISHED",
+            "author": "John Doe",
+            "updatedAt": "2026-02-24T06:07:45.682Z"
+        },
+        {
+            "key": "2",
+            "title": "The Second Post",
+            "status": "DRAFT",
+            "author": "John Valencia",
+            "updatedAt": "2026-02-24T06:07:45.682Z"
+        },
+        {
+            "key": "3",
+            "title": "The Third Post",
+            "status": "PUBLISHED",
+            "author": "Hikaru Nakamura",
+            "updatedAt": "2026-02-24T06:07:45.682Z"
+        },
+        {
+            "key": "4",
+            "title": "The Fourth Post",
+            "status": "DRAFT",
+            "author": "Magnus Carlsen",
+            "updatedAt": "2026-02-24T06:07:45.682Z"
+        },
+        {
+            "key": "5",
+            "title": "The Fifth Post",
+            "status": "DRAFT",
+            "author": "Hikaru Nakamura",
+            "updatedAt": "2026-02-24T06:07:45.682Z"
+        },
+        {
+            "key": "6",
+            "title": "The Sixth Post",
+            "status": "DRAFT",
+            "author": "Magnus Carlsen",
+            "updatedAt": "2026-02-24T06:07:45.682Z"
+        },
+        {
+            "key": "7",
+            "title": "The Seventh Post",
+            "status": "PUBLISHED",
+            "author": "Rasheed Rashard",
+            "updatedAt": "2026-02-24T06:07:45.682Z"
+        },
+        {
+            "key": "8",
+            "title": "The Eighth Post",
+            "status": "DRAFT",
+            "author": "Lebron Sinta",
+            "updatedAt": "2026-02-24T06:07:45.682Z"
+        },
+        {
+            "key": "9",
+            "title": "The Ninth Post",
+            "status": "PUBLISHED",
+            "author": "Lebron Sinta",
+            "updatedAt": "2026-02-24T06:07:45.682Z"
+        },
+        {
+            "key": "10",
+            "title": "The Tenth Post",
+            "status": "DRAFT",
+            "author": "Lebron Sinta",
+            "updatedAt": "2026-02-24T06:07:45.682Z"
+        },
+        {
+            "key": "11",
+            "title": "The Eleventh Post",
+            "status": "DRAFT",
+            "author": "Ody Pixel",
+            "updatedAt": "2026-02-24T06:07:45.682Z"
+        },
+        {
+            "key": "12",
+            "title": "The Twelfth Post",
+            "status": "DRAFT",
+            "author": "Kevin Hart",
+            "updatedAt": "2026-02-24T06:07:45.682Z"
+        },
+        {
+            "key": "13",
+            "title": "The Thirteenth Post",
+            "status": "PUBLISHED",
+            "author": "Alexandr Karpov",
+            "updatedAt": "2026-02-24T06:07:45.682Z"
+        },
+        {
+            "key": "14",
+            "title": "The Fourteenth Post",
+            "status": "DRAFT",
+            "author": "Anathan Pham",
+            "updatedAt": "2026-02-24T06:07:45.682Z"
+        },
+        {
+            "key": "15",
+            "title": "The Fifteenth Post",
+            "status": "PUBLISHED",
+            "author": "Topias Tavitsainen",
+            "updatedAt": "2026-02-24T06:07:45.682Z"
+        },
+        {
+            "key": "16",
+            "title": "The Sixteenth Post",
+            "status": "DRAFT",
+            "author": "Johan Sundstein",
+            "updatedAt": "2026-02-24T06:07:45.682Z"
+        },
+        {
+            "key": "17",
+            "title": "The Seventeenth Post",
+            "status": "PUBLISHED",
+            "author": "Sebastian Debs",
+            "updatedAt": "2026-02-24T06:07:45.682Z"
+        },
+        {
+            "key": "18",
+            "title": "The Eighteenth Post",
+            "status": "PUBLISHED",
+            "author": "Nikola Jokic",
+            "updatedAt": "2026-02-24T06:07:45.682Z"
+        },
+        {
+            "key": "19",
+            "title": "The Nineteenth Post",
+            "status": "DRAFT",
+            "author": "Jamal Murray",
+            "updatedAt": "2026-02-24T06:07:45.682Z"
+        },
+        {
+            "key": "20",
+            "title": "The Twentieth Post",
+            "status": "PUBLISHED",
+            "author": "Shai Gilgeous-Alexander",
+            "updatedAt": "2026-02-24T06:07:45.682Z"
+        }
+    ]
+}

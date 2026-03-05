@@ -1,0 +1,124 @@
+{
+    "inquiries": [
+        {
+            "key": "1",
+            "name": "John Doe",
+            "date": "2022-01-01",
+            "status": "contacted"
+        },
+        {
+            "key": "2",
+            "name": "Jane Doe",
+            "date": "2022-01-02",
+            "status": "pending"
+        },
+        {
+            "key": "3",
+            "name": "Naruto Uzumaki",
+            "date": "2022-01-01",
+            "status": "contacted"
+        },
+        {
+            "key": "4",
+            "name": "Sasuke Uchiha",
+            "date": "2022-01-02",
+            "status": "pending"
+        },
+        {
+            "key": "5",
+            "name": "Sakura Haruno",
+            "date": "2022-01-01",
+            "status": "contacted"
+        },
+        {
+            "key": "6",
+            "name": "Kakashi Hatake",
+            "date": "2022-01-02",
+            "status": "pending"
+        },
+        {
+            "key": "7",
+            "name": "Hinata Hyuga",
+            "date": "2022-01-01",
+            "status": "contacted"
+        },
+        {
+            "key": "8",
+            "name": "Shikamaru Nara",
+            "date": "2022-01-02",
+            "status": "pending"
+        },
+        {
+            "key": "9",
+            "name": "Itachi Uchiha",
+            "date": "2022-01-01",
+            "status": "contacted"
+        },
+        {
+            "key": "10",
+            "name": "Orochimaru",
+            "date": "2022-01-02",
+            "status": "pending"
+        },
+        {
+            "key": "11",
+            "name": "Pain",
+            "date": "2022-01-01",
+            "status": "contacted"
+        },
+        {
+            "key": "12",
+            "name": "Madara Uchiha",
+            "date": "2022-01-02",
+            "status": "pending"
+        },
+        {
+            "key": "13",
+            "name": "Tsunade Senju",
+            "date": "2022-01-01",
+            "status": "contacted"
+        },
+        {
+            "key": "14",
+            "name": "Jiraiya",
+            "date": "2022-01-02",
+            "status": "pending"
+        },
+        {
+            "key": "15",
+            "name": "Minato Namikaze",
+            "date": "2022-01-01",
+            "status": "contacted"
+        },
+        {
+            "key": "16",
+            "name": "John Wick",
+            "date": "2022-01-02",
+            "status": "pending"
+        },
+        {
+            "key": "17",
+            "name": "Obito Uchiha",
+            "date": "2022-01-01",
+            "status": "contacted"
+        },
+        {
+            "key": "18",
+            "name": "Lebron James",
+            "date": "2022-01-02",
+            "status": "pending"
+        },
+        {
+            "key": "19",
+            "name": "Kevin Durant",
+            "date": "2022-01-01",
+            "status": "pending"
+        },
+        {
+            "key": "20",
+            "name": "Kobe Bryant",
+            "date": "2022-01-02",
+            "status": "pending"
+        }
+    ]
+}

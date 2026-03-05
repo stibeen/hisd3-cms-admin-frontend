@@ -1,0 +1,30 @@
+{
+    "team": [
+        {
+            "key": "1",
+            "member_name": "John Doe",
+            "designation": "Software Engineer",
+            "social_links": {
+                "github": "https://github.com/johndoe",
+                "linkedin": "https://linkedin.com/in/johndoe"
+            }
+        },
+        {
+            "key": "2",
+            "member_name": "Jane Smith",
+            "designation": "Frontend Developer",
+            "social_links": {
+                "github": "https://github.com/janesmith"
+            }
+        },
+        {
+            "key": "3",
+            "member_name": "Shane Doe",
+            "designation": "Backend Developer",
+            "social_links": {
+                "linkedin": "https://linkedin.com/in/shanedoe",
+                "x": "https://x.com/shanedoe"
+            }
+        }
+    ]
+}
