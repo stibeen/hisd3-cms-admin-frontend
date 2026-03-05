@@ -9,6 +9,8 @@ export const Route = createFileRoute('/login')({
     component: Login,
 })
 
+//clone nahu ni
+
 function Login() {
     const navigate = useNavigate();
     const [signin, { loading }] = useMutation(SIGN_IN_MUTATION);
