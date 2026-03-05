@@ -82,7 +82,6 @@ function RouteComponent() {
   const handleCreateArticle = async (status: ArticleStatus) => {
     try {
       const { coverImageId, coverImageUrl, ...actualPayload } = formData;
-
       await createArticle({
         variables: {
           payload: {
