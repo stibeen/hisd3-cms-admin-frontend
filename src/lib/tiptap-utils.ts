@@ -374,17 +374,39 @@ export const handleImageUpload = async (
     )
   }
 
-  // For demo/testing: Simulate upload progress. In production, replace the following code
-  // with your own upload implementation.
-  for (let progress = 0; progress <= 100; progress += 10) {
-    if (abortSignal?.aborted) {
-      throw new Error("Upload cancelled")
-    }
-    await new Promise((resolve) => setTimeout(resolve, 500))
-    onProgress?.({ progress })
+  // Inside handleImageUpload in tiptap-utils.ts
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/media/upload`, {
+    method: 'POST',
+    body: formData,
+    credentials: 'include',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+      'ngrok-skip-browser-warning': 'true'
+    },
+    signal: abortSignal, // This allows Tiptap to cancel the upload if the user deletes the block mid-upload
+  });
+
+  if (!response.ok) {
+    throw new Error("Upload failed");
   }
 
-  return "/images/tiptap-ui-placeholder-image.jpg"
+  const data = await response.json();
+
+  // Combine the base URL with the relative path
+  const fullUrl = data.url.startsWith('http')
+    ? data.url
+    : `${import.meta.env.VITE_API_URL}${data.url}`;
+
+  // Add the ngrok bypass parameter to the URL string
+  const bypassUrl = fullUrl.includes('?')
+    ? `${fullUrl}&ngrok-skip-browser-warning=true`
+    : `${fullUrl}?ngrok-skip-browser-warning=true`;
+  // Return the URL so Tiptap can render the image immediately
+  return bypassUrl;
 }
 
 type ProtocolOptions = {

@@ -26,7 +26,7 @@ type Documents = {
     "\n  query getInquiries {\n    inquiries {\n    id\n    name\n    status\n    createdAt\n  }\n}\n": typeof types.GetInquiriesDocument,
     "\n  query getProducts {\n    adminProducts {\n    id\n    isActive\n    name\n    description\n    category {\n      id\n      name\n    }\n  }\n    categories {\n    id\n    name\n  }\n}\n": typeof types.GetProductsDocument,
     "\n  query getTeamMembers {\n    teamMembers {\n    id\n    name\n    image\n    position\n    socials\n  }\n}\n": typeof types.GetTeamMembersDocument,
-    "\n  query getArticleById($id: String!) {\n    categories {\n      id\n      name\n    }\n    adminArticle(id: $id) {\n    id\n    category {\n      name\n      id\n    }\n    updatedAt\n    content\n    slug\n    title\n    excerpt\n    status\n    }\n  }\n": typeof types.GetArticleByIdDocument,
+    "\n  query getArticleById($id: String!) {\n    categories {\n      id\n      name\n    }\n    adminArticle(id: $id) {\n    id\n    category {\n      name\n      id\n    }\n    updatedAt\n    content\n    slug\n    title\n    excerpt\n    status\n    media {\n    id\n    url\n    }\n    }\n  }\n": typeof types.GetArticleByIdDocument,
     "\n  query getAllCategories {\n    categories {\n    id\n    name\n  }\n}\n": typeof types.GetAllCategoriesDocument,
     "\n  mutation RefreshToken {\n    refreshToken {\n      user { id }\n    }\n  }\n": typeof types.RefreshTokenDocument,
     "\n  query MeQuery {\n    meQuery {\n      isSignedIn\n      user {\n        id\n        username\n      }\n    }\n  }\n": typeof types.MeQueryDocument,
@@ -44,7 +44,7 @@ const documents: Documents = {
     "\n  query getInquiries {\n    inquiries {\n    id\n    name\n    status\n    createdAt\n  }\n}\n": types.GetInquiriesDocument,
     "\n  query getProducts {\n    adminProducts {\n    id\n    isActive\n    name\n    description\n    category {\n      id\n      name\n    }\n  }\n    categories {\n    id\n    name\n  }\n}\n": types.GetProductsDocument,
     "\n  query getTeamMembers {\n    teamMembers {\n    id\n    name\n    image\n    position\n    socials\n  }\n}\n": types.GetTeamMembersDocument,
-    "\n  query getArticleById($id: String!) {\n    categories {\n      id\n      name\n    }\n    adminArticle(id: $id) {\n    id\n    category {\n      name\n      id\n    }\n    updatedAt\n    content\n    slug\n    title\n    excerpt\n    status\n    }\n  }\n": types.GetArticleByIdDocument,
+    "\n  query getArticleById($id: String!) {\n    categories {\n      id\n      name\n    }\n    adminArticle(id: $id) {\n    id\n    category {\n      name\n      id\n    }\n    updatedAt\n    content\n    slug\n    title\n    excerpt\n    status\n    media {\n    id\n    url\n    }\n    }\n  }\n": types.GetArticleByIdDocument,
     "\n  query getAllCategories {\n    categories {\n    id\n    name\n  }\n}\n": types.GetAllCategoriesDocument,
     "\n  mutation RefreshToken {\n    refreshToken {\n      user { id }\n    }\n  }\n": types.RefreshTokenDocument,
     "\n  query MeQuery {\n    meQuery {\n      isSignedIn\n      user {\n        id\n        username\n      }\n    }\n  }\n": types.MeQueryDocument,
@@ -115,7 +115,7 @@ export function graphql(source: "\n  query getTeamMembers {\n    teamMembers {\n
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query getArticleById($id: String!) {\n    categories {\n      id\n      name\n    }\n    adminArticle(id: $id) {\n    id\n    category {\n      name\n      id\n    }\n    updatedAt\n    content\n    slug\n    title\n    excerpt\n    status\n    }\n  }\n"): (typeof documents)["\n  query getArticleById($id: String!) {\n    categories {\n      id\n      name\n    }\n    adminArticle(id: $id) {\n    id\n    category {\n      name\n      id\n    }\n    updatedAt\n    content\n    slug\n    title\n    excerpt\n    status\n    }\n  }\n"];
+export function graphql(source: "\n  query getArticleById($id: String!) {\n    categories {\n      id\n      name\n    }\n    adminArticle(id: $id) {\n    id\n    category {\n      name\n      id\n    }\n    updatedAt\n    content\n    slug\n    title\n    excerpt\n    status\n    media {\n    id\n    url\n    }\n    }\n  }\n"): (typeof documents)["\n  query getArticleById($id: String!) {\n    categories {\n      id\n      name\n    }\n    adminArticle(id: $id) {\n    id\n    category {\n      name\n      id\n    }\n    updatedAt\n    content\n    slug\n    title\n    excerpt\n    status\n    media {\n    id\n    url\n    }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

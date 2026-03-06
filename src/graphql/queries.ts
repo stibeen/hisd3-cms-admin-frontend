@@ -123,6 +123,10 @@ export const GET_ARTICLE_BY_ID = graphql(`
     title
     excerpt
     status
+    media {
+    id
+    url
+    }
     }
   }
 `);

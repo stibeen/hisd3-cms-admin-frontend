@@ -35,7 +35,7 @@ function RouteComponent() {
   const [createCategory] = useMutation(CREATE_CATEGORY_MUTATION);
   const [messageApi, messageContextHolder] = message.useMessage();
   const [modal, contextHolder] = Modal.useModal();
-
+  const [selectedFile, setSelectedFile] = useState<any>(null);
   const [formData, setFormData] = useState({
     title: '',
     excerpt: '',
@@ -81,59 +81,57 @@ function RouteComponent() {
 
   const handleCreateArticle = async (status: ArticleStatus) => {
     try {
+      let uploadedMediaId = null;
       const { coverImageId, coverImageUrl, ...actualPayload } = formData;
+      // A. Check if user selected a file but it hasn't been uploaded yet
+      if (selectedFile) {
+        messageApi.loading('Uploading image...', 0); // Show sticky loading
+        const uploadResult = await uploadImage(selectedFile);
+        uploadedMediaId = uploadResult.id;
+        messageApi.destroy(); // Remove loading message
+      }
+
+      // B. Now execute the GraphQL mutation with the ID we just got
       await createArticle({
         variables: {
           payload: {
             ...actualPayload,
             categoryId: formData.categoryId || null,
             status: status,
-            mediaIds: formData.coverImageId ? [formData.coverImageId] : [],
+            // If we uploaded a file, use its ID. Otherwise, use existing coverImageId.
+            mediaIds: uploadedMediaId ? [uploadedMediaId] : []
           }
         },
         refetchQueries: [POSTS_PAGE_QUERY]
-      })
+      });
+
       messageApi.success('Article created successfully');
       navigate({ to: '/all-posts' });
     } catch (error) {
+      messageApi.destroy();
       console.error(error);
       messageApi.error('Failed to create article');
     }
-  }
-
-  const handleUpload = async (options: any) => {
-    const { file, onSuccess, onError } = options;
-
-    const formData = new FormData();
-    formData.append('file', file); // Use the key your backend expects (usually 'file' or 'image')
-
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/media/upload`, {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-        // Include auth headers since this is a separate REST call from Apollo
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-          'ngrok-skip-browser-warning': 'true'
-        }
-      });
-
-      const data = await response.json();
-
-      // 1. Tell the UI it was successful
-      onSuccess(data);
-
-      // 2. Save the ID/URL to your form state so it gets sent with your article
-      setFormData(prev => ({ ...prev, coverImageId: data.id, coverImageUrl: data.url }));
-
-      messageApi.success('Image uploaded successfully');
-    } catch (err) {
-      onError(err);
-      messageApi.error('Upload failed');
-    }
   };
 
+  // This is now a more generic helper function
+  const uploadImage = async (file: any) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/media/upload`, {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        'ngrok-skip-browser-warning': 'true'
+      }
+    });
+
+    if (!response.ok) throw new Error('Upload failed');
+    return await response.json(); // Returns { id, url }
+  };
 
   return (
     <>
@@ -211,11 +209,17 @@ function RouteComponent() {
           <Input id='post-slug' placeholder="/post-slug" value={formData.slug} onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))} />
           <label className="m-0 text-lg font-semibold" htmlFor='post-cover'>Cover Image</label>
           <Upload
-            customRequest={handleUpload}
+            beforeUpload={(file) => {
+              setSelectedFile(file); // Capture the file binary
+              return false; // Crucial: This stops the automatic upload
+            }}
+            onRemove={() => setSelectedFile(null)} // Clear if user deletes it
             maxCount={1}
             listType='picture'
           >
-            <Button icon={<UploadOutlined />}>Click to Upload Cover Image</Button>
+            {!selectedFile && (
+              <Button icon={<UploadOutlined />}>Click to Upload Cover Image</Button>
+            )}
           </Upload>
         </div>
       </div>
