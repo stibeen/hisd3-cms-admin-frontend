@@ -3,8 +3,8 @@ import { GET_ARTICLE_BY_ID } from '@/graphql/queries';
 import { CREATE_CATEGORY_MUTATION, UPDATE_ARTICLE_BY_ID_MUTATION } from '@/graphql/mutations';
 import { useMutation, useReadQuery } from '@apollo/client/react';
 import { SimpleEditor } from '@/components/tiptap-templates/simple/simple-editor';
-import { Button, Divider, Input, message, Select, Space, Typography } from 'antd';
-import { ContainerOutlined, SendOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, Divider, Input, message, Select, Space, Typography, Upload } from 'antd';
+import { ContainerOutlined, SendOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import { useState, useRef } from 'react';
 import type { InputRef } from 'antd';
 import { ArticleStatus } from '@/graphql/generated/graphql';
@@ -27,7 +27,14 @@ function RouteComponent() {
     const params = Route.useParams();
     const { queryRef } = Route.useLoaderData();
     const { data: articleData, error: articleError } = useReadQuery(queryRef);
-    // console.log(articleData.adminArticle?.content)
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    // This generates a local temporary URL for the selected file
+    const [previewUrl, setPreviewUrl] = useState<string | null>(
+        // Start with the existing image from the database if it exists
+        articleData?.adminArticle?.media?.[0]?.url
+            ? `${articleData.adminArticle.media[0].url}?ngrok-skip-browser-warning=true`
+            : null
+    );
     const [formData, setFormData] = useState({
         title: articleData?.adminArticle?.title || '',
         excerpt: articleData?.adminArticle?.excerpt || '',
@@ -36,20 +43,6 @@ function RouteComponent() {
         status: articleData?.adminArticle?.status as ArticleStatus || '',
         slug: articleData?.adminArticle?.slug || '',
     });
-
-    // Sync formData with articleData when it's loaded
-    // useEffect(() => {
-    //     if (articleData?.adminArticle) {
-    //         setFormData({
-    //             title: articleData.adminArticle.title || '',
-    //             excerpt: articleData.adminArticle.excerpt || '',
-    //             content: articleData.adminArticle.content || '',
-    //             category: articleData.adminArticle.category?.id || '',
-    //             status: articleData.adminArticle.status || '',
-    //             slug: articleData.adminArticle.slug || '',
-    //         });
-    //     }
-    // }, [articleData]);
 
     const [name, setName] = useState('');
     const inputRef = useRef<InputRef>(null);
@@ -76,8 +69,35 @@ function RouteComponent() {
         }
     };
 
+    const uploadImage = async (file: any) => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/media/upload`, {
+            method: 'POST',
+            body: formData,
+            credentials: 'include',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+                'ngrok-skip-browser-warning': 'true'
+            }
+        });
+
+        if (!response.ok) throw new Error('Upload failed');
+        return await response.json(); // Returns { id, url }
+    };
+
     const handleUpdateArticle = async (status: ArticleStatus) => {
         try {
+            let uploadedMediaId = null;
+
+            if (selectedFile) {
+                messageApi.loading('Uploading current cover image...', 0);
+                const uploadResult = await uploadImage(selectedFile);
+                uploadedMediaId = uploadResult.id;
+                messageApi.destroy();
+            }
+
             await updateArticle({
                 variables: {
                     updateArticleId: params.postId,
@@ -85,6 +105,7 @@ function RouteComponent() {
                         ...formData,
                         categoryId: formData.categoryId || null,
                         status: status,
+                        mediaIds: uploadedMediaId ? [uploadedMediaId] : articleData?.adminArticle?.media?.[0]?.id ? [articleData.adminArticle.media[0].id] : [],
                     }
                 },
                 refetchQueries: [GET_ARTICLE_BY_ID]
@@ -92,6 +113,7 @@ function RouteComponent() {
             messageApi.success('Article updated successfully');
             navigate({ to: '/all-posts' });
         } catch (error) {
+            messageApi.destroy();
             console.error(error);
             messageApi.error('Failed to update article');
         }
@@ -171,6 +193,37 @@ function RouteComponent() {
                     />
                     <label className="m-0 text-lg font-semibold" htmlFor="post-slug">Slug</label>
                     <Input id='post-slug' placeholder="/post-slug" value={formData.slug} onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))} />
+                    <label className="m-0 text-lg font-semibold" htmlFor='post-cover'>Cover Image</label>
+                    <Upload
+                        beforeUpload={(file) => {
+                            setSelectedFile(file);
+                            const url = URL.createObjectURL(file);
+                            setPreviewUrl(url);
+                            return false;
+                        }}
+                        onRemove={() => {
+                            setSelectedFile(null);
+                            setPreviewUrl(null);
+                        }}
+                        maxCount={1}
+                        listType='picture-card'
+                        showUploadList={false}
+                    >
+                        {previewUrl ? (
+                            <div className="relative group w-full h-full">
+                                <img src={previewUrl} alt="Cover Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity flex-col gap-2">
+                                    <UploadOutlined className="text-white text-xl" />
+                                    <span className="text-white text-xs">Change Image</span>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center">
+                                <PlusOutlined />
+                                <div style={{ marginTop: 8 }}>Upload Cover</div>
+                            </div>
+                        )}
+                    </Upload>
                 </div>
             </div>
 

@@ -79,28 +79,6 @@ function RouteComponent() {
     });
   };
 
-  const handleCreateArticleInitial = async (status: ArticleStatus) => {
-    try {
-      const { coverImageId, coverImageUrl, ...actualPayload } = formData;
-      await createArticle({
-        variables: {
-          payload: {
-            ...actualPayload,
-            categoryId: formData.categoryId || null,
-            status: status,
-            mediaIds: formData.coverImageId ? [formData.coverImageId] : [],
-          }
-        },
-        refetchQueries: [POSTS_PAGE_QUERY]
-      })
-      messageApi.success('Article created successfully');
-      navigate({ to: '/all-posts' });
-    } catch (error) {
-      console.error(error);
-      messageApi.error('Failed to create article');
-    }
-  }
-
   const handleCreateArticle = async (status: ArticleStatus) => {
     try {
       let uploadedMediaId = null;
@@ -135,7 +113,6 @@ function RouteComponent() {
       messageApi.error('Failed to create article');
     }
   };
-
 
   // This is now a more generic helper function
   const uploadImage = async (file: any) => {
@@ -240,7 +217,9 @@ function RouteComponent() {
             maxCount={1}
             listType='picture'
           >
-            <Button icon={<UploadOutlined />}>Click to Upload Cover Image</Button>
+            {!selectedFile && (
+              <Button icon={<UploadOutlined />}>Click to Upload Cover Image</Button>
+            )}
           </Upload>
         </div>
       </div>
