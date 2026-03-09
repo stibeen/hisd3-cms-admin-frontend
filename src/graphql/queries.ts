@@ -123,6 +123,10 @@ export const GET_ARTICLE_BY_ID = graphql(`
     title
     excerpt
     status
+    media {
+    id
+    url
+    }
     }
   }
 `);
@@ -136,4 +140,45 @@ export const GET_ALL_CATEGORIES = graphql(`
 }
 `);
 
+export const GET_INQUIRY_BY_ID = graphql(`
+  query getInquiryById($inquiryId: String!) {
+    inquiry(id: $inquiryId) {
+    id
+    createdAt
+    email
+    message
+    name
+    phone
+    status
+  }
+}
+`)
+
+export const GET_PRODUCT_BY_ID = graphql(`
+  query AdminProduct($adminProductId: String!) {
+    categories {
+      id
+      name
+    }
+    adminProduct(id: $adminProductId) {
+    id
+    category {
+      id
+      name
+    }
+    icon
+    name
+    tagline
+    description
+    isActive
+    media {
+      url
+    }
+    createdAt
+    updatedAt
+    slug
+    order
+  }
+}
+`)
 
