@@ -1,11 +1,34 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { Divider, Typography, Table, Button, Tooltip, Input, Upload, Avatar, message } from 'antd'
-import type { TableProps } from 'antd';
-import { LinkedinFilled, GithubFilled, DeleteOutlined, EditOutlined, UploadOutlined, UserAddOutlined, XOutlined, CameraTwoTone, FacebookFilled } from '@ant-design/icons';
-import type { UploadProps } from 'antd';
-import { useState } from 'react';
-import { useReadQuery } from '@apollo/client/react';
-import { TEAM_PAGE_QUERY } from '@/graphql/queries'
+import { createFileRoute } from "@tanstack/react-router";
+import {
+  Divider,
+  Typography,
+  Table,
+  Button,
+  Tooltip,
+  Input,
+  Upload,
+  Avatar,
+  message,
+  Form,
+  Popconfirm,
+} from "antd";
+import type { TableProps } from "antd";
+import {
+  LinkedinFilled,
+  GithubFilled,
+  DeleteOutlined,
+  EditOutlined,
+  UploadOutlined,
+  UserAddOutlined,
+  XOutlined,
+  CameraTwoTone,
+  FacebookFilled,
+} from "@ant-design/icons";
+import type { UploadProps } from "antd";
+import { useState } from "react";
+import { useReadQuery, useMutation } from "@apollo/client/react";
+import { TEAM_PAGE_QUERY } from "@/graphql/queries";
+import { CREATE_TEAM_MEMBER_MUTATION, REMOVE_TEAM_MEMBER_MUTATION } from "@/graphql/mutations";
 
 // Helper function to convert file to base64 for preview
 const getBase64 = (file: any): Promise<string> =>
@@ -19,103 +42,184 @@ const getBase64 = (file: any): Promise<string> =>
 const { Title } = Typography;
 
 // Move this outside or keep it if you want the columns static
-const columns: TableProps['columns'] = [
-  {
-    title: 'Member Name',
-    dataIndex: 'name',
-    key: 'name',
-    render: (text: string, record: any) => {
-      return (
-        <div className='flex items-center gap-2'>
-          {record.image ? (
-            <Avatar src={record.image} />
-          ) : (
-            <Avatar src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${text}`} />
-          )}
-          <span className='text-m font-semibold'>{text}</span>
-        </div>
-      )
-    }
-  },
-  {
-    title: 'Designation',
-    dataIndex: 'position',
-    key: 'position',
-    width: 150,
-    align: 'center',
-    render: (text: string) => <span className='text-m font-normal'>{text}</span>
-  },
-  {
-    title: 'Social Links',
-    dataIndex: 'socials',
-    key: 'socials',
-    width: 150,
-    align: 'center',
-    render: (socials: { facebook?: string; github?: string; linkedin?: string; x?: string }) => (
-      <div className='flex gap-2 justify-center'>
-        {socials?.facebook && (
-          <a href={socials.facebook} target="_blank" rel="noopener noreferrer">
-            <FacebookFilled className="text-xl text-blue-600" />
-          </a>
-        )}
-        {socials?.github && (
-          <a href={socials.github} target="_blank" rel="noopener noreferrer">
-            <GithubFilled className="text-xl" />
-          </a>
-        )}
-        {socials?.linkedin && (
-          <a href={socials.linkedin} target="_blank" rel="noopener noreferrer">
-            <LinkedinFilled className="text-xl text-blue-600" />
-          </a>
-        )}
-        {socials?.x && (
-          <a href={socials.x} target="_blank" rel="noopener noreferrer">
-            <XOutlined className="text-xl text-blue-600" />
-          </a>
-        )}
-      </div>
-    )
-  },
-  {
-    title: 'Actions',
-    dataIndex: 'actions',
-    key: 'actions',
-    width: 120,
-    align: 'center',
-    render: () => (
-      <div className='flex gap-2 justify-center'>
-        <Tooltip title="Edit">
-          <Button type="text" icon={<EditOutlined />} aria-label="Edit Post" />
-        </Tooltip>
-        <Tooltip title="Delete">
-          <Button type="text" danger icon={<DeleteOutlined />} aria-label="Delete Post" />
-        </Tooltip>
-      </div>
-    )
-  }
-];
 
-export const Route = createFileRoute('/_layout/team')({
+export const Route = createFileRoute("/_layout/team")({
   component: RouteComponent,
   loader: ({ context: { preloadQuery } }) => {
-    const queryRef = preloadQuery(TEAM_PAGE_QUERY)
-    return { queryRef }
-  }
-})
+    const queryRef = preloadQuery(TEAM_PAGE_QUERY);
+    return { queryRef };
+  },
+});
 
 function RouteComponent() {
-  const { queryRef } = Route.useLoaderData()
-  const { data: teamData } = useReadQuery(queryRef)
-  const [data] = useState(teamData?.teamMembers || []);
+  const { queryRef } = Route.useLoaderData();
+  const { data: teamData } = useReadQuery(queryRef);
+  const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string>();
 
+  const [createTeamMember] = useMutation(CREATE_TEAM_MEMBER_MUTATION, {
+    refetchQueries: [TEAM_PAGE_QUERY],
+    onCompleted: () => {
+      messageApi.success("Team member added successfully");
+      form.resetFields();
+      setImageUrl("");
+    },
+    onError: (error) => {
+      messageApi.error(error.message || "Failed to add team member");
+    },
+  });
+
+  const onFinish = async (values: any) => {
+    const payload = {
+      name: values.name,
+      position: values.position,
+      socials: {
+        facebook: values.facebook,
+        github: values.github,
+        linkedin: values.linkedin,
+        x: values.x,
+      },
+      image: imageUrl,
+    };
+
+    try {
+      await createTeamMember({
+        variables: {
+          createTeamMemberInput: payload,
+        },
+      });
+    } catch (error) {
+      console.error("Mutation error:", error);
+    }
+  };
+
+  const [removeTeamMember] = useMutation(REMOVE_TEAM_MEMBER_MUTATION, {
+    refetchQueries: [TEAM_PAGE_QUERY],
+    onCompleted: () => {
+      messageApi.success("Team member removed successfully");
+    },
+    onError: (error) => {
+      messageApi.error(error.message || "Failed to remove team member");
+    },
+  });
+
+  const handleDelete = async (id: string) => {
+    try {
+      await removeTeamMember({
+        variables: {
+          removeTeamMemberId: id,
+        },
+      });
+    } catch (error) {
+      console.error("Mutation error:", error);
+    }
+  };
+
+  const columns: TableProps["columns"] = [
+    {
+      title: "Member Name",
+      dataIndex: "name",
+      key: "name",
+      render: (text: string, record: any) => {
+        return (
+          <div className="flex items-center gap-2">
+            {record.image ? (
+              <Avatar src={record.image} />
+            ) : (
+              <Avatar
+                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${text}`}
+              />
+            )}
+            <span className="text-m font-semibold">{text}</span>
+          </div>
+        );
+      },
+    },
+    {
+      title: "Designation",
+      dataIndex: "position",
+      key: "position",
+      width: 150,
+      align: "center",
+      render: (text: string) => (
+        <span className="text-m font-normal">{text}</span>
+      ),
+    },
+    {
+      title: "Social Links",
+      dataIndex: "socials",
+      key: "socials",
+      width: 150,
+      align: "center",
+      render: (socials: {
+        facebook?: string;
+        github?: string;
+        linkedin?: string;
+        x?: string;
+      }) => (
+        <div className="flex gap-2 justify-center">
+          {socials?.facebook && (
+            <a href={socials.facebook} target="_blank" rel="noopener noreferrer">
+              <FacebookFilled className="text-xl text-blue-600" />
+            </a>
+          )}
+          {socials?.github && (
+            <a href={socials.github} target="_blank" rel="noopener noreferrer">
+              <GithubFilled className="text-xl" />
+            </a>
+          )}
+          {socials?.linkedin && (
+            <a href={socials.linkedin} target="_blank" rel="noopener noreferrer">
+              <LinkedinFilled className="text-xl text-blue-600" />
+            </a>
+          )}
+          {socials?.x && (
+            <a href={socials.x} target="_blank" rel="noopener noreferrer">
+              <XOutlined className="text-xl text-blue-600" />
+            </a>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: "Actions",
+      dataIndex: "actions",
+      key: "actions",
+      width: 120,
+      align: "center",
+      render: (_, record: any) => (
+        <div className="flex gap-2 justify-center">
+          <Tooltip title="Edit">
+            <Button type="text" icon={<EditOutlined />} aria-label="Edit Post" />
+          </Tooltip>
+          <Tooltip title="Delete">
+            <Popconfirm
+              title="Delete member"
+              description="Are you sure you want to delete this team member?"
+              onConfirm={() => handleDelete(record.id)}
+              okText="Yes"
+              cancelText="No"
+            >
+              <Button
+                type="text"
+                danger
+                icon={<DeleteOutlined />}
+                aria-label="Delete Post"
+              />
+            </Popconfirm>
+          </Tooltip>
+        </div>
+      ),
+    },
+  ];
+
   const props: UploadProps = {
-    name: 'file',
-    action: 'https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload',
+    name: "file",
+    action: "https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload",
     headers: {
-      authorization: 'authorization-text',
+      authorization: "authorization-text",
     },
     // Added customRequest to simulate upload success
     customRequest({ onSuccess }) {
@@ -126,18 +230,18 @@ function RouteComponent() {
       }, 1000);
     },
     onChange(info) {
-      if (info.file.status === 'uploading') {
+      if (info.file.status === "uploading") {
         setLoading(true);
         return;
       }
-      if (info.file.status === 'done') {
+      if (info.file.status === "done") {
         // Get this url from response in real world.
         getBase64(info.file.originFileObj as File).then((url) => {
           setLoading(false);
           setImageUrl(url);
         });
         messageApi.success(`${info.file.name} file uploaded successfully`);
-      } else if (info.file.status === 'error') {
+      } else if (info.file.status === "error") {
         setLoading(false);
         messageApi.error(`${info.file.name} file upload failed.`);
       }
@@ -148,73 +252,170 @@ function RouteComponent() {
     <>
       {contextHolder}
       {/* Header */}
-      <div className='flex justify-between items-end mb-6'>
-        <div className='flex flex-col gap-1'>
-          <Title level={2} className="m-0!">Team Management</Title>
-          <span className='text-gray-500 m-0'>Manage and organize your team members.</span>
+      <div className="flex justify-between items-end mb-6">
+        <div className="flex flex-col gap-1">
+          <Title level={2} className="m-0!">
+            Team Management
+          </Title>
+          <span className="text-gray-500 m-0">
+            Manage and organize your team members.
+          </span>
         </div>
       </div>
       <Divider />
-      <div className='flex justify-center gap-6'>
+      <div className="flex justify-center gap-6">
         {/* Table */}
-        <div className='w-2/3'>
+        <div className="w-2/3">
           <Table
-            pagination={teamData?.teamMembers?.length > 5 ? {
-              pageSize: 5,
-              showTotal: (total) => `${total} team members`,
-            } : false}
+            pagination={
+              teamData?.teamMembers?.length > 5
+                ? {
+                  pageSize: 5,
+                  showTotal: (total) => `${total} team members`,
+                }
+                : false
+            }
             columns={columns}
-            dataSource={data}
+            dataSource={teamData?.teamMembers || []}
             bordered
-            style={{ border: '1px solid #1280ED', borderRadius: '12px' }}
+            style={{ border: "1px solid #1280ED", borderRadius: "12px" }}
             rowKey="id"
           />
         </div>
         {/* Form */}
-        <div className='w-1/3 border border-[#1280ED] rounded-lg p-4'>
-          <Title level={3} className="m-0! flex justify-center"><UserAddOutlined />Add New Team Member</Title>
-          <Divider />
-          <div className='flex flex-col gap-2'>
-            <Title level={4} className="m-0!">Profile Picture</Title>
-            <div className='flex gap-5 items-center'>
-              <div className='w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border border-gray-300'>
-                {imageUrl ? (
-                  <img src={imageUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                ) : (
-                  <CameraTwoTone className='text-4xl' />
-                )}
-              </div>
-              <div className='flex flex-col gap-2'>
-                <Upload {...props} showUploadList={false}>
-                  <Button
-                    type='primary'
-                    className='bg-[#1280ED] text-white'
-                    icon={<UploadOutlined />}
-                    loading={loading}
-                  >
-                    {imageUrl ? 'Change Photo' : 'Upload Photo'}
-                  </Button>
-                </Upload>
-                {imageUrl && <Button type='default' onClick={() => {
-                  setImageUrl('')
-                }}>
-                  Remove Photo
-                </Button>}
+        <div className="w-full max-w-md border border-[#E5E7EB] rounded-xl p-6 bg-white shadow-sm">
+          {/* Header */}
+          <div className="flex items-center gap-2 mb-3">
+            <UserAddOutlined className="text-[#1280ED] text-lg" />
+            <Title level={5} className="m-0!">
+              Add New Team Member
+            </Title>
+          </div>
+
+          <Divider className="mt-2! mb-4!" />
+
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={onFinish}
+            className="flex flex-col gap-5"
+          >
+            {/* Profile Picture */}
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-3">
+                Profile Picture
+              </p>
+
+              <div className="flex items-center gap-4">
+                <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 hover:border-[#1280ED] transition">
+                  {imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      alt="avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <CameraTwoTone className="text-3xl" />
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <Upload {...props} showUploadList={false}>
+                    <Button
+                      type="primary"
+                      icon={<UploadOutlined />}
+                      loading={loading}
+                      className="bg-[#1280ED]"
+                    >
+                      {imageUrl ? "Change Photo" : "Upload Photo"}
+                    </Button>
+                  </Upload>
+
+                  {imageUrl && (
+                    <Button
+                      type="default"
+                      danger
+                      onClick={() => setImageUrl("")}
+                    >
+                      Remove Photo
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
 
-            <Title level={4} className="m-0!">Member Name</Title>
-            <Input id='memberName' placeholder="Enter member name..." />
-            <Title level={4} className="m-0!">Designation</Title>
-            <Input id='designation' placeholder="Enter designation..." />
-            <Title level={4} className="m-0!">Social Links</Title>
-            <Input id='linkedin' placeholder="Linkedin Profile URL" prefix={<LinkedinFilled />} />
-            <Input id='github' placeholder="Github Profile URL" prefix={<GithubFilled />} />
-            <Input id='x' placeholder="X Profile URL" prefix={<XOutlined />} />
-            <Button type="primary">Add Team Member</Button>
-          </div>
+            {/* Member Name */}
+            <Form.Item
+              name="name"
+              label={<span className="font-medium text-gray-700">Member Name</span>}
+              rules={[{ required: true, message: "Please enter member name" }]}
+              className="mb-0!"
+            >
+              <Input placeholder="Enter member name..." size="large" />
+            </Form.Item>
+
+            {/* Designation */}
+            <Form.Item
+              name="position"
+              label={<span className="font-medium text-gray-700">Designation</span>}
+              rules={[{ required: true, message: "Please enter designation" }]}
+              className="mb-0"
+            >
+              <Input placeholder="Enter designation..." size="large" />
+            </Form.Item>
+
+            {/* Social Links */}
+            <div className="flex flex-col gap-3">
+              <label className="text-sm font-medium text-gray-700">
+                Social Links
+              </label>
+
+              <Form.Item name="linkedin" className="mb-0!">
+                <Input
+                  placeholder="LinkedIn Profile URL"
+                  prefix={<LinkedinFilled />}
+                  size="large"
+                />
+              </Form.Item>
+
+              <Form.Item name="github" className="mb-0!">
+                <Input
+                  placeholder="GitHub Profile URL"
+                  prefix={<GithubFilled />}
+                  size="large"
+                />
+              </Form.Item>
+
+              <Form.Item name="facebook" className="mb-0!">
+                <Input
+                  placeholder="Facebook Profile URL"
+                  prefix={<FacebookFilled />}
+                  size="large"
+                />
+              </Form.Item>
+
+              <Form.Item name="x" className="mb-0!">
+                <Input
+                  placeholder="X Profile URL"
+                  prefix={<XOutlined />}
+                  size="large"
+                />
+              </Form.Item>
+            </div>
+
+            {/* Submit */}
+            <Button
+              type="primary"
+              size="large"
+              className="bg-[#1280ED] mt-2"
+              block
+              htmlType="submit"
+            >
+              Add Team Member
+            </Button>
+          </Form>
         </div>
       </div>
     </>
-  )
+  );
 }
