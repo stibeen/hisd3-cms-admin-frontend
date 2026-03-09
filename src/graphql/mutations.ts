@@ -102,6 +102,32 @@ export const REMOVE_INQUIRY_MUTATION = graphql(`
   }
 `);
 
+export const UPDATE_PRODUCT_BY_ID_MUTATION = graphql(`
+  mutation UpdateProductById($updateProductInput: UpdateProductInput!) {
+  updateProduct(updateProductInput: $updateProductInput) {
+    id
+    name
+    icon
+    slug
+    tagline
+    isActive
+    category {
+      id
+      name
+    }
+  }
+}
+`)
+
+export const REMOVE_PRODUCT_MUTATION = graphql(`
+  mutation RemoveProduct($removeProductId: String!) {
+  removeProduct(id: $removeProductId) {
+    id
+    name
+  }
+}
+  `)
+
 export const CREATE_TEAM_MEMBER_MUTATION = graphql(`
   mutation createTeamMember($createTeamMemberInput: CreateTeamMemberInput!) {
     createTeamMember(createTeamMemberInput: $createTeamMemberInput) {
