@@ -140,4 +140,18 @@ export const GET_ALL_CATEGORIES = graphql(`
 }
 `);
 
+export const GET_INQUIRY_BY_ID = graphql(`
+  query getInquiryById($inquiryId: String!) {
+    inquiry(id: $inquiryId) {
+    id
+    createdAt
+    email
+    message
+    name
+    phone
+    status
+  }
+}
+`)
+
 

@@ -14,10 +14,11 @@ import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as LayoutIndexRouteImport } from './routes/_layout.index'
 import { Route as LayoutTeamRouteImport } from './routes/_layout.team'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout.settings'
-import { Route as LayoutInquiriesRouteImport } from './routes/_layout.inquiries'
 import { Route as LayoutProductsIndexRouteImport } from './routes/_layout.products.index'
+import { Route as LayoutInquiriesIndexRouteImport } from './routes/_layout.inquiries.index'
 import { Route as LayoutAllPostsIndexRouteImport } from './routes/_layout.all-posts.index'
 import { Route as LayoutProductsCreateNewProductRouteImport } from './routes/_layout.products.create-new-product'
+import { Route as LayoutInquiriesInquiryIdRouteImport } from './routes/_layout.inquiries.$inquiryId'
 import { Route as LayoutAllPostsCreateNewPostRouteImport } from './routes/_layout.all-posts.create-new-post'
 import { Route as LayoutAllPostsPostIdRouteImport } from './routes/_layout.all-posts.$postId'
 
@@ -45,14 +46,14 @@ const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutInquiriesRoute = LayoutInquiriesRouteImport.update({
-  id: '/inquiries',
-  path: '/inquiries',
-  getParentRoute: () => LayoutRoute,
-} as any)
 const LayoutProductsIndexRoute = LayoutProductsIndexRouteImport.update({
   id: '/products/',
   path: '/products/',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutInquiriesIndexRoute = LayoutInquiriesIndexRouteImport.update({
+  id: '/inquiries/',
+  path: '/inquiries/',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutAllPostsIndexRoute = LayoutAllPostsIndexRouteImport.update({
@@ -64,6 +65,12 @@ const LayoutProductsCreateNewProductRoute =
   LayoutProductsCreateNewProductRouteImport.update({
     id: '/products/create-new-product',
     path: '/products/create-new-product',
+    getParentRoute: () => LayoutRoute,
+  } as any)
+const LayoutInquiriesInquiryIdRoute =
+  LayoutInquiriesInquiryIdRouteImport.update({
+    id: '/inquiries/$inquiryId',
+    path: '/inquiries/$inquiryId',
     getParentRoute: () => LayoutRoute,
   } as any)
 const LayoutAllPostsCreateNewPostRoute =
@@ -81,39 +88,42 @@ const LayoutAllPostsPostIdRoute = LayoutAllPostsPostIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
   '/login': typeof LoginRoute
-  '/inquiries': typeof LayoutInquiriesRoute
   '/settings': typeof LayoutSettingsRoute
   '/team': typeof LayoutTeamRoute
   '/all-posts/$postId': typeof LayoutAllPostsPostIdRoute
   '/all-posts/create-new-post': typeof LayoutAllPostsCreateNewPostRoute
+  '/inquiries/$inquiryId': typeof LayoutInquiriesInquiryIdRoute
   '/products/create-new-product': typeof LayoutProductsCreateNewProductRoute
   '/all-posts/': typeof LayoutAllPostsIndexRoute
+  '/inquiries/': typeof LayoutInquiriesIndexRoute
   '/products/': typeof LayoutProductsIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
-  '/inquiries': typeof LayoutInquiriesRoute
   '/settings': typeof LayoutSettingsRoute
   '/team': typeof LayoutTeamRoute
   '/': typeof LayoutIndexRoute
   '/all-posts/$postId': typeof LayoutAllPostsPostIdRoute
   '/all-posts/create-new-post': typeof LayoutAllPostsCreateNewPostRoute
+  '/inquiries/$inquiryId': typeof LayoutInquiriesInquiryIdRoute
   '/products/create-new-product': typeof LayoutProductsCreateNewProductRoute
   '/all-posts': typeof LayoutAllPostsIndexRoute
+  '/inquiries': typeof LayoutInquiriesIndexRoute
   '/products': typeof LayoutProductsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_layout': typeof LayoutRouteWithChildren
   '/login': typeof LoginRoute
-  '/_layout/inquiries': typeof LayoutInquiriesRoute
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/team': typeof LayoutTeamRoute
   '/_layout/': typeof LayoutIndexRoute
   '/_layout/all-posts/$postId': typeof LayoutAllPostsPostIdRoute
   '/_layout/all-posts/create-new-post': typeof LayoutAllPostsCreateNewPostRoute
+  '/_layout/inquiries/$inquiryId': typeof LayoutInquiriesInquiryIdRoute
   '/_layout/products/create-new-product': typeof LayoutProductsCreateNewProductRoute
   '/_layout/all-posts/': typeof LayoutAllPostsIndexRoute
+  '/_layout/inquiries/': typeof LayoutInquiriesIndexRoute
   '/_layout/products/': typeof LayoutProductsIndexRoute
 }
 export interface FileRouteTypes {
@@ -121,38 +131,41 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
-    | '/inquiries'
     | '/settings'
     | '/team'
     | '/all-posts/$postId'
     | '/all-posts/create-new-post'
+    | '/inquiries/$inquiryId'
     | '/products/create-new-product'
     | '/all-posts/'
+    | '/inquiries/'
     | '/products/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
-    | '/inquiries'
     | '/settings'
     | '/team'
     | '/'
     | '/all-posts/$postId'
     | '/all-posts/create-new-post'
+    | '/inquiries/$inquiryId'
     | '/products/create-new-product'
     | '/all-posts'
+    | '/inquiries'
     | '/products'
   id:
     | '__root__'
     | '/_layout'
     | '/login'
-    | '/_layout/inquiries'
     | '/_layout/settings'
     | '/_layout/team'
     | '/_layout/'
     | '/_layout/all-posts/$postId'
     | '/_layout/all-posts/create-new-post'
+    | '/_layout/inquiries/$inquiryId'
     | '/_layout/products/create-new-product'
     | '/_layout/all-posts/'
+    | '/_layout/inquiries/'
     | '/_layout/products/'
   fileRoutesById: FileRoutesById
 }
@@ -198,18 +211,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutSettingsRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/inquiries': {
-      id: '/_layout/inquiries'
-      path: '/inquiries'
-      fullPath: '/inquiries'
-      preLoaderRoute: typeof LayoutInquiriesRouteImport
-      parentRoute: typeof LayoutRoute
-    }
     '/_layout/products/': {
       id: '/_layout/products/'
       path: '/products'
       fullPath: '/products/'
       preLoaderRoute: typeof LayoutProductsIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/inquiries/': {
+      id: '/_layout/inquiries/'
+      path: '/inquiries'
+      fullPath: '/inquiries/'
+      preLoaderRoute: typeof LayoutInquiriesIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/all-posts/': {
@@ -224,6 +237,13 @@ declare module '@tanstack/react-router' {
       path: '/products/create-new-product'
       fullPath: '/products/create-new-product'
       preLoaderRoute: typeof LayoutProductsCreateNewProductRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/inquiries/$inquiryId': {
+      id: '/_layout/inquiries/$inquiryId'
+      path: '/inquiries/$inquiryId'
+      fullPath: '/inquiries/$inquiryId'
+      preLoaderRoute: typeof LayoutInquiriesInquiryIdRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/all-posts/create-new-post': {
@@ -244,26 +264,28 @@ declare module '@tanstack/react-router' {
 }
 
 interface LayoutRouteChildren {
-  LayoutInquiriesRoute: typeof LayoutInquiriesRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutTeamRoute: typeof LayoutTeamRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
   LayoutAllPostsPostIdRoute: typeof LayoutAllPostsPostIdRoute
   LayoutAllPostsCreateNewPostRoute: typeof LayoutAllPostsCreateNewPostRoute
+  LayoutInquiriesInquiryIdRoute: typeof LayoutInquiriesInquiryIdRoute
   LayoutProductsCreateNewProductRoute: typeof LayoutProductsCreateNewProductRoute
   LayoutAllPostsIndexRoute: typeof LayoutAllPostsIndexRoute
+  LayoutInquiriesIndexRoute: typeof LayoutInquiriesIndexRoute
   LayoutProductsIndexRoute: typeof LayoutProductsIndexRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
-  LayoutInquiriesRoute: LayoutInquiriesRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutTeamRoute: LayoutTeamRoute,
   LayoutIndexRoute: LayoutIndexRoute,
   LayoutAllPostsPostIdRoute: LayoutAllPostsPostIdRoute,
   LayoutAllPostsCreateNewPostRoute: LayoutAllPostsCreateNewPostRoute,
+  LayoutInquiriesInquiryIdRoute: LayoutInquiriesInquiryIdRoute,
   LayoutProductsCreateNewProductRoute: LayoutProductsCreateNewProductRoute,
   LayoutAllPostsIndexRoute: LayoutAllPostsIndexRoute,
+  LayoutInquiriesIndexRoute: LayoutInquiriesIndexRoute,
   LayoutProductsIndexRoute: LayoutProductsIndexRoute,
 }
 

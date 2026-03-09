@@ -80,6 +80,28 @@ export const CREATE_ARTICLE_MUTATION = graphql(`
   }
 `);
 
+export const UPDATE_INQUIRY_STATUS_MUTATION = graphql(`
+  mutation UpdateInquiryStatus($updateInquiryId: String!, $updateInquiryInput: UpdateInquiryInput!) {
+    updateInquiry(id: $updateInquiryId, updateInquiryInput: $updateInquiryInput) {
+      id
+      status
+    }
+  }
+`);
+
+export const REMOVE_INQUIRY_MUTATION = graphql(`
+  mutation RemoveInquiry($removeInquiryId: String!) {
+    removeInquiry(id: $removeInquiryId) {
+      id
+      name
+      email
+      message
+      phone
+      status
+    }
+  }
+`);
+
 export const CREATE_TEAM_MEMBER_MUTATION = graphql(`
   mutation createTeamMember($createTeamMemberInput: CreateTeamMemberInput!) {
     createTeamMember(createTeamMemberInput: $createTeamMemberInput) {

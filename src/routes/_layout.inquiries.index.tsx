@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { Typography, Divider, Button, Input, Tag, type TableProps, Table, Select, Card, Empty } from 'antd';
 import { CheckCircleFilled, EyeOutlined, FieldTimeOutlined, InboxOutlined, MailOutlined, RightOutlined, FileZipOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
@@ -98,15 +98,17 @@ const columns: TableProps['columns'] = [
     key: 'actions',
     width: 120,
     align: 'center',
-    render: () => (
+    render: (_, record) => (
       <div className='flex gap-2 justify-center'>
-        <Button type="link" icon={<RightOutlined />} iconPlacement="end">View Details</Button>
+        <Link to="/inquiries/$inquiryId" params={{ inquiryId: record.id }}>
+          <Button type="link" icon={<RightOutlined />} iconPlacement="end">View Details</Button>
+        </Link>
       </div>
     )
   }
 ];
 
-export const Route = createFileRoute('/_layout/inquiries')({
+export const Route = createFileRoute('/_layout/inquiries/')({
   component: RouteComponent,
   loader: ({ context: { preloadQuery } }) => {
     const queryRef = preloadQuery(INQUIRIES_PAGE_QUERY);
@@ -219,8 +221,7 @@ function RouteComponent() {
                   { value: 'all', label: 'All' },
                   { value: 'READ', label: 'Read' },
                   { value: 'UNREAD', label: 'Unread' },
-                  { value: 'ARCHIVED', label: 'Archived' },
-                  { value: 'REPLIED', label: 'Replied' },
+                  { value: 'ARCHIVED', label: 'Archived' }
                 ]}
               />
             </div>

@@ -64,8 +64,8 @@ function DashboardApp() {
   const [inquiriesPageSize, setInquiriesPageSize] = useState(6);
 
   const displayedArticles = data?.adminArticles.slice((articleCurrentPage - 1) * articlePageSize, articleCurrentPage * articlePageSize);
-  const displayedInquiries = data?.inquiries.slice((inquiriesCurrentPage - 1) * inquiriesPageSize, inquiriesPageSize);
-
+  const filteredInquiries = data?.inquiries.filter((item) => item.status === "UNREAD");
+  const displayedInquiries = filteredInquiries.slice((inquiriesCurrentPage - 1) * inquiriesPageSize, inquiriesPageSize);
   const postStat = [
     {
       title: "Total Post",
@@ -236,7 +236,7 @@ function DashboardApp() {
             {/* {data && <div className="p-4 text-center text-gray-500">Loading inquiries...</div>} */}
             {error && <div className="p-4 text-center text-red-500">Error loading inquiries: {error.message}</div>}
             <ul className="divide-y divide-gray-100">
-              {(data?.inquiries?.length ?? 0) > 0 ? (
+              {(filteredInquiries.length ?? 0) > 0 ? (
                 displayedInquiries?.map((inquiry) => (
                   <li key={inquiry.id} className="p-5 flex items-start gap-4 hover:bg-gray-50 transition-colors cursor-pointer">
                     <div className="w-10 h-10 rounded-full bg-linear-to-tr from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold shrink-0">
