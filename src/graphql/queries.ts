@@ -154,4 +154,31 @@ export const GET_INQUIRY_BY_ID = graphql(`
 }
 `)
 
+export const GET_PRODUCT_BY_ID = graphql(`
+  query AdminProduct($adminProductId: String!) {
+    categories {
+      id
+      name
+    }
+    adminProduct(id: $adminProductId) {
+    id
+    category {
+      id
+      name
+    }
+    icon
+    name
+    tagline
+    description
+    isActive
+    media {
+      url
+    }
+    createdAt
+    updatedAt
+    slug
+    order
+  }
+}
+`)
 

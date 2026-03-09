@@ -23,6 +23,8 @@ type Documents = {
     "\n  mutation CreateArticle($payload: CreateArticleDto!) {\n    createArticle(payload: $payload) {\n      category {\n        id\n        name\n      }\n      id\n      title\n      content\n      slug\n      excerpt\n      status\n    }\n  }\n": typeof types.CreateArticleDocument,
     "\n  mutation UpdateInquiryStatus($updateInquiryId: String!, $updateInquiryInput: UpdateInquiryInput!) {\n    updateInquiry(id: $updateInquiryId, updateInquiryInput: $updateInquiryInput) {\n      id\n      status\n    }\n  }\n": typeof types.UpdateInquiryStatusDocument,
     "\n  mutation RemoveInquiry($removeInquiryId: String!) {\n    removeInquiry(id: $removeInquiryId) {\n      id\n      name\n      email\n      message\n      phone\n      status\n    }\n  }\n": typeof types.RemoveInquiryDocument,
+    "\n  mutation UpdateProductById($updateProductInput: UpdateProductInput!) {\n  updateProduct(updateProductInput: $updateProductInput) {\n    id\n    name\n    icon\n    slug\n    tagline\n    isActive\n    category {\n      id\n      name\n    }\n  }\n}\n": typeof types.UpdateProductByIdDocument,
+    "\n  mutation RemoveProduct($removeProductId: String!) {\n  removeProduct(id: $removeProductId) {\n    id\n    name\n  }\n}\n  ": typeof types.RemoveProductDocument,
     "\n  mutation createTeamMember($createTeamMemberInput: CreateTeamMemberInput!) {\n    createTeamMember(createTeamMemberInput: $createTeamMemberInput) {\n      name\n      position\n      socials\n    }\n  }\n": typeof types.CreateTeamMemberDocument,
     "\n  mutation RemoveTeamMember($removeTeamMemberId: String!) {\n    removeTeamMember(id: $removeTeamMemberId) {\n      id\n      name\n    }\n  }\n": typeof types.RemoveTeamMemberDocument,
     "\n  query TestConnection {\n    __schema {\n      types {\n        name\n      }\n    }\n    adminArticles {  \n    id\n    createdAt\n    title\n    status\n    updatedAt\n    author {\n      username\n      profile {\n        avatar\n        }\n      }\n    }\n    adminProducts {\n    id\n    isActive\n    }\n    teamMembers {\n    id\n    }\n    inquiries {\n    id\n    name\n    status\n    createdAt\n    }\n  }\n": typeof types.TestConnectionDocument,
@@ -33,6 +35,7 @@ type Documents = {
     "\n  query getArticleById($id: String!) {\n    categories {\n      id\n      name\n    }\n    adminArticle(id: $id) {\n    id\n    category {\n      name\n      id\n    }\n    updatedAt\n    content\n    slug\n    title\n    excerpt\n    status\n    media {\n    id\n    url\n    }\n    }\n  }\n": typeof types.GetArticleByIdDocument,
     "\n  query getAllCategories {\n    categories {\n    id\n    name\n  }\n}\n": typeof types.GetAllCategoriesDocument,
     "\n  query getInquiryById($inquiryId: String!) {\n    inquiry(id: $inquiryId) {\n    id\n    createdAt\n    email\n    message\n    name\n    phone\n    status\n  }\n}\n": typeof types.GetInquiryByIdDocument,
+    "\n  query AdminProduct($adminProductId: String!) {\n    categories {\n      id\n      name\n    }\n    adminProduct(id: $adminProductId) {\n    id\n    category {\n      id\n      name\n    }\n    icon\n    name\n    tagline\n    description\n    isActive\n    media {\n      url\n    }\n    createdAt\n    updatedAt\n    slug\n    order\n  }\n}\n": typeof types.AdminProductDocument,
     "\n  mutation RefreshToken {\n    refreshToken {\n      user { id }\n    }\n  }\n": typeof types.RefreshTokenDocument,
     "\n  query MeQuery {\n    meQuery {\n      isSignedIn\n      user {\n        id\n        username\n      }\n    }\n  }\n": typeof types.MeQueryDocument,
 };
@@ -46,6 +49,8 @@ const documents: Documents = {
     "\n  mutation CreateArticle($payload: CreateArticleDto!) {\n    createArticle(payload: $payload) {\n      category {\n        id\n        name\n      }\n      id\n      title\n      content\n      slug\n      excerpt\n      status\n    }\n  }\n": types.CreateArticleDocument,
     "\n  mutation UpdateInquiryStatus($updateInquiryId: String!, $updateInquiryInput: UpdateInquiryInput!) {\n    updateInquiry(id: $updateInquiryId, updateInquiryInput: $updateInquiryInput) {\n      id\n      status\n    }\n  }\n": types.UpdateInquiryStatusDocument,
     "\n  mutation RemoveInquiry($removeInquiryId: String!) {\n    removeInquiry(id: $removeInquiryId) {\n      id\n      name\n      email\n      message\n      phone\n      status\n    }\n  }\n": types.RemoveInquiryDocument,
+    "\n  mutation UpdateProductById($updateProductInput: UpdateProductInput!) {\n  updateProduct(updateProductInput: $updateProductInput) {\n    id\n    name\n    icon\n    slug\n    tagline\n    isActive\n    category {\n      id\n      name\n    }\n  }\n}\n": types.UpdateProductByIdDocument,
+    "\n  mutation RemoveProduct($removeProductId: String!) {\n  removeProduct(id: $removeProductId) {\n    id\n    name\n  }\n}\n  ": types.RemoveProductDocument,
     "\n  mutation createTeamMember($createTeamMemberInput: CreateTeamMemberInput!) {\n    createTeamMember(createTeamMemberInput: $createTeamMemberInput) {\n      name\n      position\n      socials\n    }\n  }\n": types.CreateTeamMemberDocument,
     "\n  mutation RemoveTeamMember($removeTeamMemberId: String!) {\n    removeTeamMember(id: $removeTeamMemberId) {\n      id\n      name\n    }\n  }\n": types.RemoveTeamMemberDocument,
     "\n  query TestConnection {\n    __schema {\n      types {\n        name\n      }\n    }\n    adminArticles {  \n    id\n    createdAt\n    title\n    status\n    updatedAt\n    author {\n      username\n      profile {\n        avatar\n        }\n      }\n    }\n    adminProducts {\n    id\n    isActive\n    }\n    teamMembers {\n    id\n    }\n    inquiries {\n    id\n    name\n    status\n    createdAt\n    }\n  }\n": types.TestConnectionDocument,
@@ -56,6 +61,7 @@ const documents: Documents = {
     "\n  query getArticleById($id: String!) {\n    categories {\n      id\n      name\n    }\n    adminArticle(id: $id) {\n    id\n    category {\n      name\n      id\n    }\n    updatedAt\n    content\n    slug\n    title\n    excerpt\n    status\n    media {\n    id\n    url\n    }\n    }\n  }\n": types.GetArticleByIdDocument,
     "\n  query getAllCategories {\n    categories {\n    id\n    name\n  }\n}\n": types.GetAllCategoriesDocument,
     "\n  query getInquiryById($inquiryId: String!) {\n    inquiry(id: $inquiryId) {\n    id\n    createdAt\n    email\n    message\n    name\n    phone\n    status\n  }\n}\n": types.GetInquiryByIdDocument,
+    "\n  query AdminProduct($adminProductId: String!) {\n    categories {\n      id\n      name\n    }\n    adminProduct(id: $adminProductId) {\n    id\n    category {\n      id\n      name\n    }\n    icon\n    name\n    tagline\n    description\n    isActive\n    media {\n      url\n    }\n    createdAt\n    updatedAt\n    slug\n    order\n  }\n}\n": types.AdminProductDocument,
     "\n  mutation RefreshToken {\n    refreshToken {\n      user { id }\n    }\n  }\n": types.RefreshTokenDocument,
     "\n  query MeQuery {\n    meQuery {\n      isSignedIn\n      user {\n        id\n        username\n      }\n    }\n  }\n": types.MeQueryDocument,
 };
@@ -113,6 +119,14 @@ export function graphql(source: "\n  mutation RemoveInquiry($removeInquiryId: St
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n  mutation UpdateProductById($updateProductInput: UpdateProductInput!) {\n  updateProduct(updateProductInput: $updateProductInput) {\n    id\n    name\n    icon\n    slug\n    tagline\n    isActive\n    category {\n      id\n      name\n    }\n  }\n}\n"): (typeof documents)["\n  mutation UpdateProductById($updateProductInput: UpdateProductInput!) {\n  updateProduct(updateProductInput: $updateProductInput) {\n    id\n    name\n    icon\n    slug\n    tagline\n    isActive\n    category {\n      id\n      name\n    }\n  }\n}\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation RemoveProduct($removeProductId: String!) {\n  removeProduct(id: $removeProductId) {\n    id\n    name\n  }\n}\n  "): (typeof documents)["\n  mutation RemoveProduct($removeProductId: String!) {\n  removeProduct(id: $removeProductId) {\n    id\n    name\n  }\n}\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n  mutation createTeamMember($createTeamMemberInput: CreateTeamMemberInput!) {\n    createTeamMember(createTeamMemberInput: $createTeamMemberInput) {\n      name\n      position\n      socials\n    }\n  }\n"): (typeof documents)["\n  mutation createTeamMember($createTeamMemberInput: CreateTeamMemberInput!) {\n    createTeamMember(createTeamMemberInput: $createTeamMemberInput) {\n      name\n      position\n      socials\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -150,6 +164,10 @@ export function graphql(source: "\n  query getAllCategories {\n    categories {\
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query getInquiryById($inquiryId: String!) {\n    inquiry(id: $inquiryId) {\n    id\n    createdAt\n    email\n    message\n    name\n    phone\n    status\n  }\n}\n"): (typeof documents)["\n  query getInquiryById($inquiryId: String!) {\n    inquiry(id: $inquiryId) {\n    id\n    createdAt\n    email\n    message\n    name\n    phone\n    status\n  }\n}\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query AdminProduct($adminProductId: String!) {\n    categories {\n      id\n      name\n    }\n    adminProduct(id: $adminProductId) {\n    id\n    category {\n      id\n      name\n    }\n    icon\n    name\n    tagline\n    description\n    isActive\n    media {\n      url\n    }\n    createdAt\n    updatedAt\n    slug\n    order\n  }\n}\n"): (typeof documents)["\n  query AdminProduct($adminProductId: String!) {\n    categories {\n      id\n      name\n    }\n    adminProduct(id: $adminProductId) {\n    id\n    category {\n      id\n      name\n    }\n    icon\n    name\n    tagline\n    description\n    isActive\n    media {\n      url\n    }\n    createdAt\n    updatedAt\n    slug\n    order\n  }\n}\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

@@ -3,14 +3,32 @@ import { GET_ARTICLE_BY_ID } from '@/graphql/queries';
 import { CREATE_CATEGORY_MUTATION, UPDATE_ARTICLE_BY_ID_MUTATION } from '@/graphql/mutations';
 import { useMutation, useReadQuery } from '@apollo/client/react';
 import { SimpleEditor } from '@/components/tiptap-templates/simple/simple-editor';
-import { Button, Divider, Input, message, Select, Space, Typography, Upload } from 'antd';
+import { Button, Divider, Input, message, Modal, Select, Space, Typography, Upload } from 'antd';
 import { ContainerOutlined, SendOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
-import { useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import type { InputRef } from 'antd';
 import { ArticleStatus } from '@/graphql/generated/graphql';
 
 const { TextArea } = Input;
 const { Title } = Typography;
+
+const uploadImage = async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/media/upload`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+            'ngrok-skip-browser-warning': 'true'
+        }
+    });
+
+    if (!response.ok) throw new Error('Upload failed');
+    return await response.json(); // Returns { id, url }
+};
 
 export const Route = createFileRoute('/_layout/all-posts/$postId')({
     component: RouteComponent,
@@ -27,21 +45,16 @@ function RouteComponent() {
     const params = Route.useParams();
     const { queryRef } = Route.useLoaderData();
     const { data: articleData, error: articleError } = useReadQuery(queryRef);
+
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    // This generates a local temporary URL for the selected file
-    const [previewUrl, setPreviewUrl] = useState<string | null>(
-        // Start with the existing image from the database if it exists
-        articleData?.adminArticle?.media?.[0]?.url
-            ? `${articleData.adminArticle.media[0].url}?ngrok-skip-browser-warning=true`
-            : null
-    );
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [formData, setFormData] = useState({
-        title: articleData?.adminArticle?.title || '',
-        excerpt: articleData?.adminArticle?.excerpt || '',
-        content: articleData?.adminArticle?.content || '',
-        categoryId: articleData?.adminArticle?.category?.id || null,
-        status: articleData?.adminArticle?.status as ArticleStatus || '',
-        slug: articleData?.adminArticle?.slug || '',
+        title: '',
+        excerpt: '',
+        content: '',
+        categoryId: null as string | null,
+        status: '' as ArticleStatus,
+        slug: '',
     });
 
     const [name, setName] = useState('');
@@ -49,42 +62,45 @@ function RouteComponent() {
     const [createCategory, { loading: createCategoryLoading }] = useMutation(CREATE_CATEGORY_MUTATION);
     const [updateArticle, { loading: updateArticleLoading }] = useMutation(UPDATE_ARTICLE_BY_ID_MUTATION);
     const [messageApi, messageContextHolder] = message.useMessage();
+    const [modal, modalContextHolder] = Modal.useModal();
+
+    // Sync form data with article data when it loads
+    useEffect(() => {
+        if (articleData?.adminArticle) {
+            const article = articleData.adminArticle;
+            setFormData({
+                title: article.title || '',
+                excerpt: article.excerpt || '',
+                content: article.content || '',
+                categoryId: article.category?.id || null,
+                status: article.status as ArticleStatus || ArticleStatus.Draft,
+                slug: article.slug || '',
+            });
+            setPreviewUrl(article.media?.[0]?.url
+                ? `${article.media[0].url}?ngrok-skip-browser-warning=true`
+                : null
+            );
+        }
+    }, [articleData]);
 
     const handleAddCategory = async () => {
+        if (!name.trim()) return;
         try {
             await createCategory({
                 variables: {
                     createCategoryInput: {
                         name: name,
-                        slug: name.toLowerCase()
+                        slug: name.toLowerCase().replace(/\s+/g, '-')
                     }
                 },
                 refetchQueries: [GET_ARTICLE_BY_ID]
             });
             setName('');
-            await messageApi.success('Category added successfully');
+            messageApi.success('Category added successfully');
         } catch (error) {
             console.error('Error adding category:', error);
             messageApi.error('Failed to add category');
         }
-    };
-
-    const uploadImage = async (file: any) => {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/media/upload`, {
-            method: 'POST',
-            body: formData,
-            credentials: 'include',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-                'ngrok-skip-browser-warning': 'true'
-            }
-        });
-
-        if (!response.ok) throw new Error('Upload failed');
-        return await response.json(); // Returns { id, url }
     };
 
     const handleUpdateArticle = async (status: ArticleStatus) => {
@@ -119,11 +135,25 @@ function RouteComponent() {
         }
     }
 
+    const showConfirmPublish = (status: ArticleStatus) => {
+        const isDraft = status === ArticleStatus.Draft;
+        modal.confirm({
+            title: isDraft ? 'Save as Draft?' : 'Publish Post?',
+            content: `Are you sure you want to ${isDraft ? 'save this as a draft' : 'publish this post'}?`,
+            okText: 'Yes',
+            cancelText: 'Cancel',
+            onOk: async () => {
+                await handleUpdateArticle(status);
+            },
+        });
+    };
+
     if (articleError) return <div className="p-10 text-center text-red-500">Error: {articleError.message}</div>;
 
     return (
         <>
             {messageContextHolder}
+            {modalContextHolder}
             {/* Header */}
             <div className='flex justify-between items-end mb-6'>
                 <div className='flex flex-col gap-1'>
@@ -134,7 +164,8 @@ function RouteComponent() {
                     <Button
                         type="default"
                         icon={<ContainerOutlined />}
-                        onClick={() => handleUpdateArticle('DRAFT' as ArticleStatus)}
+                        onClick={() => showConfirmPublish(ArticleStatus.Draft)}
+                        loading={updateArticleLoading}
                     >
                         Save as Draft
                     </Button>
@@ -143,7 +174,7 @@ function RouteComponent() {
                         icon={<SendOutlined />}
                         disabled={updateArticleLoading}
                         loading={updateArticleLoading}
-                        onClick={() => handleUpdateArticle('PUBLISHED' as ArticleStatus)}
+                        onClick={() => showConfirmPublish(ArticleStatus.Published)}
                     >
                         Publish Post
                     </Button>

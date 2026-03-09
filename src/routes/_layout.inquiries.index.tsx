@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Typography, Divider, Button, Input, Tag, type TableProps, Table, Select, Card, Empty } from 'antd';
 import { CheckCircleFilled, EyeOutlined, FieldTimeOutlined, InboxOutlined, MailOutlined, RightOutlined, FileZipOutlined } from '@ant-design/icons';
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { INQUIRIES_PAGE_QUERY } from '@/graphql/queries';
 import { useReadQuery } from '@apollo/client/react';
 import { format } from 'date-fns';
@@ -120,19 +120,17 @@ function RouteComponent() {
   const { queryRef } = Route.useLoaderData();
   const { data: inquiriesData, error: inquiriesError } = useReadQuery(queryRef);
   // 1. Initialize logic state
-  const [data, setData] = useState(inquiriesData?.inquiries || []);
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  // 2. Filter Effect
-  useEffect(() => {
-    const filtered = inquiriesData?.inquiries.filter((item) => {
+  // 2. Filter logic using useMemo to ensure it updates when inquiriesData changes
+  const filteredData = useMemo(() => {
+    return inquiriesData?.inquiries.filter((item: any) => {
       const matchesSearch = item.name?.toLowerCase().includes(searchText.toLowerCase());
       const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
       return matchesSearch && matchesStatus;
-    });
-    setData(filtered);
-  }, [searchText, statusFilter]);
+    }) || [];
+  }, [inquiriesData, searchText, statusFilter]);
 
   // 3. Handlers
   const handleSearch = (value: string) => setSearchText(value);
@@ -196,7 +194,7 @@ function RouteComponent() {
         <Table
           pagination={inquiriesData?.inquiries?.length > 5 ? { pageSize: 5, showTotal: (total) => `${total} inquiries` } : false}
           columns={columns}
-          dataSource={data}
+          dataSource={filteredData}
           bordered
           style={{ border: '1px solid #1280ED', borderRadius: '12px' }}
           rowKey="id"
