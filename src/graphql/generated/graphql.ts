@@ -45,6 +45,17 @@ export type AdminArticleEntity = {
   userId?: Maybe<Scalars['String']['output']>;
 };
 
+export type AdminGalleryEntity = {
+  __typename?: 'AdminGalleryEntity';
+  _count: GalleryCount;
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['ID']['output'];
+  media?: Maybe<Array<Media>>;
+  status: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
 export type AdminProductEntity = {
   __typename?: 'AdminProductEntity';
   _count: ProductCount;
@@ -230,6 +241,12 @@ export type CreateCompanyProfileInput = {
   socials?: InputMaybe<Scalars['JSON']['input']>;
 };
 
+export type CreateGalleryDto = {
+  mediaIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  status?: InputMaybe<Scalars['String']['input']>;
+  title: Scalars['String']['input'];
+};
+
 export type CreateInquiryInput = {
   email?: InputMaybe<Scalars['String']['input']>;
   hospitalOrClinic?: InputMaybe<Scalars['String']['input']>;
@@ -323,6 +340,39 @@ export type EnumRoleNullableListFilter = {
   isEmpty?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+export type Gallery = {
+  __typename?: 'Gallery';
+  _count: GalleryCount;
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['ID']['output'];
+  media?: Maybe<Array<Media>>;
+  status: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type GalleryCount = {
+  __typename?: 'GalleryCount';
+  media: Scalars['Int']['output'];
+};
+
+export type GalleryNullableScalarRelationFilter = {
+  is?: InputMaybe<GalleryWhereInput>;
+  isNot?: InputMaybe<GalleryWhereInput>;
+};
+
+export type GalleryWhereInput = {
+  AND?: InputMaybe<Array<GalleryWhereInput>>;
+  NOT?: InputMaybe<Array<GalleryWhereInput>>;
+  OR?: InputMaybe<Array<GalleryWhereInput>>;
+  createdAt?: InputMaybe<DateTimeFilter>;
+  id?: InputMaybe<StringFilter>;
+  media?: InputMaybe<MediaListRelationFilter>;
+  status?: InputMaybe<StringFilter>;
+  title?: InputMaybe<StringFilter>;
+  updatedAt?: InputMaybe<DateTimeFilter>;
+};
+
 export type GeneralMsg = {
   __typename?: 'GeneralMsg';
   message: Scalars['String']['output'];
@@ -402,6 +452,8 @@ export type Media = {
   createdAt: Scalars['DateTime']['output'];
   createdBy?: Maybe<Scalars['String']['output']>;
   filename: Scalars['String']['output'];
+  gallery?: Maybe<Gallery>;
+  galleryId?: Maybe<Scalars['String']['output']>;
   height?: Maybe<Scalars['Int']['output']>;
   id: Scalars['ID']['output'];
   mimeType?: Maybe<Scalars['String']['output']>;
@@ -441,6 +493,8 @@ export type MediaWhereInput = {
   createdAt?: InputMaybe<DateTimeFilter>;
   createdBy?: InputMaybe<StringNullableFilter>;
   filename?: InputMaybe<StringFilter>;
+  gallery?: InputMaybe<GalleryNullableScalarRelationFilter>;
+  galleryId?: InputMaybe<StringNullableFilter>;
   height?: InputMaybe<IntNullableFilter>;
   id?: InputMaybe<StringFilter>;
   mimeType?: InputMaybe<StringNullableFilter>;
@@ -473,6 +527,7 @@ export type Mutation = {
   createArticle: AdminArticleEntity;
   createCategory: Category;
   createCompanyProfile: CompanyProfile;
+  createGallery: AdminGalleryEntity;
   createInquiry: Inquiry;
   createProduct: Product;
   createTeamMember: TeamMember;
@@ -482,6 +537,7 @@ export type Mutation = {
   refreshToken: SignResponse;
   removeArticle: AdminArticleEntity;
   removeCategory: Category;
+  removeGallery: AdminGalleryEntity;
   removeInquiry: Inquiry;
   removeProduct: Product;
   removeTeamMember: TeamMember;
@@ -491,6 +547,7 @@ export type Mutation = {
   updateArticle: AdminArticleEntity;
   updateCategory: Category;
   updateCompanyProfile: CompanyProfile;
+  updateGallery: AdminGalleryEntity;
   updateInquiry: Inquiry;
   updateMyProfile: Profile;
   updateProduct: Product;
@@ -516,6 +573,11 @@ export type MutationCreateCategoryArgs = {
 
 export type MutationCreateCompanyProfileArgs = {
   createCompanyProfileInput: CreateCompanyProfileInput;
+};
+
+
+export type MutationCreateGalleryArgs = {
+  payload: CreateGalleryDto;
 };
 
 
@@ -550,6 +612,11 @@ export type MutationRemoveArticleArgs = {
 
 
 export type MutationRemoveCategoryArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type MutationRemoveGalleryArgs = {
   id: Scalars['String']['input'];
 };
 
@@ -597,6 +664,12 @@ export type MutationUpdateCategoryArgs = {
 
 export type MutationUpdateCompanyProfileArgs = {
   updateCompanyProfileInput: UpdateCompanyProfileInput;
+};
+
+
+export type MutationUpdateGalleryArgs = {
+  id: Scalars['String']['input'];
+  payload: UpdateGalleryDto;
 };
 
 
@@ -859,6 +932,7 @@ export type PublicAuthorEntity = {
 
 export type PublicCategoryEntity = {
   __typename?: 'PublicCategoryEntity';
+  articleCount?: Maybe<Scalars['Int']['output']>;
   createdAt: Scalars['DateTime']['output'];
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -875,6 +949,20 @@ export type PublicCompanyProfileEntity = {
   phone?: Maybe<Scalars['String']['output']>;
   socials?: Maybe<Scalars['JSON']['output']>;
   updatedAt: Scalars['DateTime']['output'];
+};
+
+export type PublicGalleryDetailEntity = {
+  __typename?: 'PublicGalleryDetailEntity';
+  id: Scalars['ID']['output'];
+  media?: Maybe<Array<Media>>;
+  title: Scalars['String']['output'];
+};
+
+export type PublicGalleryEntity = {
+  __typename?: 'PublicGalleryEntity';
+  coverImageUrl?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  title: Scalars['String']['output'];
 };
 
 export type PublicProductEntity = {
@@ -901,11 +989,14 @@ export type Query = {
   __typename?: 'Query';
   adminArticle?: Maybe<AdminArticleEntity>;
   adminArticles: Array<AdminArticleEntity>;
+  adminGalleries: Array<AdminGalleryEntity>;
+  adminGallery?: Maybe<AdminGalleryEntity>;
   adminProduct?: Maybe<AdminProductEntity>;
   adminProducts: Array<AdminProductEntity>;
   article?: Maybe<PublicArticleEntity>;
   articles: Array<PublicArticleEntity>;
   categories: Array<PublicCategoryEntity>;
+  categoriesAdmin: Array<Category>;
   category?: Maybe<PublicCategoryEntity>;
   categoryBySlug?: Maybe<PublicCategoryEntity>;
   companyProfile?: Maybe<PublicCompanyProfileEntity>;
@@ -913,6 +1004,8 @@ export type Query = {
   companyProfiles: Array<PublicCompanyProfileEntity>;
   findAllUsers: UserList;
   findOneUser: Profile;
+  galleries: Array<PublicGalleryEntity>;
+  gallery?: Maybe<PublicGalleryDetailEntity>;
   inquiries: Array<Inquiry>;
   inquiry: Inquiry;
   meQuery: MeQuery;
@@ -930,6 +1023,11 @@ export type QueryAdminArticleArgs = {
 
 export type QueryAdminArticlesArgs = {
   where?: InputMaybe<ArticleWhereInput>;
+};
+
+
+export type QueryAdminGalleryArgs = {
+  id: Scalars['String']['input'];
 };
 
 
@@ -972,6 +1070,11 @@ export type QueryFindAllUsersArgs = {
 
 export type QueryFindOneUserArgs = {
   profileId: Scalars['String']['input'];
+};
+
+
+export type QueryGalleryArgs = {
+  id: Scalars['String']['input'];
 };
 
 
@@ -1097,6 +1200,12 @@ export type UpdateCompanyProfileInput = {
   id: Scalars['String']['input'];
   phone?: InputMaybe<Scalars['String']['input']>;
   socials?: InputMaybe<Scalars['JSON']['input']>;
+};
+
+export type UpdateGalleryDto = {
+  mediaIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  status?: InputMaybe<Scalars['String']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UpdateInquiryInput = {
