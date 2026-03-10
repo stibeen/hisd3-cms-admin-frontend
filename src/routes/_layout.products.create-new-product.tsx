@@ -58,7 +58,7 @@ function RouteComponent() {
   const { categoryQueryRef } = Route.useLoaderData();
   const { productsQueryRef } = Route.useLoaderData();
   const { data: categoriesData } = useReadQuery(categoryQueryRef);
-  const { data: productsListData } = useReadQuery(productsQueryRef);
+  useReadQuery(productsQueryRef);
   const navigate = useNavigate();
   const [createCategory, { loading: createCategoryLoading }] = useMutation(
     CREATE_CATEGORY_MUTATION,
