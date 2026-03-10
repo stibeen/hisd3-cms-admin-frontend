@@ -102,6 +102,30 @@ export const REMOVE_INQUIRY_MUTATION = graphql(`
   }
 `);
 
+export const CREATE_PRODUCT_MUTATION = graphql(`
+  mutation CreateProduct($createProductInput: CreateProductInput!) {
+  createProduct(createProductInput: $createProductInput) {
+    id
+    category {
+      id
+      name
+    }
+    media {
+      id
+      url
+    }
+    name
+    tagline
+    description
+    icon
+    isActive
+    slug
+    createdAt
+    updatedAt
+  }
+}
+`)
+
 export const UPDATE_PRODUCT_BY_ID_MUTATION = graphql(`
   mutation UpdateProductById($updateProductInput: UpdateProductInput!) {
   updateProduct(updateProductInput: $updateProductInput) {
@@ -111,6 +135,10 @@ export const UPDATE_PRODUCT_BY_ID_MUTATION = graphql(`
     slug
     tagline
     isActive
+    media {
+      id
+      url
+    }
     category {
       id
       name
