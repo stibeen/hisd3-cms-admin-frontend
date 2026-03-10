@@ -58,7 +58,7 @@ export const Route = createFileRoute("/_layout/products/$productId")({
 function RouteComponent() {
   const { queryRef, productsListQueryRef } = Route.useLoaderData();
   const { data: productData } = useReadQuery(queryRef);
-  const { data: productsData } = useReadQuery(productsListQueryRef);
+  useReadQuery(productsListQueryRef);
   const params = Route.useParams();
   const navigate = useNavigate();
   const [createCategory, { loading: createCategoryLoading }] = useMutation(
@@ -139,12 +139,12 @@ function RouteComponent() {
 
   const handleUpdateProduct = async () => {
     try {
-      let iconURL = null;
+      //   let iconURL = null;
       let uploadedMediaId = null;
       if (selectedFile) {
         messageApi.loading("Uploading current cover image...", 0);
         const uploadResult = await uploadImage(selectedFile);
-        iconURL = uploadResult.url;
+        // iconURL = uploadResult.url;
         uploadedMediaId = uploadResult.id;
         messageApi.destroy();
       }
