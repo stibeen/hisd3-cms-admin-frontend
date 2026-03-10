@@ -166,6 +166,18 @@ export const CREATE_TEAM_MEMBER_MUTATION = graphql(`
   }
 `);
 
+export const UPDATE_TEAM_MEMBER_MUTATION = graphql(`
+  mutation UpdateTeamMember($updateTeamMemberId: String!, $updateTeamMemberInput: UpdateTeamMemberInput!) {
+    updateTeamMember(id: $updateTeamMemberId, updateTeamMemberInput: $updateTeamMemberInput) {
+      id
+      name
+      position
+      socials
+      image
+    }
+  }
+`);
+
 export const REMOVE_TEAM_MEMBER_MUTATION = graphql(`
   mutation RemoveTeamMember($removeTeamMemberId: String!) {
     removeTeamMember(id: $removeTeamMemberId) {
