@@ -53,12 +53,6 @@ const uploadImage = async (file: File) => {
   if (!response.ok) throw new Error("Upload failed");
   return await response.json(); // Returns { id, url }
 };
-const modalConfig = {
-  title: "Title",
-  content: "Some contents...",
-};
-
-// Move this outside or keep it if you want the columns static
 
 export const Route = createFileRoute("/_layout/team")({
   component: RouteComponent,
