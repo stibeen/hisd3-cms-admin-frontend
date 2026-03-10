@@ -11,6 +11,7 @@ import {
   message,
   Form,
   Popconfirm,
+  Modal,
 } from "antd";
 import type { TableProps } from "antd";
 import {
@@ -23,23 +24,39 @@ import {
   XOutlined,
   CameraTwoTone,
   FacebookFilled,
+  CloseOutlined,
 } from "@ant-design/icons";
-import type { UploadProps } from "antd";
 import { useState } from "react";
 import { useReadQuery, useMutation } from "@apollo/client/react";
 import { TEAM_PAGE_QUERY } from "@/graphql/queries";
-import { CREATE_TEAM_MEMBER_MUTATION, REMOVE_TEAM_MEMBER_MUTATION } from "@/graphql/mutations";
+import {
+  CREATE_TEAM_MEMBER_MUTATION,
+  REMOVE_TEAM_MEMBER_MUTATION,
+  UPDATE_TEAM_MEMBER_MUTATION,
+} from "@/graphql/mutations";
+const { Title } = Typography;
 
-// Helper function to convert file to base64 for preview
-const getBase64 = (file: any): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = (error) => reject(error);
+const uploadImage = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/media/upload`, {
+    method: "POST",
+    body: formData,
+    credentials: "include",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      "ngrok-skip-browser-warning": "true",
+    },
   });
 
-const { Title } = Typography;
+  if (!response.ok) throw new Error("Upload failed");
+  return await response.json(); // Returns { id, url }
+};
+const modalConfig = {
+  title: "Title",
+  content: "Some contents...",
+};
 
 // Move this outside or keep it if you want the columns static
 
@@ -56,54 +73,92 @@ function RouteComponent() {
   const { data: teamData } = useReadQuery(queryRef);
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
-  const [loading, setLoading] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string>();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
+  const [modal, modalContextHolder] = Modal.useModal();
 
-  const [createTeamMember] = useMutation(CREATE_TEAM_MEMBER_MUTATION, {
-    refetchQueries: [TEAM_PAGE_QUERY],
-    onCompleted: () => {
-      messageApi.success("Team member added successfully");
-      form.resetFields();
-      setImageUrl("");
-    },
-    onError: (error) => {
-      messageApi.error(error.message || "Failed to add team member");
-    },
-  });
-
-  const onFinish = async (values: any) => {
-    const payload = {
-      name: values.name,
-      position: values.position,
-      socials: {
-        facebook: values.facebook,
-        github: values.github,
-        linkedin: values.linkedin,
-        x: values.x,
+  const [createTeamMember, { loading: createTeamMemberLoading }] = useMutation(
+    CREATE_TEAM_MEMBER_MUTATION,
+    {
+      refetchQueries: [TEAM_PAGE_QUERY],
+      onCompleted: () => {
+        messageApi.success("Team member added successfully");
+        form.resetFields();
+        setPreviewUrl(null);
       },
-      image: imageUrl,
-    };
+      onError: (error) => {
+        messageApi.error(error.message || "Failed to add team member");
+      },
+    },
+  );
 
-    try {
-      await createTeamMember({
-        variables: {
-          createTeamMemberInput: payload,
-        },
-      });
-    } catch (error) {
-      console.error("Mutation error:", error);
+  const [updateTeamMember, { loading: updateTeamMemberLoading }] = useMutation(
+    UPDATE_TEAM_MEMBER_MUTATION,
+    {
+      refetchQueries: [TEAM_PAGE_QUERY],
+      onCompleted: () => {
+        messageApi.success("Team member updated successfully");
+        handleCancelEdit();
+      },
+      onError: (error) => {
+        messageApi.error(error.message || "Failed to update team member");
+      },
+    },
+  );
+
+  const [removeTeamMember, { loading: removeTeamMemberLoading }] = useMutation(
+    REMOVE_TEAM_MEMBER_MUTATION,
+    {
+      refetchQueries: [TEAM_PAGE_QUERY],
+      onCompleted: () => {
+        messageApi.success("Team member removed successfully");
+      },
+      onError: (error) => {
+        messageApi.error(error.message || "Failed to remove team member");
+      },
+    },
+  );
+
+  const handleSubmit = async (values: any) => {
+    if (isEditing) {
+      await handleUpdateTeamMember(values);
+    } else {
+      await handleAddTeamMember(values);
     }
   };
 
-  const [removeTeamMember] = useMutation(REMOVE_TEAM_MEMBER_MUTATION, {
-    refetchQueries: [TEAM_PAGE_QUERY],
-    onCompleted: () => {
-      messageApi.success("Team member removed successfully");
-    },
-    onError: (error) => {
-      messageApi.error(error.message || "Failed to remove team member");
-    },
-  });
+  const handleAddTeamMember = async (values: any) => {
+    const payload = {
+      name: values.name,
+      position: values.position,
+      socials: values.socials,
+    };
+
+    try {
+      let imageURL = "";
+      if (selectedFile) {
+        messageApi.loading("Uploading profile image...", 0);
+        const uploadResult = await uploadImage(selectedFile);
+        imageURL = `${import.meta.env.VITE_API_URL}${uploadResult.url}?ngrok-skip-browser-warning=true`;
+        messageApi.destroy();
+      }
+
+      await createTeamMember({
+        variables: {
+          createTeamMemberInput: {
+            ...payload,
+            image: imageURL,
+          },
+        },
+      });
+    } catch (error) {
+      messageApi.destroy();
+      console.error(error);
+      messageApi.error("Failed to add team member");
+    }
+  };
 
   const handleDelete = async (id: string) => {
     try {
@@ -117,6 +172,90 @@ function RouteComponent() {
     }
   };
 
+  const handleEdit = (id: string) => {
+    const member = teamData?.teamMembers?.find((m) => m.id === id);
+    if (!member) return;
+
+    setIsEditing(true);
+    setEditingMemberId(id);
+
+    form.setFieldsValue({
+      name: member.name,
+      position: member.position,
+      socials: {
+        facebook: member.socials?.facebook,
+        github: member.socials?.github,
+        linkedin: member.socials?.linkedin,
+        x: member.socials?.x,
+      },
+    });
+    setPreviewUrl(member.image || "");
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditingMemberId(null);
+    setSelectedFile(null);
+    form.resetFields();
+    setPreviewUrl(null);
+  };
+
+  const handleUpdateTeamMember = async (values: any) => {
+    if (!editingMemberId) return;
+
+    const payload = {
+      name: values.name,
+      position: values.position,
+      socials: values.socials,
+    };
+
+    try {
+      let imageURL = previewUrl; // Default to current image (either existing URL or old URL)
+
+      if (selectedFile) {
+        messageApi.loading("Uploading new profile image...", 0);
+        const uploadResult = await uploadImage(selectedFile);
+        imageURL = `${import.meta.env.VITE_API_URL}${uploadResult.url}?ngrok-skip-browser-warning=true`;
+        messageApi.destroy();
+      }
+
+      await updateTeamMember({
+        variables: {
+          updateTeamMemberId: editingMemberId,
+          updateTeamMemberInput: {
+            ...payload,
+            image: imageURL,
+          },
+        },
+      });
+    } catch (error) {
+      messageApi.destroy();
+      console.error(error);
+      messageApi.error("Failed to update team member");
+    }
+  };
+
+  const handlePreviewAvatar = (id: string) => {
+    const member = teamData?.teamMembers?.find((m) => m.id === id);
+    if (!member) return;
+    const url = member.image || "";
+    modal.info({
+      title: `${member.name}'s Profile Image`,
+      content: (
+        <div className="flex items-center">
+          {url ? (
+            <img src={url} alt="Profile Image Preview" className="max-w-full" />
+          ) : (
+            <Avatar
+              src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${member.name}`}
+            />
+          )}
+        </div>
+      ),
+      mask: { blur: true },
+    });
+  };
+
   const columns: TableProps["columns"] = [
     {
       title: "Member Name",
@@ -126,7 +265,13 @@ function RouteComponent() {
         return (
           <div className="flex items-center gap-2">
             {record.image ? (
-              <Avatar src={record.image} />
+              <Tooltip title={`View Profile Image of ${text}`}>
+                <Avatar
+                  src={record.image}
+                  onClick={() => handlePreviewAvatar(record.id)}
+                  className="cursor-pointer"
+                />
+              </Tooltip>
             ) : (
               <Avatar
                 src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${text}`}
@@ -161,7 +306,11 @@ function RouteComponent() {
       }) => (
         <div className="flex gap-2 justify-center">
           {socials?.facebook && (
-            <a href={socials.facebook} target="_blank" rel="noopener noreferrer">
+            <a
+              href={socials.facebook}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <FacebookFilled className="text-xl text-blue-600" />
             </a>
           )}
@@ -171,7 +320,11 @@ function RouteComponent() {
             </a>
           )}
           {socials?.linkedin && (
-            <a href={socials.linkedin} target="_blank" rel="noopener noreferrer">
+            <a
+              href={socials.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <LinkedinFilled className="text-xl text-blue-600" />
             </a>
           )}
@@ -191,9 +344,25 @@ function RouteComponent() {
       align: "center",
       render: (_, record: any) => (
         <div className="flex gap-2 justify-center">
-          <Tooltip title="Edit">
-            <Button type="text" icon={<EditOutlined />} aria-label="Edit Post" />
-          </Tooltip>
+          {isEditing && editingMemberId === record.id ? (
+            <Tooltip title="Cancel">
+              <Button
+                type="text"
+                icon={<CloseOutlined />}
+                aria-label="Cancel Edit"
+                onClick={() => handleCancelEdit()}
+              />
+            </Tooltip>
+          ) : (
+            <Tooltip title="Edit">
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                aria-label="Edit Post"
+                onClick={() => handleEdit(record.id)}
+              />
+            </Tooltip>
+          )}
           <Tooltip title="Delete">
             <Popconfirm
               title="Delete member"
@@ -207,6 +376,7 @@ function RouteComponent() {
                 danger
                 icon={<DeleteOutlined />}
                 aria-label="Delete Post"
+                loading={removeTeamMemberLoading}
               />
             </Popconfirm>
           </Tooltip>
@@ -215,42 +385,10 @@ function RouteComponent() {
     },
   ];
 
-  const props: UploadProps = {
-    name: "file",
-    action: "https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload",
-    headers: {
-      authorization: "authorization-text",
-    },
-    // Added customRequest to simulate upload success
-    customRequest({ onSuccess }) {
-      setTimeout(() => {
-        if (onSuccess) {
-          onSuccess("ok");
-        }
-      }, 1000);
-    },
-    onChange(info) {
-      if (info.file.status === "uploading") {
-        setLoading(true);
-        return;
-      }
-      if (info.file.status === "done") {
-        // Get this url from response in real world.
-        getBase64(info.file.originFileObj as File).then((url) => {
-          setLoading(false);
-          setImageUrl(url);
-        });
-        messageApi.success(`${info.file.name} file uploaded successfully`);
-      } else if (info.file.status === "error") {
-        setLoading(false);
-        messageApi.error(`${info.file.name} file upload failed.`);
-      }
-    },
-  };
-
   return (
     <>
       {contextHolder}
+      {modalContextHolder}
       {/* Header */}
       <div className="flex justify-between items-end mb-6">
         <div className="flex flex-col gap-1">
@@ -262,33 +400,36 @@ function RouteComponent() {
           </span>
         </div>
       </div>
+
       <Divider />
+
       <div className="flex justify-center gap-6">
         {/* Table */}
         <div className="w-2/3">
           <Table
             pagination={
-              teamData?.teamMembers?.length > 5
+              teamData?.teamMembers?.length > 10
                 ? {
-                  pageSize: 5,
-                  showTotal: (total) => `${total} team members`,
-                }
+                    pageSize: 10,
+                    showTotal: (total) => `${total} team members`,
+                  }
                 : false
             }
             columns={columns}
             dataSource={teamData?.teamMembers || []}
             bordered
-            style={{ border: "1px solid #1280ED", borderRadius: "12px" }}
+            // style={{ border: "1px solid #1280ED", borderRadius: "12px" }}
             rowKey="id"
           />
         </div>
+
         {/* Form */}
         <div className="w-full max-w-md border border-[#E5E7EB] rounded-xl p-6 bg-white shadow-sm">
           {/* Header */}
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex justify-center gap-2 mb-3">
             <UserAddOutlined className="text-[#1280ED] text-lg" />
             <Title level={5} className="m-0!">
-              Add New Team Member
+              {isEditing ? "Edit Team Member" : "Add New Team Member"}
             </Title>
           </div>
 
@@ -297,7 +438,7 @@ function RouteComponent() {
           <Form
             form={form}
             layout="vertical"
-            onFinish={onFinish}
+            onFinish={handleSubmit}
             className="flex flex-col gap-5"
           >
             {/* Profile Picture */}
@@ -308,9 +449,9 @@ function RouteComponent() {
 
               <div className="flex items-center gap-4">
                 <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 hover:border-[#1280ED] transition">
-                  {imageUrl ? (
+                  {previewUrl ? (
                     <img
-                      src={imageUrl}
+                      src={previewUrl}
                       alt="avatar"
                       className="w-full h-full object-cover"
                     />
@@ -320,22 +461,35 @@ function RouteComponent() {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <Upload {...props} showUploadList={false}>
+                  <Upload
+                    beforeUpload={(file) => {
+                      setSelectedFile(file);
+                      const url = URL.createObjectURL(file);
+                      setPreviewUrl(url);
+                      return false;
+                    }}
+                    onRemove={() => {
+                      setSelectedFile(null);
+                      setPreviewUrl(null);
+                    }}
+                    maxCount={1}
+                    showUploadList={false}
+                  >
                     <Button
                       type="primary"
                       icon={<UploadOutlined />}
-                      loading={loading}
+                      loading={createTeamMemberLoading}
                       className="bg-[#1280ED]"
                     >
-                      {imageUrl ? "Change Photo" : "Upload Photo"}
+                      {previewUrl ? "Change Photo" : "Upload Photo"}
                     </Button>
                   </Upload>
 
-                  {imageUrl && (
+                  {previewUrl && (
                     <Button
                       type="default"
                       danger
-                      onClick={() => setImageUrl("")}
+                      onClick={() => setPreviewUrl(null)}
                     >
                       Remove Photo
                     </Button>
@@ -347,7 +501,9 @@ function RouteComponent() {
             {/* Member Name */}
             <Form.Item
               name="name"
-              label={<span className="font-medium text-gray-700">Member Name</span>}
+              label={
+                <span className="font-medium text-gray-700">Member Name</span>
+              }
               rules={[{ required: true, message: "Please enter member name" }]}
               className="mb-0!"
             >
@@ -357,7 +513,9 @@ function RouteComponent() {
             {/* Designation */}
             <Form.Item
               name="position"
-              label={<span className="font-medium text-gray-700">Designation</span>}
+              label={
+                <span className="font-medium text-gray-700">Designation</span>
+              }
               rules={[{ required: true, message: "Please enter designation" }]}
               className="mb-0"
             >
@@ -370,7 +528,7 @@ function RouteComponent() {
                 Social Links
               </label>
 
-              <Form.Item name="linkedin" className="mb-0!">
+              <Form.Item name={["socials", "linkedin"]} className="mb-0!">
                 <Input
                   placeholder="LinkedIn Profile URL"
                   prefix={<LinkedinFilled />}
@@ -378,7 +536,7 @@ function RouteComponent() {
                 />
               </Form.Item>
 
-              <Form.Item name="github" className="mb-0!">
+              <Form.Item name={["socials", "github"]} className="mb-0!">
                 <Input
                   placeholder="GitHub Profile URL"
                   prefix={<GithubFilled />}
@@ -386,7 +544,7 @@ function RouteComponent() {
                 />
               </Form.Item>
 
-              <Form.Item name="facebook" className="mb-0!">
+              <Form.Item name={["socials", "facebook"]} className="mb-0!">
                 <Input
                   placeholder="Facebook Profile URL"
                   prefix={<FacebookFilled />}
@@ -394,7 +552,7 @@ function RouteComponent() {
                 />
               </Form.Item>
 
-              <Form.Item name="x" className="mb-0!">
+              <Form.Item name={["socials", "x"]} className="mb-0!">
                 <Input
                   placeholder="X Profile URL"
                   prefix={<XOutlined />}
@@ -410,8 +568,10 @@ function RouteComponent() {
               className="bg-[#1280ED] mt-2"
               block
               htmlType="submit"
+              disabled={createTeamMemberLoading || updateTeamMemberLoading}
+              loading={createTeamMemberLoading || updateTeamMemberLoading}
             >
-              Add Team Member
+              {isEditing ? "Update Team Member" : "Add Team Member"}
             </Button>
           </Form>
         </div>
