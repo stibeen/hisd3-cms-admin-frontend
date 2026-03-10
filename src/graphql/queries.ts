@@ -172,7 +172,8 @@ export const GET_PRODUCT_BY_ID = graphql(`
     description
     isActive
     media {
-      url
+    id
+    url
     }
     createdAt
     updatedAt

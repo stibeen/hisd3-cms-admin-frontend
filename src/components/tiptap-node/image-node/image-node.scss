@@ -19,6 +19,28 @@
     outline-color: var(--tt-brand-color-500);
   }
 
+  // Handle alignment for block-level images
+  img {
+    &[style*="text-align: center"] {
+      margin-left: auto !important;
+      margin-right: auto !important;
+      display: block;
+    }
+
+    &[style*="text-align: right"] {
+      margin-left: auto !important;
+      margin-right: 0 !important;
+      display: block;
+    }
+
+    &[style*="text-align: left"],
+    &[style*="text-align: justify"] {
+      margin-left: 0 !important;
+      margin-right: auto !important;
+      display: block;
+    }
+  }
+
   // Thread image handling
   .tiptap-thread:has(> img) {
     margin: 2rem 0;
