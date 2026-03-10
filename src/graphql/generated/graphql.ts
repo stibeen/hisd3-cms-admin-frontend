@@ -284,6 +284,16 @@ export type CreateTeamMemberInput = {
   socials?: InputMaybe<Scalars['JSON']['input']>;
 };
 
+export type CreateTestimonyInput = {
+  avatarUrl?: InputMaybe<Scalars['String']['input']>;
+  company?: InputMaybe<Scalars['String']['input']>;
+  content: Scalars['String']['input'];
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  name: Scalars['String']['input'];
+  order?: InputMaybe<Scalars['Float']['input']>;
+  position?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type CreateUserInput = {
   email: Scalars['String']['input'];
   hashedPassword: Scalars['String']['input'];
@@ -531,6 +541,7 @@ export type Mutation = {
   createInquiry: Inquiry;
   createProduct: Product;
   createTeamMember: TeamMember;
+  createTestimony: Testimony;
   createUser: GeneralMsg;
   hardDeleteArticle: AdminArticleEntity;
   logOut: GeneralMsg;
@@ -541,6 +552,7 @@ export type Mutation = {
   removeInquiry: Inquiry;
   removeProduct: Product;
   removeTeamMember: TeamMember;
+  removeTestimony: Testimony;
   restoreArticle: AdminArticleEntity;
   signin: SignResponse;
   signup: SignResponse;
@@ -553,6 +565,7 @@ export type Mutation = {
   updateProduct: Product;
   updateProfile: Profile;
   updateTeamMember: TeamMember;
+  updateTestimony: Testimony;
 };
 
 
@@ -596,6 +609,11 @@ export type MutationCreateTeamMemberArgs = {
 };
 
 
+export type MutationCreateTestimonyArgs = {
+  payload: CreateTestimonyInput;
+};
+
+
 export type MutationCreateUserArgs = {
   createUserInput: CreateUserProfileInput;
 };
@@ -632,6 +650,11 @@ export type MutationRemoveProductArgs = {
 
 
 export type MutationRemoveTeamMemberArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type MutationRemoveTestimonyArgs = {
   id: Scalars['String']['input'];
 };
 
@@ -697,6 +720,12 @@ export type MutationUpdateProfileArgs = {
 export type MutationUpdateTeamMemberArgs = {
   id: Scalars['String']['input'];
   updateTeamMemberInput: UpdateTeamMemberInput;
+};
+
+
+export type MutationUpdateTestimonyArgs = {
+  id: Scalars['String']['input'];
+  payload: UpdateTestimonyInput;
 };
 
 export type NestedBoolFilter = {
@@ -985,6 +1014,17 @@ export type PublicProfileEntity = {
   lastName?: Maybe<Scalars['String']['output']>;
 };
 
+export type PublicTestimonyEntity = {
+  __typename?: 'PublicTestimonyEntity';
+  avatarUrl?: Maybe<Scalars['String']['output']>;
+  company?: Maybe<Scalars['String']['output']>;
+  content: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  order: Scalars['Int']['output'];
+  position?: Maybe<Scalars['String']['output']>;
+};
+
 export type Query = {
   __typename?: 'Query';
   adminArticle?: Maybe<AdminArticleEntity>;
@@ -993,6 +1033,8 @@ export type Query = {
   adminGallery?: Maybe<AdminGalleryEntity>;
   adminProduct?: Maybe<AdminProductEntity>;
   adminProducts: Array<AdminProductEntity>;
+  adminTestimonies: Array<Testimony>;
+  adminTestimony?: Maybe<Testimony>;
   article?: Maybe<PublicArticleEntity>;
   articles: Array<PublicArticleEntity>;
   categories: Array<PublicCategoryEntity>;
@@ -1013,6 +1055,7 @@ export type Query = {
   products: Array<PublicProductEntity>;
   teamMember: TeamMember;
   teamMembers: Array<TeamMember>;
+  testimonies: Array<PublicTestimonyEntity>;
 };
 
 
@@ -1032,6 +1075,11 @@ export type QueryAdminGalleryArgs = {
 
 
 export type QueryAdminProductArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type QueryAdminTestimonyArgs = {
   id: Scalars['String']['input'];
 };
 
@@ -1174,6 +1222,22 @@ export type TeamMember = {
   updatedAt: Scalars['DateTime']['output'];
 };
 
+export type Testimony = {
+  __typename?: 'Testimony';
+  avatarUrl?: Maybe<Scalars['String']['output']>;
+  company?: Maybe<Scalars['String']['output']>;
+  content: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  createdBy?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  isActive: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  order: Scalars['Int']['output'];
+  position?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+  updatedBy?: Maybe<Scalars['String']['output']>;
+};
+
 export type UpdateArticleDto = {
   categoryId?: InputMaybe<Scalars['String']['input']>;
   content?: InputMaybe<Scalars['String']['input']>;
@@ -1248,6 +1312,16 @@ export type UpdateTeamMemberInput = {
   order?: InputMaybe<Scalars['Int']['input']>;
   position?: InputMaybe<Scalars['String']['input']>;
   socials?: InputMaybe<Scalars['JSON']['input']>;
+};
+
+export type UpdateTestimonyInput = {
+  avatarUrl?: InputMaybe<Scalars['String']['input']>;
+  company?: InputMaybe<Scalars['String']['input']>;
+  content?: InputMaybe<Scalars['String']['input']>;
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  order?: InputMaybe<Scalars['Int']['input']>;
+  position?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type User = {
