@@ -1,5 +1,18 @@
 import { graphql } from "./generated/gql"
 
+export const ME_QUERY = graphql(`
+  query QueryMe {
+    meQuery {
+      isSignedIn
+      user {
+        id
+        username
+        email
+      }
+    }
+  }
+`)
+
 export const HOME_PAGE_QUERY = graphql(`
   query TestConnection {
     __schema {
@@ -59,6 +72,10 @@ export const POSTS_PAGE_QUERY = graphql(`
       id
       name
     }
+    media {
+      id
+      url
+    }
     }
   }
 `);
@@ -104,6 +121,18 @@ export const TEAM_PAGE_QUERY = graphql(`
   }
 }
 `);
+
+export const SETTINGS_PAGE_QUERY = graphql(`
+  query getSettings {
+  companyProfile {
+    id
+    address
+    email
+    phone
+    socials
+  }
+}
+`)
 
 export const GET_ARTICLE_BY_ID = graphql(`
   query getArticleById($id: String!) {

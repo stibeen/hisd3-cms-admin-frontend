@@ -3,7 +3,7 @@ import type { CodegenConfig } from '@graphql-codegen/cli';
 const config: CodegenConfig = {
     overwrite: true,
     schema: {
-        'https://lyndsey-overtenacious-unthickly.ngrok-free.dev/graphql': {
+        'https://exostotic-unreprievable-clyde.ngrok-free.dev/graphql': {
             headers: {
                 'ngrok-skip-browser-warning': 'true',
             },
