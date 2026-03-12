@@ -1042,8 +1042,6 @@ export type Query = {
   category?: Maybe<PublicCategoryEntity>;
   categoryBySlug?: Maybe<PublicCategoryEntity>;
   companyProfile?: Maybe<PublicCompanyProfileEntity>;
-  companyProfileById?: Maybe<PublicCompanyProfileEntity>;
-  companyProfiles: Array<PublicCompanyProfileEntity>;
   findAllUsers: UserList;
   findOneUser: Profile;
   galleries: Array<PublicGalleryEntity>;
@@ -1101,11 +1099,6 @@ export type QueryCategoryArgs = {
 
 export type QueryCategoryBySlugArgs = {
   slug: Scalars['String']['input'];
-};
-
-
-export type QueryCompanyProfileByIdArgs = {
-  id: Scalars['String']['input'];
 };
 
 
@@ -1281,6 +1274,7 @@ export type UpdateMyProfileInput = {
   email?: InputMaybe<Scalars['String']['input']>;
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
+  username?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UpdateProductInput = {
