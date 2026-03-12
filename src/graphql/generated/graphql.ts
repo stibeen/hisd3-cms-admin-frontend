@@ -538,7 +538,7 @@ export type Mutation = {
   createCategory: Category;
   createCompanyProfile: CompanyProfile;
   createGallery: AdminGalleryEntity;
-  createInquiry: Inquiry;
+  createInquiry: PublicInquiryResponseEntity;
   createProduct: Product;
   createTeamMember: TeamMember;
   createTestimony: Testimony;
@@ -994,6 +994,12 @@ export type PublicGalleryEntity = {
   title: Scalars['String']['output'];
 };
 
+export type PublicInquiryResponseEntity = {
+  __typename?: 'PublicInquiryResponseEntity';
+  message?: Maybe<Scalars['String']['output']>;
+  success: Scalars['Boolean']['output'];
+};
+
 export type PublicProductEntity = {
   __typename?: 'PublicProductEntity';
   category?: Maybe<Category>;
@@ -1012,6 +1018,17 @@ export type PublicProfileEntity = {
   designation?: Maybe<Scalars['String']['output']>;
   firstName?: Maybe<Scalars['String']['output']>;
   lastName?: Maybe<Scalars['String']['output']>;
+};
+
+export type PublicTeamMemberEntity = {
+  __typename?: 'PublicTeamMemberEntity';
+  bio?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  image?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  order: Scalars['Int']['output'];
+  position: Scalars['String']['output'];
+  socials?: Maybe<Scalars['JSON']['output']>;
 };
 
 export type PublicTestimonyEntity = {
@@ -1052,7 +1069,7 @@ export type Query = {
   product?: Maybe<PublicProductEntity>;
   products: Array<PublicProductEntity>;
   teamMember: TeamMember;
-  teamMembers: Array<TeamMember>;
+  teamMembers: Array<PublicTeamMemberEntity>;
   testimonies: Array<PublicTestimonyEntity>;
 };
 
@@ -1700,7 +1717,7 @@ export type QueryMeQuery = { __typename?: 'Query', meQuery: { __typename?: 'MeQu
 export type TestConnectionQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type TestConnectionQuery = { __typename?: 'Query', __schema: { __typename?: '__Schema', types: Array<{ __typename?: '__Type', name?: string | null }> }, adminArticles: Array<{ __typename?: 'AdminArticleEntity', id: string, createdAt: any, title?: string | null, status: ArticleStatus, updatedAt: any, author?: { __typename?: 'User', role?: Array<Role> | null, username: string, profile?: { __typename?: 'Profile', avatar?: string | null } | null } | null }>, adminProducts: Array<{ __typename?: 'AdminProductEntity', id: string, isActive: boolean }>, teamMembers: Array<{ __typename?: 'TeamMember', id: string }>, inquiries: Array<{ __typename?: 'Inquiry', id: string, name?: string | null, status: InquiryStatus, createdAt: any }> };
+export type TestConnectionQuery = { __typename?: 'Query', __schema: { __typename?: '__Schema', types: Array<{ __typename?: '__Type', name?: string | null }> }, adminArticles: Array<{ __typename?: 'AdminArticleEntity', id: string, createdAt: any, title?: string | null, status: ArticleStatus, updatedAt: any, author?: { __typename?: 'User', role?: Array<Role> | null, username: string, profile?: { __typename?: 'Profile', avatar?: string | null } | null } | null }>, adminProducts: Array<{ __typename?: 'AdminProductEntity', id: string, isActive: boolean }>, teamMembers: Array<{ __typename?: 'PublicTeamMemberEntity', id: string }>, inquiries: Array<{ __typename?: 'Inquiry', id: string, name?: string | null, status: InquiryStatus, createdAt: any }> };
 
 export type GetPostsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1720,7 +1737,7 @@ export type GetProductsQuery = { __typename?: 'Query', adminProducts: Array<{ __
 export type GetTeamMembersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetTeamMembersQuery = { __typename?: 'Query', teamMembers: Array<{ __typename?: 'TeamMember', id: string, name: string, image?: string | null, position: string, socials?: any | null }> };
+export type GetTeamMembersQuery = { __typename?: 'Query', teamMembers: Array<{ __typename?: 'PublicTeamMemberEntity', id: string, name: string, image?: string | null, position: string, socials?: any | null }> };
 
 export type GetSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
