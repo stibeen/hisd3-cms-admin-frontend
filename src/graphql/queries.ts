@@ -129,6 +129,22 @@ export const TEAM_PAGE_QUERY = graphql(`
 }
 `);
 
+export const TESTIMONIES_PAGE_QUERY = graphql(`
+  query AdminTestimonies {
+  adminTestimonies {
+    id
+    name
+    content
+    createdAt
+    updatedAt
+    company
+    avatarUrl
+    isActive
+    position
+  }
+}
+`)
+
 export const SETTINGS_PAGE_QUERY = graphql(`
   query getSettings {
   companyProfile {
@@ -215,6 +231,22 @@ export const GET_PRODUCT_BY_ID = graphql(`
     updatedAt
     slug
     order
+  }
+}
+`)
+
+export const GET_TESTIMONY_BY_ID = graphql(`
+  query AdminTestimony($adminTestimonyId: String!) {
+    adminTestimony(id: $adminTestimonyId) {
+    id
+    name
+    content
+    createdAt
+    updatedAt
+    company
+    avatarUrl
+    isActive
+    position
   }
 }
 `)

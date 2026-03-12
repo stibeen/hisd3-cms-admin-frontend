@@ -169,7 +169,7 @@ function RouteComponent() {
       <div className='flex justify-between items-end'>
         <div className='flex flex-col gap-1'>
           <Title level={2} className="m-0!">Inquiries</Title>
-          <span className='text-gray-500 m-0'>Manage inquiries from website visitors.</span>
+          <span className='text-gray-500 m-0'>Stay connected—review and respond to messages from website visitors.</span>
         </div>
       </div>
 
