@@ -14,9 +14,12 @@ import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as LayoutIndexRouteImport } from './routes/_layout.index'
 import { Route as LayoutTeamRouteImport } from './routes/_layout.team'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout.settings'
+import { Route as LayoutTestimoniesIndexRouteImport } from './routes/_layout.testimonies.index'
 import { Route as LayoutProductsIndexRouteImport } from './routes/_layout.products.index'
 import { Route as LayoutInquiriesIndexRouteImport } from './routes/_layout.inquiries.index'
 import { Route as LayoutAllPostsIndexRouteImport } from './routes/_layout.all-posts.index'
+import { Route as LayoutTestimoniesCreateNewTestimonyRouteImport } from './routes/_layout.testimonies.create-new-testimony'
+import { Route as LayoutTestimoniesTestimonyIdRouteImport } from './routes/_layout.testimonies.$testimonyId'
 import { Route as LayoutProductsCreateNewProductRouteImport } from './routes/_layout.products.create-new-product'
 import { Route as LayoutProductsProductIdRouteImport } from './routes/_layout.products.$productId'
 import { Route as LayoutInquiriesInquiryIdRouteImport } from './routes/_layout.inquiries.$inquiryId'
@@ -47,6 +50,11 @@ const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutTestimoniesIndexRoute = LayoutTestimoniesIndexRouteImport.update({
+  id: '/testimonies/',
+  path: '/testimonies/',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutProductsIndexRoute = LayoutProductsIndexRouteImport.update({
   id: '/products/',
   path: '/products/',
@@ -62,6 +70,18 @@ const LayoutAllPostsIndexRoute = LayoutAllPostsIndexRouteImport.update({
   path: '/all-posts/',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutTestimoniesCreateNewTestimonyRoute =
+  LayoutTestimoniesCreateNewTestimonyRouteImport.update({
+    id: '/testimonies/create-new-testimony',
+    path: '/testimonies/create-new-testimony',
+    getParentRoute: () => LayoutRoute,
+  } as any)
+const LayoutTestimoniesTestimonyIdRoute =
+  LayoutTestimoniesTestimonyIdRouteImport.update({
+    id: '/testimonies/$testimonyId',
+    path: '/testimonies/$testimonyId',
+    getParentRoute: () => LayoutRoute,
+  } as any)
 const LayoutProductsCreateNewProductRoute =
   LayoutProductsCreateNewProductRouteImport.update({
     id: '/products/create-new-product',
@@ -101,9 +121,12 @@ export interface FileRoutesByFullPath {
   '/inquiries/$inquiryId': typeof LayoutInquiriesInquiryIdRoute
   '/products/$productId': typeof LayoutProductsProductIdRoute
   '/products/create-new-product': typeof LayoutProductsCreateNewProductRoute
+  '/testimonies/$testimonyId': typeof LayoutTestimoniesTestimonyIdRoute
+  '/testimonies/create-new-testimony': typeof LayoutTestimoniesCreateNewTestimonyRoute
   '/all-posts/': typeof LayoutAllPostsIndexRoute
   '/inquiries/': typeof LayoutInquiriesIndexRoute
   '/products/': typeof LayoutProductsIndexRoute
+  '/testimonies/': typeof LayoutTestimoniesIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -115,9 +138,12 @@ export interface FileRoutesByTo {
   '/inquiries/$inquiryId': typeof LayoutInquiriesInquiryIdRoute
   '/products/$productId': typeof LayoutProductsProductIdRoute
   '/products/create-new-product': typeof LayoutProductsCreateNewProductRoute
+  '/testimonies/$testimonyId': typeof LayoutTestimoniesTestimonyIdRoute
+  '/testimonies/create-new-testimony': typeof LayoutTestimoniesCreateNewTestimonyRoute
   '/all-posts': typeof LayoutAllPostsIndexRoute
   '/inquiries': typeof LayoutInquiriesIndexRoute
   '/products': typeof LayoutProductsIndexRoute
+  '/testimonies': typeof LayoutTestimoniesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -131,9 +157,12 @@ export interface FileRoutesById {
   '/_layout/inquiries/$inquiryId': typeof LayoutInquiriesInquiryIdRoute
   '/_layout/products/$productId': typeof LayoutProductsProductIdRoute
   '/_layout/products/create-new-product': typeof LayoutProductsCreateNewProductRoute
+  '/_layout/testimonies/$testimonyId': typeof LayoutTestimoniesTestimonyIdRoute
+  '/_layout/testimonies/create-new-testimony': typeof LayoutTestimoniesCreateNewTestimonyRoute
   '/_layout/all-posts/': typeof LayoutAllPostsIndexRoute
   '/_layout/inquiries/': typeof LayoutInquiriesIndexRoute
   '/_layout/products/': typeof LayoutProductsIndexRoute
+  '/_layout/testimonies/': typeof LayoutTestimoniesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -147,9 +176,12 @@ export interface FileRouteTypes {
     | '/inquiries/$inquiryId'
     | '/products/$productId'
     | '/products/create-new-product'
+    | '/testimonies/$testimonyId'
+    | '/testimonies/create-new-testimony'
     | '/all-posts/'
     | '/inquiries/'
     | '/products/'
+    | '/testimonies/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -161,9 +193,12 @@ export interface FileRouteTypes {
     | '/inquiries/$inquiryId'
     | '/products/$productId'
     | '/products/create-new-product'
+    | '/testimonies/$testimonyId'
+    | '/testimonies/create-new-testimony'
     | '/all-posts'
     | '/inquiries'
     | '/products'
+    | '/testimonies'
   id:
     | '__root__'
     | '/_layout'
@@ -176,9 +211,12 @@ export interface FileRouteTypes {
     | '/_layout/inquiries/$inquiryId'
     | '/_layout/products/$productId'
     | '/_layout/products/create-new-product'
+    | '/_layout/testimonies/$testimonyId'
+    | '/_layout/testimonies/create-new-testimony'
     | '/_layout/all-posts/'
     | '/_layout/inquiries/'
     | '/_layout/products/'
+    | '/_layout/testimonies/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -223,6 +261,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutSettingsRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/testimonies/': {
+      id: '/_layout/testimonies/'
+      path: '/testimonies'
+      fullPath: '/testimonies/'
+      preLoaderRoute: typeof LayoutTestimoniesIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/products/': {
       id: '/_layout/products/'
       path: '/products'
@@ -242,6 +287,20 @@ declare module '@tanstack/react-router' {
       path: '/all-posts'
       fullPath: '/all-posts/'
       preLoaderRoute: typeof LayoutAllPostsIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/testimonies/create-new-testimony': {
+      id: '/_layout/testimonies/create-new-testimony'
+      path: '/testimonies/create-new-testimony'
+      fullPath: '/testimonies/create-new-testimony'
+      preLoaderRoute: typeof LayoutTestimoniesCreateNewTestimonyRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/testimonies/$testimonyId': {
+      id: '/_layout/testimonies/$testimonyId'
+      path: '/testimonies/$testimonyId'
+      fullPath: '/testimonies/$testimonyId'
+      preLoaderRoute: typeof LayoutTestimoniesTestimonyIdRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/products/create-new-product': {
@@ -291,9 +350,12 @@ interface LayoutRouteChildren {
   LayoutInquiriesInquiryIdRoute: typeof LayoutInquiriesInquiryIdRoute
   LayoutProductsProductIdRoute: typeof LayoutProductsProductIdRoute
   LayoutProductsCreateNewProductRoute: typeof LayoutProductsCreateNewProductRoute
+  LayoutTestimoniesTestimonyIdRoute: typeof LayoutTestimoniesTestimonyIdRoute
+  LayoutTestimoniesCreateNewTestimonyRoute: typeof LayoutTestimoniesCreateNewTestimonyRoute
   LayoutAllPostsIndexRoute: typeof LayoutAllPostsIndexRoute
   LayoutInquiriesIndexRoute: typeof LayoutInquiriesIndexRoute
   LayoutProductsIndexRoute: typeof LayoutProductsIndexRoute
+  LayoutTestimoniesIndexRoute: typeof LayoutTestimoniesIndexRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
@@ -305,9 +367,13 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutInquiriesInquiryIdRoute: LayoutInquiriesInquiryIdRoute,
   LayoutProductsProductIdRoute: LayoutProductsProductIdRoute,
   LayoutProductsCreateNewProductRoute: LayoutProductsCreateNewProductRoute,
+  LayoutTestimoniesTestimonyIdRoute: LayoutTestimoniesTestimonyIdRoute,
+  LayoutTestimoniesCreateNewTestimonyRoute:
+    LayoutTestimoniesCreateNewTestimonyRoute,
   LayoutAllPostsIndexRoute: LayoutAllPostsIndexRoute,
   LayoutInquiriesIndexRoute: LayoutInquiriesIndexRoute,
   LayoutProductsIndexRoute: LayoutProductsIndexRoute,
+  LayoutTestimoniesIndexRoute: LayoutTestimoniesIndexRoute,
 }
 
 const LayoutRouteWithChildren =
