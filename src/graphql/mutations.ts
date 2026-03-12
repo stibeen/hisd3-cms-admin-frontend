@@ -195,6 +195,47 @@ export const REMOVE_TEAM_MEMBER_MUTATION = graphql(`
   }
 `);
 
+export const CREATE_TESTIMONY_MUTATION = graphql(`
+  mutation CreateTestimony($payload: CreateTestimonyInput!) {
+    createTestimony(payload: $payload) {
+      id
+      name
+      content
+      createdAt
+      updatedAt
+      company
+      avatarUrl
+      isActive
+      position
+    }
+  }
+`);
+
+export const UPDATE_TESTIMONY_BY_ID_MUTATION = graphql(`
+  mutation UpdateTestimonyById($updateTestimonyId: String!, $payload: UpdateTestimonyInput!) {
+    updateTestimony(id: $updateTestimonyId, payload: $payload) {
+      id
+      name
+      content
+      createdAt
+      updatedAt
+      company
+      avatarUrl
+      isActive
+      position
+    }
+  }
+`);
+
+export const REMOVE_TESTIMONY_MUTATION = graphql(`
+  mutation RemoveTestimony($removeTestimonyId: String!) {
+    removeTestimony(id: $removeTestimonyId) {
+      id
+      name
+    }
+  }
+`);
+
 export const UPDATE_USER_PROFILE_MUTATION = graphql(`
   mutation UpdateMyProfile($input: UpdateMyProfileInput!) {
   updateMyProfile(input: $input) {
@@ -230,5 +271,4 @@ export const UPDATE_COMPANY_PROFILE_MUTATION = graphql(`
   }
 }
   `)
-
 

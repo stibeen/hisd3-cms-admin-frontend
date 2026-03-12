@@ -390,7 +390,7 @@ function RouteComponent() {
             Team Management
           </Title>
           <span className="text-gray-500 m-0">
-            Manage and organize your team members.
+            Build and manage the professional profiles of your team members.
           </span>
         </div>
       </div>

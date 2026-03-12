@@ -1,18 +1,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { TESTIMONIES_PAGE_QUERY } from "@/graphql/queries";
+import { useMutation, useReadQuery } from "@apollo/client/react";
+import { REMOVE_TESTIMONY_MUTATION } from "@/graphql/mutations";
 import {
-  Button,
-  Divider,
-  Typography,
-  Input,
-  Table,
-  Tag,
-  Tooltip,
-  Select,
-  Modal,
   message,
+  Modal,
+  Button,
+  Typography,
+  Divider,
   Empty,
+  type TableProps,
+  Tooltip,
+  Table,
+  Avatar,
+  Input,
+  Tag,
 } from "antd";
-import type { TableProps } from "antd";
+import { useMemo, useState } from "react";
 import {
   PlusOutlined,
   EditOutlined,
@@ -20,20 +24,14 @@ import {
   EyeFilled,
   EyeInvisibleFilled,
 } from "@ant-design/icons";
-import { useMemo, useState } from "react";
-import { PRODUCTS_PAGE_QUERY } from "@/graphql/queries";
-import { REMOVE_PRODUCT_MUTATION } from "@/graphql/mutations";
-import { useMutation, useReadQuery } from "@apollo/client/react";
 
-const { Search } = Input;
 const { Title } = Typography;
+const { Search } = Input;
 
-// Move this outside or keep it if you want the columns static
-
-export const Route = createFileRoute("/_layout/products/")({
+export const Route = createFileRoute("/_layout/testimonies/")({
   component: RouteComponent,
   loader: ({ context: { preloadQuery } }) => {
-    const queryRef = preloadQuery(PRODUCTS_PAGE_QUERY);
+    const queryRef = preloadQuery(TESTIMONIES_PAGE_QUERY);
     return { queryRef };
   },
 });
@@ -41,77 +39,93 @@ export const Route = createFileRoute("/_layout/products/")({
 function RouteComponent() {
   const navigate = Route.useNavigate();
   const { queryRef } = Route.useLoaderData();
-  const { data: productsData } = useReadQuery(queryRef);
-  const [removeProduct, { loading: loadingRemoveProduct }] = useMutation(
-    REMOVE_PRODUCT_MUTATION,
-  );
-  const [searchText, setSearchText] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const { data: testimoniesData } = useReadQuery(queryRef);
   const [messageApi, contextHolder] = message.useMessage();
   const [modal, modalContextHolder] = Modal.useModal();
+  const [searchText, setSearchText] = useState("");
+
+  const [removeTestimony, { loading: loadingRemoveTestimony }] = useMutation(
+    REMOVE_TESTIMONY_MUTATION,
+    {
+      refetchQueries: [TESTIMONIES_PAGE_QUERY],
+      onCompleted: () => {
+        messageApi.success("Testimony deleted successfully");
+      },
+      onError: () => {
+        messageApi.error("Failed to delete testimony");
+      },
+    },
+  );
 
   const filteredData = useMemo(() => {
     return (
-      productsData?.adminProducts.filter((item) => {
+      testimoniesData?.adminTestimonies.filter((item) => {
         const matchesSearch = item.name
           .toLowerCase()
           .includes(searchText.toLowerCase());
-        const matchesStatus =
-          statusFilter === "all" || item.category?.name === statusFilter;
-        return matchesSearch && matchesStatus;
+        return matchesSearch;
       }) || []
     );
-  }, [productsData, searchText, statusFilter]);
+  }, [testimoniesData, searchText]);
 
   const handleSearch = (value: string) => setSearchText(value);
-  const handleStatusChange = (value: string) => setStatusFilter(value);
+
+  const handleDeleteTestimony = async (id: string) => {
+    await removeTestimony({
+      variables: {
+        removeTestimonyId: id,
+      },
+    });
+  };
 
   const showConfirmDelete = (id: string) => {
     modal.confirm({
       title: "Confirm Changes",
       content:
-        "Are you sure you want to delete this product? This action can't be undone",
+        "Are you sure you want to delete this testimony? This action can't be undone",
       okText: "Delete",
       cancelText: "Cancel",
       onOk: async () => {
-        await handleDeleteProduct(id);
+        await handleDeleteTestimony(id);
       },
     });
-  };
-
-  const handleDeleteProduct = async (id: string) => {
-    try {
-      await removeProduct({
-        variables: {
-          removeProductId: id,
-        },
-        refetchQueries: [PRODUCTS_PAGE_QUERY],
-      });
-    } catch (error) {
-      console.error(error);
-      messageApi.error("Failed to delete product");
-    }
   };
 
   const columns: TableProps["columns"] = useMemo(
     () => [
       {
-        title: "Product Name",
+        title: "Name",
         dataIndex: "name",
         key: "name",
+        render: (text: string, record: any) => {
+          return (
+            <div className="flex items-center gap-2">
+              {record.avatarUrl ? (
+                <Avatar src={record.avatarUrl} />
+              ) : (
+                <Avatar
+                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${text}`}
+                />
+              )}
+              <span className="text-m font-semibold">{text}</span>
+            </div>
+          );
+        },
+      },
+      {
+        title: "Company",
+        dataIndex: "company",
+        key: "company",
         render: (text: string) => (
           <span className="text-m font-semibold">{text}</span>
         ),
       },
       {
-        title: "Category",
-        dataIndex: "category",
-        key: "category",
-        width: "40%",
-        render: (category: any) => (
-          <Tag color="geekblue" className="capitalize">
-            {category?.name || "Uncategorized"}
-          </Tag>
+        title: "Position",
+        dataIndex: "position",
+        key: "position",
+        render: (text: string) => (
+          <span className="text-m font-semibold">{text}</span>
         ),
       },
       {
@@ -164,7 +178,10 @@ function RouteComponent() {
         render: (_, record) => (
           <div className="flex gap-2 justify-center">
             <Tooltip title="Edit">
-              <Link to="/products/$productId" params={{ productId: record.id }}>
+              <Link
+                to="/testimonies/$testimonyId"
+                params={{ testimonyId: record.id }}
+              >
                 <Button type="text" icon={<EditOutlined />} />
               </Link>
             </Tooltip>
@@ -173,10 +190,10 @@ function RouteComponent() {
                 type="text"
                 danger
                 icon={<DeleteOutlined />}
-                aria-label="Delete Post"
+                aria-label="Delete Testimony"
                 onClick={() => showConfirmDelete(record.id)}
-                disabled={loadingRemoveProduct}
-                loading={loadingRemoveProduct}
+                disabled={loadingRemoveTestimony}
+                loading={loadingRemoveTestimony}
               />
             </Tooltip>
           </div>
@@ -185,41 +202,40 @@ function RouteComponent() {
     ],
     [navigate],
   );
-
   return (
     <>
-      {modalContextHolder}
       {contextHolder}
+      {modalContextHolder}
       {/* Header */}
       <div className="flex justify-between items-end mb-6">
         <div className="flex flex-col gap-1">
           <Title level={2} className="m-0!">
-            Products
+            Testimonies
           </Title>
           <span className="text-gray-500 m-0">
-            Showcase your offerings with detailed descriptions and organized categories.
+            Highlight success stories and build trust with client endorsements.
           </span>
         </div>
         <div className="flex items-center">
-          <Link to="/products/create-new-product">
+          <Link to="/testimonies/create-new-testimony">
             <Button type="primary" icon={<PlusOutlined />}>
-              Add New Product
+              Add New Testimony
             </Button>
           </Link>
         </div>
       </div>
 
       <Divider />
-      {/* Table */}
-      {productsData?.adminProducts?.length === 0 ? (
-        <Empty description="No products found" />
+
+      {testimoniesData.adminTestimonies?.length === 0 ? (
+        <Empty />
       ) : (
         <Table
           pagination={
-            productsData?.adminProducts?.length > 5
+            testimoniesData?.adminTestimonies?.length > 5
               ? {
                   pageSize: 5,
-                  showTotal: (total) => `${total} products`,
+                  showTotal: (total) => `${total} testimonies`,
                 }
               : false
           }
@@ -232,27 +248,13 @@ function RouteComponent() {
             <div className="flex gap-2 items-center">
               <Search
                 id="search"
-                placeholder="Search products..."
+                placeholder="Search testimonies..."
                 allowClear
                 onSearch={handleSearch}
                 // Also filter on change if you want "live" search
                 onChange={(e) => handleSearch(e.target.value)}
                 enterButton
                 style={{ width: 300 }}
-              />
-              <Select
-                id="status"
-                defaultValue="all"
-                style={{ width: 200 }}
-                onChange={handleStatusChange}
-                placeholder="Filter Status"
-                options={[
-                  { value: "all", label: "All" },
-                  ...productsData?.categories.map((category) => ({
-                    value: category.name,
-                    label: category.name,
-                  })),
-                ]}
               />
             </div>
           )}

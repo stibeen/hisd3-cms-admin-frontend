@@ -225,7 +225,7 @@ function RouteComponent() {
             Settings
           </Title>
           <span className="text-gray-500 m-0">
-            Manage and organize your settings.
+            Control your site's global configuration and contact information.
           </span>
         </div>
       </div>
