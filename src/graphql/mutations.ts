@@ -198,6 +198,10 @@ export const REMOVE_TEAM_MEMBER_MUTATION = graphql(`
 export const UPDATE_USER_PROFILE_MUTATION = graphql(`
   mutation UpdateMyProfile($input: UpdateMyProfileInput!) {
   updateMyProfile(input: $input) {
+    id
+    lastName
+    firstName
+    avatar
     user {
       username
       email

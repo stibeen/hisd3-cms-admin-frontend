@@ -8,6 +8,12 @@ export const ME_QUERY = graphql(`
         id
         username
         email
+        profile {
+          id
+          lastName
+          firstName
+          avatar
+        }
       }
     }
   }
@@ -27,6 +33,7 @@ export const HOME_PAGE_QUERY = graphql(`
     status
     updatedAt
     author {
+      role
       username
       profile {
         avatar

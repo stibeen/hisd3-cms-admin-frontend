@@ -1,5 +1,6 @@
 import {
   CameraTwoTone,
+  DeleteOutlined,
   FacebookFilled,
   // GithubFilled,
   HomeOutlined,
@@ -29,6 +30,23 @@ import {
   UPDATE_USER_PROFILE_MUTATION,
 } from "@/graphql/mutations";
 const { Title } = Typography;
+
+const uploadImage = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/media/upload`, {
+    method: "POST",
+    body: formData,
+    credentials: "include",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      "ngrok-skip-browser-warning": "true",
+    },
+  });
+
+  if (!response.ok) throw new Error("Upload failed");
+  return await response.json(); // Returns { id, url }
+};
 
 export const Route = createFileRoute("/_layout/settings")({
   component: RouteComponent,
@@ -77,6 +95,8 @@ function RouteComponent() {
   const { data } = useReadQuery(queryRef);
   const { data: userData } = useReadQuery(meQueryRef);
 
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [userProfileForm] = Form.useForm();
   const [updatePasswordForm] = Form.useForm();
   const [companyProfileForm] = Form.useForm();
@@ -116,14 +136,20 @@ function RouteComponent() {
     });
 
   const [messageApi, contextHolder] = message.useMessage();
-  const [imageUrl, setImageUrl] = useState<string>();
-
   const handleUpdateProfile = async (values: any) => {
+    let profileUrl = null;
+    if (selectedFile) {
+      messageApi.loading("Uploading current cover image...", 0);
+      const uploadResult = await uploadImage(selectedFile);
+      profileUrl = `${import.meta.env.VITE_API_URL}${uploadResult.url}`;
+      messageApi.destroy();
+    }
     await updateProfile({
       variables: {
         input: {
           username: values.username,
           email: values.email,
+          avatar: profileUrl,
         },
       },
     });
@@ -181,6 +207,11 @@ function RouteComponent() {
         username: userData.meQuery.user.username,
         email: userData.meQuery.user.email,
       });
+      setPreviewUrl(
+        userData.meQuery.user.profile?.avatar
+          ? `${userData.meQuery.user.profile.avatar}`
+          : null,
+      );
     }
   }, [userData]);
 
@@ -229,9 +260,9 @@ function RouteComponent() {
               {/* Profile Picture */}
               <div className="flex gap-2">
                 <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border border-gray-300">
-                  {imageUrl ? (
+                  {previewUrl ? (
                     <img
-                      src={imageUrl}
+                      src={previewUrl}
                       alt="avatar"
                       style={{
                         width: "100%",
@@ -244,31 +275,46 @@ function RouteComponent() {
                   )}
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Title level={5} className="m-0!">
+                  <label className="font-medium text-gray-700">
                     Profile Photo
-                  </Title>
-                  <span className="text-gray-500 m-0 font-normal">
-                    JPG, PNG or GIF (max. 800x400px)
-                  </span>
+                  </label>
                   <div className="flex gap-2">
-                    <Upload showUploadList={false}>
+                    <Upload
+                      beforeUpload={(file) => {
+                        setSelectedFile(file);
+                        const url = URL.createObjectURL(file);
+                        setPreviewUrl(url);
+                        return false;
+                      }}
+                      onRemove={() => {
+                        setSelectedFile(null);
+                        setPreviewUrl(null);
+                      }}
+                      maxCount={1}
+                      showUploadList={false}
+                    >
                       <Button
                         type="primary"
                         className="bg-[#1280ED] text-white"
                         icon={<UploadOutlined />}
                       >
-                        {imageUrl
+                        {previewUrl
                           ? "Change Profile Picture"
                           : "Upload Profile Picture"}
                       </Button>
                     </Upload>
-                    {imageUrl && (
+                    {previewUrl && (
                       <Button
                         type="default"
+                        danger
                         className="bg-[#1280ED] text-white"
-                        onClick={() => setImageUrl("")}
+                        icon={<DeleteOutlined />}
+                        onClick={() => {
+                          setSelectedFile(null);
+                          setPreviewUrl(null);
+                        }}
                       >
-                        Remove
+                        Remove Profile Picture
                       </Button>
                     )}
                   </div>
