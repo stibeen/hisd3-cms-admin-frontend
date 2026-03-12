@@ -36,6 +36,10 @@ export const UPDATE_ARTICLE_BY_ID_MUTATION = graphql(`
       category {
         name
       }
+      media {
+        id
+        url
+      }
       title
       slug
       excerpt
@@ -69,6 +73,10 @@ export const CREATE_ARTICLE_MUTATION = graphql(`
       category {
         id
         name
+      }
+      media {
+        id
+        url
       }
       id
       title
@@ -186,5 +194,41 @@ export const REMOVE_TEAM_MEMBER_MUTATION = graphql(`
     }
   }
 `);
+
+export const UPDATE_USER_PROFILE_MUTATION = graphql(`
+  mutation UpdateMyProfile($input: UpdateMyProfileInput!) {
+  updateMyProfile(input: $input) {
+    id
+    lastName
+    firstName
+    avatar
+    user {
+      username
+      email
+    }
+  }
+}
+  `)
+
+export const UPDATE_PASSWORD_MUTATION = graphql(`
+  mutation ChangePassword($input: ChangePasswordInput!) {
+  changePassword(input: $input) {
+    message
+  }
+}
+  `)
+
+export const UPDATE_COMPANY_PROFILE_MUTATION = graphql(`
+  mutation UpdateCompanyProfile($updateCompanyProfileInput: UpdateCompanyProfileInput!) {
+  updateCompanyProfile(updateCompanyProfileInput: $updateCompanyProfileInput) {
+    id
+    email
+    address
+    phone
+    socials
+    updatedAt
+  }
+}
+  `)
 
 
