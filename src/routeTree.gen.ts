@@ -17,12 +17,15 @@ import { Route as LayoutSettingsRouteImport } from './routes/_layout.settings'
 import { Route as LayoutTestimoniesIndexRouteImport } from './routes/_layout.testimonies.index'
 import { Route as LayoutProductsIndexRouteImport } from './routes/_layout.products.index'
 import { Route as LayoutInquiriesIndexRouteImport } from './routes/_layout.inquiries.index'
+import { Route as LayoutGalleriesIndexRouteImport } from './routes/_layout.galleries.index'
 import { Route as LayoutAllPostsIndexRouteImport } from './routes/_layout.all-posts.index'
 import { Route as LayoutTestimoniesCreateNewTestimonyRouteImport } from './routes/_layout.testimonies.create-new-testimony'
 import { Route as LayoutTestimoniesTestimonyIdRouteImport } from './routes/_layout.testimonies.$testimonyId'
 import { Route as LayoutProductsCreateNewProductRouteImport } from './routes/_layout.products.create-new-product'
 import { Route as LayoutProductsProductIdRouteImport } from './routes/_layout.products.$productId'
 import { Route as LayoutInquiriesInquiryIdRouteImport } from './routes/_layout.inquiries.$inquiryId'
+import { Route as LayoutGalleriesCreateNewGalleryRouteImport } from './routes/_layout.galleries.create-new-gallery'
+import { Route as LayoutGalleriesGalleryIdRouteImport } from './routes/_layout.galleries.$galleryId'
 import { Route as LayoutAllPostsCreateNewPostRouteImport } from './routes/_layout.all-posts.create-new-post'
 import { Route as LayoutAllPostsPostIdRouteImport } from './routes/_layout.all-posts.$postId'
 
@@ -65,6 +68,11 @@ const LayoutInquiriesIndexRoute = LayoutInquiriesIndexRouteImport.update({
   path: '/inquiries/',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutGalleriesIndexRoute = LayoutGalleriesIndexRouteImport.update({
+  id: '/galleries/',
+  path: '/galleries/',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutAllPostsIndexRoute = LayoutAllPostsIndexRouteImport.update({
   id: '/all-posts/',
   path: '/all-posts/',
@@ -99,6 +107,18 @@ const LayoutInquiriesInquiryIdRoute =
     path: '/inquiries/$inquiryId',
     getParentRoute: () => LayoutRoute,
   } as any)
+const LayoutGalleriesCreateNewGalleryRoute =
+  LayoutGalleriesCreateNewGalleryRouteImport.update({
+    id: '/galleries/create-new-gallery',
+    path: '/galleries/create-new-gallery',
+    getParentRoute: () => LayoutRoute,
+  } as any)
+const LayoutGalleriesGalleryIdRoute =
+  LayoutGalleriesGalleryIdRouteImport.update({
+    id: '/galleries/$galleryId',
+    path: '/galleries/$galleryId',
+    getParentRoute: () => LayoutRoute,
+  } as any)
 const LayoutAllPostsCreateNewPostRoute =
   LayoutAllPostsCreateNewPostRouteImport.update({
     id: '/all-posts/create-new-post',
@@ -118,12 +138,15 @@ export interface FileRoutesByFullPath {
   '/team': typeof LayoutTeamRoute
   '/all-posts/$postId': typeof LayoutAllPostsPostIdRoute
   '/all-posts/create-new-post': typeof LayoutAllPostsCreateNewPostRoute
+  '/galleries/$galleryId': typeof LayoutGalleriesGalleryIdRoute
+  '/galleries/create-new-gallery': typeof LayoutGalleriesCreateNewGalleryRoute
   '/inquiries/$inquiryId': typeof LayoutInquiriesInquiryIdRoute
   '/products/$productId': typeof LayoutProductsProductIdRoute
   '/products/create-new-product': typeof LayoutProductsCreateNewProductRoute
   '/testimonies/$testimonyId': typeof LayoutTestimoniesTestimonyIdRoute
   '/testimonies/create-new-testimony': typeof LayoutTestimoniesCreateNewTestimonyRoute
   '/all-posts/': typeof LayoutAllPostsIndexRoute
+  '/galleries/': typeof LayoutGalleriesIndexRoute
   '/inquiries/': typeof LayoutInquiriesIndexRoute
   '/products/': typeof LayoutProductsIndexRoute
   '/testimonies/': typeof LayoutTestimoniesIndexRoute
@@ -135,12 +158,15 @@ export interface FileRoutesByTo {
   '/': typeof LayoutIndexRoute
   '/all-posts/$postId': typeof LayoutAllPostsPostIdRoute
   '/all-posts/create-new-post': typeof LayoutAllPostsCreateNewPostRoute
+  '/galleries/$galleryId': typeof LayoutGalleriesGalleryIdRoute
+  '/galleries/create-new-gallery': typeof LayoutGalleriesCreateNewGalleryRoute
   '/inquiries/$inquiryId': typeof LayoutInquiriesInquiryIdRoute
   '/products/$productId': typeof LayoutProductsProductIdRoute
   '/products/create-new-product': typeof LayoutProductsCreateNewProductRoute
   '/testimonies/$testimonyId': typeof LayoutTestimoniesTestimonyIdRoute
   '/testimonies/create-new-testimony': typeof LayoutTestimoniesCreateNewTestimonyRoute
   '/all-posts': typeof LayoutAllPostsIndexRoute
+  '/galleries': typeof LayoutGalleriesIndexRoute
   '/inquiries': typeof LayoutInquiriesIndexRoute
   '/products': typeof LayoutProductsIndexRoute
   '/testimonies': typeof LayoutTestimoniesIndexRoute
@@ -154,12 +180,15 @@ export interface FileRoutesById {
   '/_layout/': typeof LayoutIndexRoute
   '/_layout/all-posts/$postId': typeof LayoutAllPostsPostIdRoute
   '/_layout/all-posts/create-new-post': typeof LayoutAllPostsCreateNewPostRoute
+  '/_layout/galleries/$galleryId': typeof LayoutGalleriesGalleryIdRoute
+  '/_layout/galleries/create-new-gallery': typeof LayoutGalleriesCreateNewGalleryRoute
   '/_layout/inquiries/$inquiryId': typeof LayoutInquiriesInquiryIdRoute
   '/_layout/products/$productId': typeof LayoutProductsProductIdRoute
   '/_layout/products/create-new-product': typeof LayoutProductsCreateNewProductRoute
   '/_layout/testimonies/$testimonyId': typeof LayoutTestimoniesTestimonyIdRoute
   '/_layout/testimonies/create-new-testimony': typeof LayoutTestimoniesCreateNewTestimonyRoute
   '/_layout/all-posts/': typeof LayoutAllPostsIndexRoute
+  '/_layout/galleries/': typeof LayoutGalleriesIndexRoute
   '/_layout/inquiries/': typeof LayoutInquiriesIndexRoute
   '/_layout/products/': typeof LayoutProductsIndexRoute
   '/_layout/testimonies/': typeof LayoutTestimoniesIndexRoute
@@ -173,12 +202,15 @@ export interface FileRouteTypes {
     | '/team'
     | '/all-posts/$postId'
     | '/all-posts/create-new-post'
+    | '/galleries/$galleryId'
+    | '/galleries/create-new-gallery'
     | '/inquiries/$inquiryId'
     | '/products/$productId'
     | '/products/create-new-product'
     | '/testimonies/$testimonyId'
     | '/testimonies/create-new-testimony'
     | '/all-posts/'
+    | '/galleries/'
     | '/inquiries/'
     | '/products/'
     | '/testimonies/'
@@ -190,12 +222,15 @@ export interface FileRouteTypes {
     | '/'
     | '/all-posts/$postId'
     | '/all-posts/create-new-post'
+    | '/galleries/$galleryId'
+    | '/galleries/create-new-gallery'
     | '/inquiries/$inquiryId'
     | '/products/$productId'
     | '/products/create-new-product'
     | '/testimonies/$testimonyId'
     | '/testimonies/create-new-testimony'
     | '/all-posts'
+    | '/galleries'
     | '/inquiries'
     | '/products'
     | '/testimonies'
@@ -208,12 +243,15 @@ export interface FileRouteTypes {
     | '/_layout/'
     | '/_layout/all-posts/$postId'
     | '/_layout/all-posts/create-new-post'
+    | '/_layout/galleries/$galleryId'
+    | '/_layout/galleries/create-new-gallery'
     | '/_layout/inquiries/$inquiryId'
     | '/_layout/products/$productId'
     | '/_layout/products/create-new-product'
     | '/_layout/testimonies/$testimonyId'
     | '/_layout/testimonies/create-new-testimony'
     | '/_layout/all-posts/'
+    | '/_layout/galleries/'
     | '/_layout/inquiries/'
     | '/_layout/products/'
     | '/_layout/testimonies/'
@@ -282,6 +320,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutInquiriesIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/galleries/': {
+      id: '/_layout/galleries/'
+      path: '/galleries'
+      fullPath: '/galleries/'
+      preLoaderRoute: typeof LayoutGalleriesIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/all-posts/': {
       id: '/_layout/all-posts/'
       path: '/all-posts'
@@ -324,6 +369,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutInquiriesInquiryIdRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/galleries/create-new-gallery': {
+      id: '/_layout/galleries/create-new-gallery'
+      path: '/galleries/create-new-gallery'
+      fullPath: '/galleries/create-new-gallery'
+      preLoaderRoute: typeof LayoutGalleriesCreateNewGalleryRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/galleries/$galleryId': {
+      id: '/_layout/galleries/$galleryId'
+      path: '/galleries/$galleryId'
+      fullPath: '/galleries/$galleryId'
+      preLoaderRoute: typeof LayoutGalleriesGalleryIdRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/all-posts/create-new-post': {
       id: '/_layout/all-posts/create-new-post'
       path: '/all-posts/create-new-post'
@@ -347,12 +406,15 @@ interface LayoutRouteChildren {
   LayoutIndexRoute: typeof LayoutIndexRoute
   LayoutAllPostsPostIdRoute: typeof LayoutAllPostsPostIdRoute
   LayoutAllPostsCreateNewPostRoute: typeof LayoutAllPostsCreateNewPostRoute
+  LayoutGalleriesGalleryIdRoute: typeof LayoutGalleriesGalleryIdRoute
+  LayoutGalleriesCreateNewGalleryRoute: typeof LayoutGalleriesCreateNewGalleryRoute
   LayoutInquiriesInquiryIdRoute: typeof LayoutInquiriesInquiryIdRoute
   LayoutProductsProductIdRoute: typeof LayoutProductsProductIdRoute
   LayoutProductsCreateNewProductRoute: typeof LayoutProductsCreateNewProductRoute
   LayoutTestimoniesTestimonyIdRoute: typeof LayoutTestimoniesTestimonyIdRoute
   LayoutTestimoniesCreateNewTestimonyRoute: typeof LayoutTestimoniesCreateNewTestimonyRoute
   LayoutAllPostsIndexRoute: typeof LayoutAllPostsIndexRoute
+  LayoutGalleriesIndexRoute: typeof LayoutGalleriesIndexRoute
   LayoutInquiriesIndexRoute: typeof LayoutInquiriesIndexRoute
   LayoutProductsIndexRoute: typeof LayoutProductsIndexRoute
   LayoutTestimoniesIndexRoute: typeof LayoutTestimoniesIndexRoute
@@ -364,6 +426,8 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutIndexRoute: LayoutIndexRoute,
   LayoutAllPostsPostIdRoute: LayoutAllPostsPostIdRoute,
   LayoutAllPostsCreateNewPostRoute: LayoutAllPostsCreateNewPostRoute,
+  LayoutGalleriesGalleryIdRoute: LayoutGalleriesGalleryIdRoute,
+  LayoutGalleriesCreateNewGalleryRoute: LayoutGalleriesCreateNewGalleryRoute,
   LayoutInquiriesInquiryIdRoute: LayoutInquiriesInquiryIdRoute,
   LayoutProductsProductIdRoute: LayoutProductsProductIdRoute,
   LayoutProductsCreateNewProductRoute: LayoutProductsCreateNewProductRoute,
@@ -371,6 +435,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutTestimoniesCreateNewTestimonyRoute:
     LayoutTestimoniesCreateNewTestimonyRoute,
   LayoutAllPostsIndexRoute: LayoutAllPostsIndexRoute,
+  LayoutGalleriesIndexRoute: LayoutGalleriesIndexRoute,
   LayoutInquiriesIndexRoute: LayoutInquiriesIndexRoute,
   LayoutProductsIndexRoute: LayoutProductsIndexRoute,
   LayoutTestimoniesIndexRoute: LayoutTestimoniesIndexRoute,

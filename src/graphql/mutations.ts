@@ -236,6 +236,44 @@ export const REMOVE_TESTIMONY_MUTATION = graphql(`
   }
 `);
 
+export const CREATE_GALLERY_MUTATION = graphql(`
+  mutation CreateGallery($payload: CreateGalleryDto!) {
+  createGallery(payload: $payload) {
+    id
+    title
+    status
+    media {
+      url
+    }
+    createdAt
+  }
+}
+`)
+
+export const UPDATE_GALLERY_BY_ID_MUTATION = graphql(`
+  mutation UpdateGalleryById($updateGalleryId: String!, $payload: UpdateGalleryDto!) {
+    updateGallery(id: $updateGalleryId, payload: $payload) {
+      id
+      title
+      status
+      media {
+        id
+        url
+      }
+      updatedAt
+    }
+  }
+`)
+
+export const REMOVE_GALLERY_MUTATION = graphql(`
+  mutation RemoveGallery($removeGalleryId: String!) {
+    removeGallery(id: $removeGalleryId) {
+      id
+      title
+    }
+  }
+`)
+
 export const UPDATE_USER_PROFILE_MUTATION = graphql(`
   mutation UpdateMyProfile($input: UpdateMyProfileInput!) {
   updateMyProfile(input: $input) {

@@ -11,6 +11,7 @@ import {
   HomeOutlined,
   ExclamationCircleFilled,
   CommentOutlined,
+  PictureOutlined,
 } from "@ant-design/icons";
 import {
   Button,
@@ -79,7 +80,8 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
     if (path.startsWith("/products")) return "4";
     if (path.startsWith("/team")) return "5";
     if (path.startsWith("/testimonies")) return "6";
-    if (path.startsWith("/settings")) return "7";
+    if (path.startsWith("/galleries")) return "7";
+    if (path.startsWith("/settings")) return "8";
     return "1";
   }, [location.pathname]);
 
@@ -180,11 +182,16 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
               },
               {
                 key: "7",
+                icon: <PictureOutlined />,
+                label: <Link to="/galleries">Galleries</Link>,
+              },
+              {
+                key: "8",
                 icon: <SettingOutlined />,
                 label: <Link to="/settings">Settings</Link>,
               },
               {
-                key: "8",
+                key: "9",
                 icon: <LogoutOutlined />,
                 label: "Logout",
                 onClick: showLogoutConfirm,
