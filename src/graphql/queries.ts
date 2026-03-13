@@ -145,6 +145,38 @@ export const TESTIMONIES_PAGE_QUERY = graphql(`
 }
 `)
 
+export const GALLERIES_PAGE_QUERY = graphql(`
+  query AdminGalleries {
+  adminGalleries {
+    id
+    title
+    createdAt
+    updatedAt
+    status
+    media {
+    id
+    url
+    }
+  }
+}
+`)
+
+export const GET_GALLERY_BY_ID = graphql(`
+  query AdminGallery($id: String!) {
+  adminGallery(id: $id) {
+    id
+    title
+    status
+    media {
+      id
+      url
+    }
+    createdAt
+    updatedAt
+  }
+}
+`)
+
 export const SETTINGS_PAGE_QUERY = graphql(`
   query getSettings {
   companyProfile {
@@ -250,4 +282,5 @@ export const GET_TESTIMONY_BY_ID = graphql(`
   }
 }
 `)
+
 

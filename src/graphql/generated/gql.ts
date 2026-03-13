@@ -32,6 +32,9 @@ type Documents = {
     "\n  mutation CreateTestimony($payload: CreateTestimonyInput!) {\n    createTestimony(payload: $payload) {\n      id\n      name\n      content\n      createdAt\n      updatedAt\n      company\n      avatarUrl\n      isActive\n      position\n    }\n  }\n": typeof types.CreateTestimonyDocument,
     "\n  mutation UpdateTestimonyById($updateTestimonyId: String!, $payload: UpdateTestimonyInput!) {\n    updateTestimony(id: $updateTestimonyId, payload: $payload) {\n      id\n      name\n      content\n      createdAt\n      updatedAt\n      company\n      avatarUrl\n      isActive\n      position\n    }\n  }\n": typeof types.UpdateTestimonyByIdDocument,
     "\n  mutation RemoveTestimony($removeTestimonyId: String!) {\n    removeTestimony(id: $removeTestimonyId) {\n      id\n      name\n    }\n  }\n": typeof types.RemoveTestimonyDocument,
+    "\n  mutation CreateGallery($payload: CreateGalleryDto!) {\n  createGallery(payload: $payload) {\n    id\n    title\n    status\n    media {\n      url\n    }\n    createdAt\n  }\n}\n": typeof types.CreateGalleryDocument,
+    "\n  mutation UpdateGalleryById($updateGalleryId: String!, $payload: UpdateGalleryDto!) {\n    updateGallery(id: $updateGalleryId, payload: $payload) {\n      id\n      title\n      status\n      media {\n        id\n        url\n      }\n      updatedAt\n    }\n  }\n": typeof types.UpdateGalleryByIdDocument,
+    "\n  mutation RemoveGallery($removeGalleryId: String!) {\n    removeGallery(id: $removeGalleryId) {\n      id\n      title\n    }\n  }\n": typeof types.RemoveGalleryDocument,
     "\n  mutation UpdateMyProfile($input: UpdateMyProfileInput!) {\n  updateMyProfile(input: $input) {\n    id\n    lastName\n    firstName\n    avatar\n    user {\n      username\n      email\n    }\n  }\n}\n  ": typeof types.UpdateMyProfileDocument,
     "\n  mutation ChangePassword($input: ChangePasswordInput!) {\n  changePassword(input: $input) {\n    message\n  }\n}\n  ": typeof types.ChangePasswordDocument,
     "\n  mutation UpdateCompanyProfile($updateCompanyProfileInput: UpdateCompanyProfileInput!) {\n  updateCompanyProfile(updateCompanyProfileInput: $updateCompanyProfileInput) {\n    id\n    email\n    address\n    phone\n    socials\n    updatedAt\n  }\n}\n  ": typeof types.UpdateCompanyProfileDocument,
@@ -42,6 +45,8 @@ type Documents = {
     "\n  query getProducts {\n    adminProducts {\n    id\n    isActive\n    name\n    description\n    category {\n      id\n      name\n    }\n  }\n    categories {\n    id\n    name\n  }\n}\n": typeof types.GetProductsDocument,
     "\n  query getTeamMembers {\n    teamMembers {\n    id\n    name\n    image\n    position\n    socials\n  }\n}\n": typeof types.GetTeamMembersDocument,
     "\n  query AdminTestimonies {\n  adminTestimonies {\n    id\n    name\n    content\n    createdAt\n    updatedAt\n    company\n    avatarUrl\n    isActive\n    position\n  }\n}\n": typeof types.AdminTestimoniesDocument,
+    "\n  query AdminGalleries {\n  adminGalleries {\n    id\n    title\n    createdAt\n    updatedAt\n    status\n    media {\n    id\n    url\n    }\n  }\n}\n": typeof types.AdminGalleriesDocument,
+    "\n  query AdminGallery($id: String!) {\n  adminGallery(id: $id) {\n    id\n    title\n    status\n    media {\n      id\n      url\n    }\n    createdAt\n    updatedAt\n  }\n}\n": typeof types.AdminGalleryDocument,
     "\n  query getSettings {\n  companyProfile {\n    id\n    address\n    email\n    phone\n    socials\n  }\n}\n": typeof types.GetSettingsDocument,
     "\n  query getArticleById($id: String!) {\n    categories {\n      id\n      name\n    }\n    adminArticle(id: $id) {\n    id\n    category {\n      name\n      id\n    }\n    updatedAt\n    content\n    slug\n    title\n    excerpt\n    status\n    media {\n    id\n    url\n    }\n    }\n  }\n": typeof types.GetArticleByIdDocument,
     "\n  query getAllCategories {\n    categories {\n    id\n    name\n  }\n}\n": typeof types.GetAllCategoriesDocument,
@@ -70,6 +75,9 @@ const documents: Documents = {
     "\n  mutation CreateTestimony($payload: CreateTestimonyInput!) {\n    createTestimony(payload: $payload) {\n      id\n      name\n      content\n      createdAt\n      updatedAt\n      company\n      avatarUrl\n      isActive\n      position\n    }\n  }\n": types.CreateTestimonyDocument,
     "\n  mutation UpdateTestimonyById($updateTestimonyId: String!, $payload: UpdateTestimonyInput!) {\n    updateTestimony(id: $updateTestimonyId, payload: $payload) {\n      id\n      name\n      content\n      createdAt\n      updatedAt\n      company\n      avatarUrl\n      isActive\n      position\n    }\n  }\n": types.UpdateTestimonyByIdDocument,
     "\n  mutation RemoveTestimony($removeTestimonyId: String!) {\n    removeTestimony(id: $removeTestimonyId) {\n      id\n      name\n    }\n  }\n": types.RemoveTestimonyDocument,
+    "\n  mutation CreateGallery($payload: CreateGalleryDto!) {\n  createGallery(payload: $payload) {\n    id\n    title\n    status\n    media {\n      url\n    }\n    createdAt\n  }\n}\n": types.CreateGalleryDocument,
+    "\n  mutation UpdateGalleryById($updateGalleryId: String!, $payload: UpdateGalleryDto!) {\n    updateGallery(id: $updateGalleryId, payload: $payload) {\n      id\n      title\n      status\n      media {\n        id\n        url\n      }\n      updatedAt\n    }\n  }\n": types.UpdateGalleryByIdDocument,
+    "\n  mutation RemoveGallery($removeGalleryId: String!) {\n    removeGallery(id: $removeGalleryId) {\n      id\n      title\n    }\n  }\n": types.RemoveGalleryDocument,
     "\n  mutation UpdateMyProfile($input: UpdateMyProfileInput!) {\n  updateMyProfile(input: $input) {\n    id\n    lastName\n    firstName\n    avatar\n    user {\n      username\n      email\n    }\n  }\n}\n  ": types.UpdateMyProfileDocument,
     "\n  mutation ChangePassword($input: ChangePasswordInput!) {\n  changePassword(input: $input) {\n    message\n  }\n}\n  ": types.ChangePasswordDocument,
     "\n  mutation UpdateCompanyProfile($updateCompanyProfileInput: UpdateCompanyProfileInput!) {\n  updateCompanyProfile(updateCompanyProfileInput: $updateCompanyProfileInput) {\n    id\n    email\n    address\n    phone\n    socials\n    updatedAt\n  }\n}\n  ": types.UpdateCompanyProfileDocument,
@@ -80,6 +88,8 @@ const documents: Documents = {
     "\n  query getProducts {\n    adminProducts {\n    id\n    isActive\n    name\n    description\n    category {\n      id\n      name\n    }\n  }\n    categories {\n    id\n    name\n  }\n}\n": types.GetProductsDocument,
     "\n  query getTeamMembers {\n    teamMembers {\n    id\n    name\n    image\n    position\n    socials\n  }\n}\n": types.GetTeamMembersDocument,
     "\n  query AdminTestimonies {\n  adminTestimonies {\n    id\n    name\n    content\n    createdAt\n    updatedAt\n    company\n    avatarUrl\n    isActive\n    position\n  }\n}\n": types.AdminTestimoniesDocument,
+    "\n  query AdminGalleries {\n  adminGalleries {\n    id\n    title\n    createdAt\n    updatedAt\n    status\n    media {\n    id\n    url\n    }\n  }\n}\n": types.AdminGalleriesDocument,
+    "\n  query AdminGallery($id: String!) {\n  adminGallery(id: $id) {\n    id\n    title\n    status\n    media {\n      id\n      url\n    }\n    createdAt\n    updatedAt\n  }\n}\n": types.AdminGalleryDocument,
     "\n  query getSettings {\n  companyProfile {\n    id\n    address\n    email\n    phone\n    socials\n  }\n}\n": types.GetSettingsDocument,
     "\n  query getArticleById($id: String!) {\n    categories {\n      id\n      name\n    }\n    adminArticle(id: $id) {\n    id\n    category {\n      name\n      id\n    }\n    updatedAt\n    content\n    slug\n    title\n    excerpt\n    status\n    media {\n    id\n    url\n    }\n    }\n  }\n": types.GetArticleByIdDocument,
     "\n  query getAllCategories {\n    categories {\n    id\n    name\n  }\n}\n": types.GetAllCategoriesDocument,
@@ -179,6 +189,18 @@ export function graphql(source: "\n  mutation RemoveTestimony($removeTestimonyId
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n  mutation CreateGallery($payload: CreateGalleryDto!) {\n  createGallery(payload: $payload) {\n    id\n    title\n    status\n    media {\n      url\n    }\n    createdAt\n  }\n}\n"): (typeof documents)["\n  mutation CreateGallery($payload: CreateGalleryDto!) {\n  createGallery(payload: $payload) {\n    id\n    title\n    status\n    media {\n      url\n    }\n    createdAt\n  }\n}\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation UpdateGalleryById($updateGalleryId: String!, $payload: UpdateGalleryDto!) {\n    updateGallery(id: $updateGalleryId, payload: $payload) {\n      id\n      title\n      status\n      media {\n        id\n        url\n      }\n      updatedAt\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateGalleryById($updateGalleryId: String!, $payload: UpdateGalleryDto!) {\n    updateGallery(id: $updateGalleryId, payload: $payload) {\n      id\n      title\n      status\n      media {\n        id\n        url\n      }\n      updatedAt\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation RemoveGallery($removeGalleryId: String!) {\n    removeGallery(id: $removeGalleryId) {\n      id\n      title\n    }\n  }\n"): (typeof documents)["\n  mutation RemoveGallery($removeGalleryId: String!) {\n    removeGallery(id: $removeGalleryId) {\n      id\n      title\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n  mutation UpdateMyProfile($input: UpdateMyProfileInput!) {\n  updateMyProfile(input: $input) {\n    id\n    lastName\n    firstName\n    avatar\n    user {\n      username\n      email\n    }\n  }\n}\n  "): (typeof documents)["\n  mutation UpdateMyProfile($input: UpdateMyProfileInput!) {\n  updateMyProfile(input: $input) {\n    id\n    lastName\n    firstName\n    avatar\n    user {\n      username\n      email\n    }\n  }\n}\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -216,6 +238,14 @@ export function graphql(source: "\n  query getTeamMembers {\n    teamMembers {\n
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query AdminTestimonies {\n  adminTestimonies {\n    id\n    name\n    content\n    createdAt\n    updatedAt\n    company\n    avatarUrl\n    isActive\n    position\n  }\n}\n"): (typeof documents)["\n  query AdminTestimonies {\n  adminTestimonies {\n    id\n    name\n    content\n    createdAt\n    updatedAt\n    company\n    avatarUrl\n    isActive\n    position\n  }\n}\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query AdminGalleries {\n  adminGalleries {\n    id\n    title\n    createdAt\n    updatedAt\n    status\n    media {\n    id\n    url\n    }\n  }\n}\n"): (typeof documents)["\n  query AdminGalleries {\n  adminGalleries {\n    id\n    title\n    createdAt\n    updatedAt\n    status\n    media {\n    id\n    url\n    }\n  }\n}\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query AdminGallery($id: String!) {\n  adminGallery(id: $id) {\n    id\n    title\n    status\n    media {\n      id\n      url\n    }\n    createdAt\n    updatedAt\n  }\n}\n"): (typeof documents)["\n  query AdminGallery($id: String!) {\n  adminGallery(id: $id) {\n    id\n    title\n    status\n    media {\n      id\n      url\n    }\n    createdAt\n    updatedAt\n  }\n}\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
