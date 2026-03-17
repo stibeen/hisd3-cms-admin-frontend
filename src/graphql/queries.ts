@@ -33,9 +33,11 @@ export const HOME_PAGE_QUERY = graphql(`
     status
     updatedAt
     author {
+      id
       role
       username
       profile {
+        id
         avatar
         }
       }

@@ -73,7 +73,10 @@ function RouteComponent() {
         navigate({ to: "/testimonies" });
       },
       onError: (error) => {
-        messageApi.error(error.message);
+        console.error(error);
+        messageApi.error(
+          "Failed to update testimony. Check console for more details.",
+        );
       },
     },
   );
@@ -145,6 +148,12 @@ function RouteComponent() {
             </span>
           </div>
           <div className="flex gap-2">
+            <Button
+              type="default"
+              onClick={() => navigate({ to: "/testimonies" })}
+            >
+              Cancel
+            </Button>
             <Button
               type="primary"
               icon={<PlusOutlined />}

@@ -17,8 +17,13 @@ import {
   Modal,
   type InputRef,
   Upload,
+  Form,
 } from "antd";
-import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
+import {
+  PictureTwoTone,
+  PlusOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import { useEffect, useRef, useState } from "react";
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
 const { TextArea } = Input;
@@ -63,40 +68,52 @@ function RouteComponent() {
   const navigate = useNavigate();
   const [createCategory, { loading: createCategoryLoading }] = useMutation(
     CREATE_CATEGORY_MUTATION,
+    {
+      refetchQueries: [GET_PRODUCT_BY_ID],
+      onCompleted: () => {
+        messageApi.success("Category added successfully");
+      },
+      onError: (error) => {
+        console.error(error);
+        messageApi.error("Failed to add category");
+      },
+    },
   );
   const [updateProduct, { loading: updateProductLoading }] = useMutation(
     UPDATE_PRODUCT_BY_ID_MUTATION,
+    {
+      refetchQueries: [GET_PRODUCT_BY_ID],
+      onCompleted: () => {
+        messageApi.success("Product updated successfully");
+        navigate({ to: "/products" });
+      },
+      onError: (error) => {
+        console.error(error);
+        messageApi.error("Failed to update product");
+      },
+    },
   );
+  const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
   const [modal, modalContextHolder] = Modal.useModal();
-  const [name, setName] = useState("");
+  const [categoryNameInput, setCategoryNameInput] = useState("");
   const inputRef = useRef<InputRef>(null);
+  const [isActive, setIsActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    icon: "",
-    name: "",
-    description: "",
-    tagline: "",
-    isActive: false,
-    slug: "",
-    categoryId: null as string | null,
-  });
 
   // Initialize/Sync form data when product data is available
   useEffect(() => {
     if (productData?.adminProduct) {
       const product = productData.adminProduct;
-      setFormData((prev) => ({
-        ...prev,
-        // icon: product.icon || '',
+      form.setFieldsValue({
         name: product.name || "",
         description: product.description || "",
-        tagline: product.tagline || "",
-        isActive: product.isActive || false,
-        slug: product.slug || "",
-        categoryId: product.category?.id || null,
-      }));
+        tagline: product.tagline,
+        isActive: product.isActive,
+        slug: product.slug,
+        categoryId: product.category?.id,
+      });
       setPreviewUrl(
         product.media?.[0]?.url
           ? `${product.media[0].url}?ngrok-skip-browser-warning=true`
@@ -106,23 +123,16 @@ function RouteComponent() {
   }, [productData]);
 
   const handleAddCategory = async () => {
-    if (!name.trim()) return;
-    try {
-      await createCategory({
-        variables: {
-          createCategoryInput: {
-            name: name,
-            slug: name.toLowerCase().replace(/\s+/g, "-"),
-          },
+    if (!categoryNameInput.trim()) return;
+    await createCategory({
+      variables: {
+        createCategoryInput: {
+          name: categoryNameInput,
+          slug: categoryNameInput.toLowerCase().replace(/\s+/g, "-"),
         },
-        refetchQueries: [GET_PRODUCT_BY_ID],
-      });
-      setName("");
-      messageApi.success("Category added successfully");
-    } catch (error) {
-      console.error("Error adding category:", error);
-      messageApi.error("Failed to add category");
-    }
+      },
+    });
+    setCategoryNameInput("");
   };
 
   const showConfirmChanges = () => {
@@ -138,228 +148,278 @@ function RouteComponent() {
   };
 
   const handleUpdateProduct = async () => {
-    try {
-      //   let iconURL = null;
-      let uploadedMediaId = null;
-      if (selectedFile) {
-        messageApi.loading("Uploading current cover image...", 0);
-        const uploadResult = await uploadImage(selectedFile);
-        // iconURL = uploadResult.url;
-        uploadedMediaId = uploadResult.id;
-        messageApi.destroy();
-      }
-
-      await updateProduct({
-        variables: {
-          updateProductInput: {
-            ...formData,
-            categoryId: formData.categoryId || null,
-            id: params.productId,
-            mediaIds: uploadedMediaId
-              ? [uploadedMediaId]
-              : productData?.adminProduct?.media?.[0]?.id
-                ? [productData.adminProduct.media[0].id]
-                : [],
-            // icon: iconURL
-            //   ? `${import.meta.env.VITE_API_URL}${iconURL}`
-            //   : formData.icon,
-            slug: formData.slug.trim()
-              ? formData.slug.toLowerCase().replace(/\s+/g, "-")
-              : formData.name.toLowerCase().replace(/\s+/g, "-"),
-          },
-        },
-        refetchQueries: [PRODUCTS_PAGE_QUERY],
-      });
-      messageApi.success("Product updated successfully");
-      navigate({ to: "/products" });
-    } catch (error) {
+    //   let iconURL = null;
+    let uploadedMediaId = null;
+    const { image, ...actualPayload } = form.getFieldsValue();
+    if (selectedFile) {
+      messageApi.loading("Uploading current cover image...", 0);
+      const uploadResult = await uploadImage(selectedFile);
+      // iconURL = uploadResult.url;
+      uploadedMediaId = uploadResult.id;
       messageApi.destroy();
-      console.error(error);
-      messageApi.error("Failed to update product");
     }
+
+    await updateProduct({
+      variables: {
+        updateProductInput: {
+          ...actualPayload,
+          id: params.productId,
+          mediaIds: uploadedMediaId
+            ? [uploadedMediaId]
+            : productData?.adminProduct?.media?.[0]?.id
+              ? [productData.adminProduct.media[0].id]
+              : [],
+          // icon: iconURL
+          //   ? `${import.meta.env.VITE_API_URL}${iconURL}`
+          //   : formData.icon,
+          slug: actualPayload.slug.trim()
+            ? actualPayload.slug.toLowerCase().replace(/\s+/g, "-")
+            : actualPayload.name.toLowerCase().replace(/\s+/g, "-"),
+        },
+      },
+    });
   };
 
   return (
     <>
-      {contextHolder}
-      {modalContextHolder}
-      {/* Header */}
-      <div className="flex justify-between items-end mb-6">
-        <div className="flex flex-col gap-1">
-          <Title level={2} className="m-0!">
-            Edit Product
-          </Title>
-          <span className="text-gray-500 m-0">
-            Edit and upload product to the website.
-          </span>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={showConfirmChanges}
-            loading={updateProductLoading}
-          >
-            Save Changes
-          </Button>
-        </div>
-      </div>
-
-      <Divider />
-
-      {/* Form */}
-      <div className="flex gap-6 mb-3">
-        <div className="w-2/3 flex flex-col gap-2">
-          <label className="m-0 text-lg font-semibold" htmlFor="product-name">
-            Product Name
-          </label>
-          <Input
-            id="product-name"
-            placeholder="Enter product name..."
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          />
-          <label className="m-0 text-lg font-semibold" htmlFor="product-slug">
-            Slug
-          </label>
-          <Input
-            id="product-slug"
-            placeholder="/product-slug"
-            value={formData.slug}
-            onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-          />
-          <label
-            className="m-0 text-lg font-semibold"
-            htmlFor="product-tagline"
-          >
-            Tagline
-          </label>
-          <TextArea
-            rows={4}
-            id="product-tagline"
-            placeholder="Enter product tagline..."
-            value={formData.tagline}
-            onChange={(e) =>
-              setFormData({ ...formData, tagline: e.target.value })
-            }
-          />
-        </div>
-        <div className="w-1/3 flex flex-col gap-2">
-          <label
-            className="m-0 text-lg font-semibold"
-            htmlFor="product-category"
-          >
-            Category
-          </label>
-          <Select
-            id="product-category"
-            style={{ width: 350 }}
-            placeholder="None"
-            options={[
-              ...(productData?.categories?.map((c: any) => ({
-                value: c.id,
-                label: c.name,
-              })) || []),
-            ]}
-            value={formData.categoryId || undefined}
-            onChange={(value) =>
-              setFormData({ ...formData, categoryId: value })
-            }
-            popupRender={(menu) => (
-              <>
-                {menu}
-                <Divider style={{ margin: "8px 0" }} />
-                <Space style={{ padding: "0 8px 4px" }}>
-                  <Input
-                    id="product-category-input"
-                    placeholder="Add New Category"
-                    ref={inputRef}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    onKeyDown={(e) => e.stopPropagation()}
-                  />
-                  <Button
-                    type="text"
-                    icon={<PlusOutlined />}
-                    onClick={handleAddCategory}
-                    disabled={createCategoryLoading || !name.trim()}
-                  >
-                    Add Category
-                  </Button>
-                </Space>
-              </>
-            )}
-          />
-          <label
-            className="m-0 text-lg font-semibold"
-            htmlFor="product-active-status"
-          >
-            Active Status
-          </label>
-          <div className="flex justify-between items-center gap-2 border border-gray-300 rounded-md p-2">
+      <Form form={form} onFinish={showConfirmChanges} layout="vertical">
+        {contextHolder}
+        {modalContextHolder}
+        {/* Header */}
+        <div className="flex justify-between items-end mb-6">
+          <div className="flex flex-col gap-1">
+            <Title level={2} className="m-0!">
+              Edit Product
+            </Title>
             <span className="text-gray-500 m-0">
-              {formData.isActive
-                ? "Visible to the public"
-                : "Hidden from the public"}
+              Edit and upload product to the website.
             </span>
-            <Switch
-              id="product-active-status"
-              onChange={(checked) =>
-                setFormData({ ...formData, isActive: checked })
-              }
-              checked={formData.isActive}
-            />
           </div>
-          <label htmlFor="product-icon">Icon</label>
-          <Upload
-            beforeUpload={(file) => {
-              setSelectedFile(file);
-              const url = URL.createObjectURL(file);
-              setPreviewUrl(url);
-              return false;
-            }}
-            onRemove={() => {
-              setSelectedFile(null);
-              setPreviewUrl(null);
-            }}
-            maxCount={1}
-            listType="picture-card"
-            showUploadList={false}
-          >
-            {previewUrl ? (
-              <div className="relative group w-full h-full">
-                <img
-                  src={previewUrl}
-                  alt="Cover Preview"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          <div className="flex justify-center gap-2">
+            <Form.Item name="isActive" className="mb-0!">
+              <div className="flex justify-between items-center gap-2 border border-gray-300 rounded-md p-2">
+                <span className="text-gray-500 m-0">
+                  {isActive
+                    ? "Visible to the public"
+                    : "Hidden from the public"}
+                </span>
+                <Switch
+                  defaultChecked={productData?.adminProduct?.isActive}
+                  onChange={(checked) => {
+                    setIsActive(checked);
+                    form.setFieldsValue({
+                      isActive: checked,
+                    });
+                  }}
                 />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity flex-col gap-2">
-                  <UploadOutlined className="text-white text-xl" />
-                  <span className="text-white text-xs">Change Image</span>
+              </div>
+            </Form.Item>
+            <Button
+              type="default"
+              htmlType="button"
+              onClick={() => navigate({ to: "/products" })}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              disabled={updateProductLoading}
+              loading={updateProductLoading}
+              htmlType="submit"
+            >
+              Save Changes
+            </Button>
+          </div>
+        </div>
+
+        <Divider />
+
+        {/* Form */}
+        <div className="flex gap-6 mb-3">
+          <div className="w-2/3 flex flex-col gap-2">
+            {/* Product Title */}
+            <Form.Item
+              name="name"
+              rules={[{ required: true, message: "Please enter product name" }]}
+              label={
+                <span className="font-medium text-gray-700">Product Name</span>
+              }
+              className="mb-0!"
+            >
+              <Input placeholder="Enter product name..." size="large" />
+            </Form.Item>
+
+            {/* Product Description */}
+            <Form.Item
+              name="description"
+              valuePropName="content"
+              label={
+                <span className="font-medium text-gray-700">
+                  Product Description
+                </span>
+              }
+              rules={[
+                { required: true, message: "Please enter product description" },
+              ]}
+              className="mb-0!"
+            >
+              <SimpleEditor
+                className="border rounded-md"
+                style={{ height: 500 }}
+              />
+            </Form.Item>
+
+            {/* Product Tagline */}
+            <Form.Item
+              name="tagline"
+              rules={[
+                { required: true, message: "Please enter product tagline" },
+              ]}
+              label={
+                <span className="font-medium text-gray-700">
+                  Product Tagline
+                </span>
+              }
+              className="mb-0!"
+            >
+              <TextArea rows={4} placeholder="Enter product tagline..." />
+            </Form.Item>
+          </div>
+
+          <div className="w-1/3 flex flex-col gap-2">
+            {/* Product Icon */}
+            <Form.Item
+              name="image"
+              label={<span className="font-medium text-gray-700">Icon</span>}
+              rules={[
+                {
+                  validator: () => {
+                    if (!selectedFile && !previewUrl) {
+                      return Promise.reject(new Error("Please upload icon"));
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+              className="mb-0!"
+            >
+              <div className="flex flex-col items-center gap-4">
+                {/* Preview */}
+                <div className="w-full aspect-video rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 shadow-inner">
+                  {previewUrl ? (
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <div className="text-center text-gray-400">
+                      <PictureTwoTone className="text-5xl mb-2" />
+                      <p>No Image Uploaded</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Upload Controls */}
+                <div className="flex gap-2 w-full">
+                  <Upload
+                    beforeUpload={(file) => {
+                      setSelectedFile(file);
+                      const url = URL.createObjectURL(file);
+                      setPreviewUrl(url);
+                      return false;
+                    }}
+                    onRemove={() => {
+                      setSelectedFile(null);
+                      setPreviewUrl(null);
+                    }}
+                    maxCount={1}
+                    showUploadList={false}
+                  >
+                    <Button icon={<UploadOutlined />} className="w-full">
+                      {previewUrl ? "Change Image" : "Upload Image"}
+                    </Button>
+                  </Upload>
+                  {previewUrl && (
+                    <Button
+                      danger
+                      className="flex-1"
+                      onClick={() => {
+                        setSelectedFile(null);
+                        setPreviewUrl(null);
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  )}
                 </div>
               </div>
-            ) : (
-              <div className="flex flex-col items-center">
-                <PlusOutlined />
-                <div style={{ marginTop: 8 }}>Upload Cover</div>
-              </div>
-            )}
-          </Upload>
-        </div>
-      </div>
+            </Form.Item>
 
-      {/* Description WYSIWYG*/}
-      <div className="flex flex-col gap-2">
-        <label className="m-0 text-lg font-semibold">Description</label>
-        <SimpleEditor
-          className="border rounded-md"
-          style={{ height: 500 }}
-          content={formData.description}
-          onChange={(newContent) =>
-            setFormData((prev) => ({ ...prev, description: newContent }))
-          }
-        />
-      </div>
+            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 flex flex-col gap-4">
+              {/* Product Category */}
+              <Form.Item
+                name="categoryId"
+                label={
+                  <span className="font-medium text-gray-700">Category</span>
+                }
+                rules={[
+                  {
+                    required: true,
+                    message: "Please select a category",
+                  },
+                ]}
+                className="mb-0!"
+              >
+                <Select
+                  className="w-full"
+                  placeholder="None"
+                  options={[
+                    ...(productData.categories?.map((c) => ({
+                      label: c.name,
+                      value: c.id,
+                    })) || []),
+                  ]}
+                  popupRender={(menu) => (
+                    <>
+                      {menu}
+                      <Divider style={{ margin: "8px 0" }} />
+                      <Space style={{ padding: "0 8px 4px" }}>
+                        <Input
+                          id="post-category-input"
+                          placeholder="Add New Category"
+                          ref={inputRef}
+                          value={categoryNameInput}
+                          onChange={(e) => setCategoryNameInput(e.target.value)}
+                          onKeyDown={(e) => e.stopPropagation()}
+                        />
+                        <Button
+                          type="text"
+                          icon={<PlusOutlined />}
+                          onClick={handleAddCategory}
+                          disabled={createCategoryLoading}
+                          loading={createCategoryLoading}
+                        >
+                          Add Category
+                        </Button>
+                      </Space>
+                    </>
+                  )}
+                />
+              </Form.Item>
+              {/* Product Slug */}
+              <Form.Item
+                name="slug"
+                label={<span className="font-medium text-gray-700">Slug</span>}
+                className="mb-0!"
+              >
+                <Input placeholder="/post-slug" />
+              </Form.Item>
+            </div>
+          </div>
+        </div>
+      </Form>
     </>
   );
 }

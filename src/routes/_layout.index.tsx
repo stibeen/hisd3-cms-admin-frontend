@@ -304,24 +304,32 @@ function DashboardApp() {
             <ul className="divide-y divide-gray-100">
               {(filteredInquiries.length ?? 0) > 0 ? (
                 displayedInquiries?.map((inquiry) => (
-                  <li
+                  <Link
                     key={inquiry.id}
-                    className="p-5 flex items-start gap-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                    to="/inquiries/$inquiryId"
+                    params={{
+                      inquiryId: inquiry.id,
+                    }}
                   >
-                    <div className="w-10 h-10 rounded-full bg-linear-to-tr from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold shrink-0">
-                      {inquiry.name?.charAt(0)}
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-gray-900">
-                        {inquiry.name}
-                      </h4>
-                      <p className="text-sm text-gray-500 line-clamp-1 mt-0.5">
-                        {formatDistanceToNow(new Date(inquiry.createdAt), {
-                          addSuffix: true,
-                        })}
-                      </p>
-                    </div>
-                  </li>
+                    <li
+                      key={inquiry.id}
+                      className="p-5 flex items-start gap-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-linear-to-tr from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold shrink-0">
+                        {inquiry.name?.charAt(0)}
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-semibold text-gray-900">
+                          {inquiry.name}
+                        </h4>
+                        <p className="text-sm text-gray-500 line-clamp-1 mt-0.5">
+                          {formatDistanceToNow(new Date(inquiry.createdAt), {
+                            addSuffix: true,
+                          })}
+                        </p>
+                      </div>
+                    </li>
+                  </Link>
                 ))
               ) : (
                 <Empty className="py-10" />
@@ -330,10 +338,10 @@ function DashboardApp() {
           </div>
           {/* Pagination */}
           <div className="p-4 flex justify-end border-t border-gray-100">
-            {data.inquiries.length > 6 && (
+            {(filteredInquiries.length ?? 0) > 6 && (
               <Pagination
                 size="small"
-                total={data?.inquiries?.length ?? 0}
+                total={filteredInquiries.length ?? 0}
                 showTotal={(total) => `${total} items`}
                 pageSize={inquiriesPageSize}
                 current={inquiriesCurrentPage}

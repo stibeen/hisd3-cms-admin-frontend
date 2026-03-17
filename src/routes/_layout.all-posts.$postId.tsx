@@ -16,12 +16,13 @@ import {
   Space,
   Typography,
   Upload,
+  Form,
 } from "antd";
 import {
-  ContainerOutlined,
-  SendOutlined,
   PlusOutlined,
   UploadOutlined,
+  SaveOutlined,
+  PictureTwoTone,
 } from "@ant-design/icons";
 import { useEffect, useState, useRef } from "react";
 import type { InputRef } from "antd";
@@ -61,25 +62,31 @@ function RouteComponent() {
   const navigate = useNavigate();
   const params = Route.useParams();
   const { queryRef } = Route.useLoaderData();
+  const [form] = Form.useForm();
   const { data: articleData, error: articleError } = useReadQuery(queryRef);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    title: "",
-    excerpt: "",
-    content: "",
-    categoryId: null as string | null,
-    status: "" as ArticleStatus,
-    slug: "",
-  });
 
-  const [name, setName] = useState("");
+  const [categoryNameInput, setCategoryNameInput] = useState("");
   const inputRef = useRef<InputRef>(null);
   const [createCategory, { loading: createCategoryLoading }] = useMutation(
     CREATE_CATEGORY_MUTATION,
   );
   const [updateArticle, { loading: updateArticleLoading }] = useMutation(
     UPDATE_ARTICLE_BY_ID_MUTATION,
+    {
+      refetchQueries: [GET_ARTICLE_BY_ID],
+      onCompleted: () => {
+        messageApi.success("Article updated successfully");
+        navigate({ to: "/all-posts" });
+      },
+      onError: (error) => {
+        console.error(error);
+        messageApi.error(
+          "Failed to update article. Check console for more details.",
+        );
+      },
+    },
   );
   const [messageApi, messageContextHolder] = message.useMessage();
   const [modal, modalContextHolder] = Modal.useModal();
@@ -88,7 +95,7 @@ function RouteComponent() {
   useEffect(() => {
     if (articleData?.adminArticle) {
       const article = articleData.adminArticle;
-      setFormData({
+      form.setFieldsValue({
         title: article.title || "",
         excerpt: article.excerpt || "",
         content: article.content || "",
@@ -105,18 +112,18 @@ function RouteComponent() {
   }, [articleData]);
 
   const handleAddCategory = async () => {
-    if (!name.trim()) return;
+    if (!categoryNameInput.trim()) return;
     try {
       await createCategory({
         variables: {
           createCategoryInput: {
-            name: name,
-            slug: name.toLowerCase().replace(/\s+/g, "-"),
+            name: categoryNameInput,
+            slug: categoryNameInput.toLowerCase().replace(/\s+/g, "-"),
           },
         },
         refetchQueries: [GET_ARTICLE_BY_ID],
       });
-      setName("");
+      setCategoryNameInput("");
       messageApi.success("Category added successfully");
     } catch (error) {
       console.error("Error adding category:", error);
@@ -124,10 +131,10 @@ function RouteComponent() {
     }
   };
 
-  const handleUpdateArticle = async (status: ArticleStatus) => {
+  const handleUpdateArticle = async () => {
     try {
       let uploadedMediaId = null;
-
+      const { image, ...actualPayload } = form.getFieldsValue();
       if (selectedFile) {
         messageApi.loading("Uploading current cover image...", 0);
         const uploadResult = await uploadImage(selectedFile);
@@ -139,9 +146,7 @@ function RouteComponent() {
         variables: {
           updateArticleId: params.postId,
           payload: {
-            ...formData,
-            categoryId: formData.categoryId || null,
-            status: status,
+            ...actualPayload,
             mediaIds: uploadedMediaId
               ? [uploadedMediaId]
               : articleData?.adminArticle?.media?.[0]?.id
@@ -160,15 +165,14 @@ function RouteComponent() {
     }
   };
 
-  const showConfirmPublish = (status: ArticleStatus) => {
-    const isDraft = status === ArticleStatus.Draft;
+  const showConfirm = () => {
     modal.confirm({
-      title: isDraft ? "Save as Draft?" : "Publish Post?",
-      content: `Are you sure you want to ${isDraft ? "save this as a draft" : "publish this post"}?`,
+      title: "Save Changes?",
+      content: `Are you sure you want to save changes for this article?`,
       okText: "Yes",
       cancelText: "Cancel",
       onOk: async () => {
-        await handleUpdateArticle(status);
+        await handleUpdateArticle();
       },
     });
   };
@@ -182,178 +186,237 @@ function RouteComponent() {
 
   return (
     <>
-      {messageContextHolder}
-      {modalContextHolder}
-      {/* Header */}
-      <div className="flex justify-between items-end mb-6">
-        <div className="flex flex-col gap-1">
-          <Title level={2} className="m-0!">
-            Edit Post
-          </Title>
-          <span className="text-gray-500 m-0">
-            Edit and publish post to the website.
-          </span>
+      <Form form={form} onFinish={showConfirm} layout="vertical">
+        {messageContextHolder}
+        {modalContextHolder}
+        {/* Header */}
+        <div className="flex justify-between items-end mb-6">
+          <div className="flex flex-col gap-1">
+            <Title level={2} className="m-0!">
+              Edit Post
+            </Title>
+            <span className="text-gray-500 m-0">
+              Edit and publish post to the website.
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <Form.Item name="status" initialValue={"DRAFT" as ArticleStatus}>
+              <Select
+                style={{ width: 150 }}
+                options={[
+                  {
+                    label: "Draft",
+                    value: "DRAFT" as ArticleStatus,
+                  },
+                  {
+                    label: "Published",
+                    value: "PUBLISHED" as ArticleStatus,
+                  },
+                ]}
+              />
+            </Form.Item>
+            <Button
+              type="default"
+              htmlType="button"
+              onClick={() => navigate({ to: "/all-posts" })}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              icon={<SaveOutlined />}
+              disabled={updateArticleLoading}
+              loading={updateArticleLoading}
+            >
+              Save Changes
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button
-            type="default"
-            icon={<ContainerOutlined />}
-            onClick={() => showConfirmPublish(ArticleStatus.Draft)}
-            loading={updateArticleLoading}
-          >
-            Save as Draft
-          </Button>
-          <Button
-            type="primary"
-            icon={<SendOutlined />}
-            disabled={updateArticleLoading}
-            loading={updateArticleLoading}
-            onClick={() => showConfirmPublish(ArticleStatus.Published)}
-          >
-            Publish Post
-          </Button>
-        </div>
-      </div>
 
-      <Divider />
+        <Divider />
 
-      {/* Form */}
-      <div className="flex gap-6 mb-3">
-        <div className="w-2/3 flex flex-col gap-2">
-          <label className="m-0 text-lg font-semibold" htmlFor="post-title">
-            Post Title
-          </label>
-          <Input
-            id="post-title"
-            placeholder="Enter post title..."
-            value={formData.title}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, title: e.target.value }))
-            }
-          />
-          <label className="m-0 text-lg font-semibold" htmlFor="post-excerpt">
-            Excerpt
-          </label>
-          <TextArea
-            id="post-excerpt"
-            rows={4}
-            placeholder="Enter post excerpt..."
-            value={formData.excerpt}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, excerpt: e.target.value }))
-            }
-          />
-        </div>
-        <div className="w-1/3 flex flex-col gap-2">
-          <label className="m-0 text-lg font-semibold" htmlFor="post-category">
-            Category
-          </label>
-          <Select
-            id="post-category"
-            style={{ width: 350 }}
-            placeholder="None"
-            options={[
-              ...(articleData?.categories?.map((c: any) => ({
-                value: c.id,
-                label: c.name,
-              })) || []),
-            ]}
-            value={formData.categoryId || undefined}
-            onChange={(value) =>
-              setFormData((prev) => ({ ...prev, categoryId: value }))
-            }
-            popupRender={(menu) => (
-              <>
-                {menu}
-                <Divider style={{ margin: "8px 0" }} />
-                <Space style={{ padding: "0 8px 4px" }}>
-                  <Input
-                    id="post-category-input"
-                    placeholder="Add New Category"
-                    ref={inputRef}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    onKeyDown={(e) => e.stopPropagation()}
-                  />
-                  <Button
-                    type="text"
-                    icon={<PlusOutlined />}
-                    onClick={handleAddCategory}
-                    disabled={createCategoryLoading || !name.trim()}
+        {/* Form */}
+        <div className="flex gap-8 mb-3">
+          <div className="w-2/3 flex flex-col gap-4">
+            <Form.Item
+              name="title"
+              label={
+                <span className="font-medium text-gray-700">Post Title</span>
+              }
+              rules={[{ required: true, message: "Please enter a title" }]}
+              className="mb-0!"
+            >
+              <Input placeholder="Enter post title..." size="large" />
+            </Form.Item>
+
+            <Form.Item
+              name="content"
+              valuePropName="content"
+              label={<span className="font-medium text-gray-700">Content</span>}
+              rules={[
+                {
+                  required: true,
+                  message: "Please enter post content",
+                },
+              ]}
+              className="mb-0!"
+            >
+              <SimpleEditor
+                className="border rounded-md"
+                style={{ height: 500 }}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="excerpt"
+              label={<span className="font-medium text-gray-700">Excerpt</span>}
+              rules={[
+                {
+                  required: true,
+                  message: "Please enter a post excerpt",
+                },
+              ]}
+              className="mb-0!"
+            >
+              <TextArea rows={4} placeholder="Enter post excerpt..." />
+            </Form.Item>
+          </div>
+          <div className="w-1/3 flex flex-col gap-4">
+            <Form.Item
+              name="image"
+              label={
+                <span className="font-medium text-gray-700">Cover Image</span>
+              }
+              rules={[
+                {
+                  validator: () => {
+                    if (!selectedFile && !previewUrl) {
+                      return Promise.reject(
+                        new Error("Please upload gallery image"),
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+              className="mb-0!"
+            >
+              <div className="flex flex-col items-center gap-4">
+                {/* Preview */}
+                <div className="w-full aspect-video rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 shadow-inner">
+                  {previewUrl ? (
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <div className="text-center text-gray-400">
+                      <PictureTwoTone className="text-5xl mb-2" />
+                      <p>No Image Uploaded</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Upload Controls */}
+                <div className="flex gap-2 w-full">
+                  <Upload
+                    beforeUpload={(file) => {
+                      setSelectedFile(file);
+                      const url = URL.createObjectURL(file);
+                      setPreviewUrl(url);
+                      return false;
+                    }}
+                    onRemove={() => {
+                      setSelectedFile(null);
+                      setPreviewUrl(null);
+                    }}
+                    maxCount={1}
+                    showUploadList={false}
                   >
-                    Add Category
-                  </Button>
-                </Space>
-              </>
-            )}
-          />
-          <label className="m-0 text-lg font-semibold" htmlFor="post-slug">
-            Slug
-          </label>
-          <Input
-            id="post-slug"
-            placeholder="/post-slug"
-            value={formData.slug}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, slug: e.target.value }))
-            }
-          />
-          <label className="m-0 text-lg font-semibold" htmlFor="post-cover">
-            Cover Image
-          </label>
-          <Upload
-            beforeUpload={(file) => {
-              setSelectedFile(file);
-              const url = URL.createObjectURL(file);
-              setPreviewUrl(url);
-              return false;
-            }}
-            onRemove={() => {
-              setSelectedFile(null);
-              setPreviewUrl(null);
-            }}
-            maxCount={1}
-            listType="picture-card"
-            showUploadList={false}
-          >
-            {previewUrl ? (
-              <div className="relative group w-full h-full">
-                <img
-                  src={previewUrl}
-                  alt="Cover Preview"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity flex-col gap-2">
-                  <UploadOutlined className="text-white text-xl" />
-                  <span className="text-white text-xs">Change Image</span>
+                    <Button icon={<UploadOutlined />} className="w-full">
+                      {previewUrl ? "Change Image" : "Upload Image"}
+                    </Button>
+                  </Upload>
+                  {previewUrl && (
+                    <Button
+                      danger
+                      className="flex-1"
+                      onClick={() => {
+                        setSelectedFile(null);
+                        setPreviewUrl(null);
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  )}
                 </div>
               </div>
-            ) : (
-              <div className="flex flex-col items-center">
-                <PlusOutlined />
-                <div style={{ marginTop: 8 }}>Upload Cover</div>
-              </div>
-            )}
-          </Upload>
-        </div>
-      </div>
+            </Form.Item>
 
-      {/* Content */}
-      <div className="flex flex-col gap-2">
-        <label className="m-0 text-lg font-semibold">Content</label>
-        <SimpleEditor
-          className="border rounded-md"
-          style={{ height: 500 }}
-          content={formData.content}
-          onChange={(newContent) =>
-            setFormData((prev) => ({ ...prev, content: newContent }))
-          }
-        />
-        {/* <SimpleEditor
-                    value={formData.content}
-                    onChange={(newContent) => setFormData(prev => ({ ...prev, content: newContent }))}
-                /> */}
-      </div>
+            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 flex flex-col gap-4">
+              <Form.Item
+                name="categoryId"
+                label={
+                  <span className="font-medium text-gray-700">Category</span>
+                }
+                rules={[
+                  {
+                    required: true,
+                    message: "Please select a category",
+                  },
+                ]}
+                className="mb-0!"
+              >
+                <Select
+                  className="w-full"
+                  placeholder="None"
+                  options={[
+                    ...(articleData?.categories.map((c) => ({
+                      label: c.name,
+                      value: c.id,
+                    })) || []),
+                  ]}
+                  popupRender={(menu) => (
+                    <>
+                      {menu}
+                      <Divider style={{ margin: "8px 0" }} />
+                      <Space style={{ padding: "0 8px 4px" }}>
+                        <Input
+                          id="post-category-input"
+                          placeholder="Add New Category"
+                          ref={inputRef}
+                          value={categoryNameInput}
+                          onChange={(e) => setCategoryNameInput(e.target.value)}
+                          onKeyDown={(e) => e.stopPropagation()}
+                        />
+                        <Button
+                          type="text"
+                          icon={<PlusOutlined />}
+                          onClick={handleAddCategory}
+                          disabled={createCategoryLoading}
+                          loading={createCategoryLoading}
+                        >
+                          Add Category
+                        </Button>
+                      </Space>
+                    </>
+                  )}
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="slug"
+                label={<span className="font-medium text-gray-700">Slug</span>}
+                className="mb-0!"
+              >
+                <Input placeholder="/post-slug" />
+              </Form.Item>
+            </div>
+          </div>
+        </div>
+      </Form>
     </>
   );
 }

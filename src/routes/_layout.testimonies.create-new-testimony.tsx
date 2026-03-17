@@ -119,6 +119,12 @@ function RouteComponent() {
           </div>
           <div className="flex gap-2">
             <Button
+              type="default"
+              onClick={() => navigate({ to: "/testimonies" })}
+            >
+              Cancel
+            </Button>
+            <Button
               type="primary"
               icon={<PlusOutlined />}
               htmlType="submit"
@@ -266,7 +272,7 @@ function RouteComponent() {
                   label={
                     <span className="font-medium text-gray-700">Status</span>
                   }
-                  rules={[{ required: true, message: "Please select status" }]}
+                  // rules={[{ required: true, message: "Please select status" }]}
                   className="mb-0!"
                 >
                   <div className="flex justify-between items-center gap-2 border border-gray-300 rounded-md p-2">

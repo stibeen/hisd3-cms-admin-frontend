@@ -108,6 +108,7 @@ function RouteComponent() {
       refetchQueries: [TEAM_PAGE_QUERY],
       onCompleted: () => {
         messageApi.success("Team member removed successfully");
+        handleCancelEdit();
       },
       onError: (error) => {
         messageApi.error(error.message || "Failed to remove team member");
@@ -442,7 +443,7 @@ function RouteComponent() {
               </p>
 
               <div className="flex items-center gap-4">
-                <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 hover:border-[#1280ED] transition">
+                <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 border-dashed hover:border-[#1280ED] transition">
                   {previewUrl ? (
                     <img
                       src={previewUrl}

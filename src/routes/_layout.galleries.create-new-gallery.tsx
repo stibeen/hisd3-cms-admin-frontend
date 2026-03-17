@@ -149,7 +149,11 @@ function RouteComponent() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="flex flex-col gap-4">
               <Form.Item
-                label="Gallery Title"
+                label={
+                  <span className="font-medium text-gray-700">
+                    Gallery Title
+                  </span>
+                }
                 name="title"
                 rules={[
                   { required: true, message: "Please enter gallery title" },
@@ -159,7 +163,9 @@ function RouteComponent() {
               </Form.Item>
 
               <Form.Item
-                label="Status"
+                label={
+                  <span className="font-medium text-gray-700">Status</span>
+                }
                 name="status"
                 rules={[{ required: true, message: "Please select status" }]}
               >
@@ -176,7 +182,11 @@ function RouteComponent() {
 
             <div className="flex flex-col gap-2">
               <Form.Item
-                label="Gallery Image"
+                label={
+                  <span className="font-medium text-gray-700">
+                    Gallery Image
+                  </span>
+                }
                 name="image"
                 rules={[
                   {

@@ -1,9 +1,11 @@
 import { useRef, useState } from "react";
 import {
-  ContainerOutlined,
-  SendOutlined,
+  // ContainerOutlined,
+  // SendOutlined,
   PlusOutlined,
   UploadOutlined,
+  SaveOutlined,
+  PictureTwoTone,
 } from "@ant-design/icons";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
@@ -16,6 +18,7 @@ import {
   Typography,
   Modal,
   Upload,
+  Form,
 } from "antd";
 import type { InputRef } from "antd";
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
@@ -29,6 +32,25 @@ import { ArticleStatus } from "@/graphql/generated/graphql";
 
 const { TextArea } = Input;
 const { Title } = Typography;
+
+// This is now a more generic helper function
+const uploadImage = async (file: any) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/media/upload`, {
+    method: "POST",
+    body: formData,
+    credentials: "include",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      "ngrok-skip-browser-warning": "true",
+    },
+  });
+
+  if (!response.ok) throw new Error("Upload failed");
+  return await response.json(); // Returns { id, url }
+};
 
 export const Route = createFileRoute("/_layout/all-posts/create-new-post")({
   component: RouteComponent,
@@ -47,51 +69,70 @@ function RouteComponent() {
   const { categoryQueryRef, postsQueryRef } = Route.useLoaderData();
   const { data: categoriesData } = useReadQuery(categoryQueryRef);
   useReadQuery(postsQueryRef);
-  const [name, setName] = useState("");
+  const [categoryNameInput, setCategoryNameInput] = useState("");
+  const [form] = Form.useForm();
   const inputRef = useRef<InputRef>(null);
   const [createArticle, { loading: createArticleLoading }] = useMutation(
     CREATE_ARTICLE_MUTATION,
+    {
+      refetchQueries: [POSTS_PAGE_QUERY],
+      onCompleted: () => {
+        messageApi.success("Article created successfully");
+        navigate({ to: "/all-posts" });
+      },
+      onError: (error) => {
+        console.error(error);
+        messageApi.error(
+          "Failed to create article. Check console for more details.",
+        );
+      },
+    },
   );
-  const [createCategory] = useMutation(CREATE_CATEGORY_MUTATION);
+  const [createCategory] = useMutation(CREATE_CATEGORY_MUTATION, {
+    refetchQueries: [GET_ALL_CATEGORIES],
+    onCompleted: () => {
+      messageApi.success("Category added successfully");
+    },
+    onError: (error) => {
+      console.error(error);
+      messageApi.error(
+        "Failed to add category. Check console for more details.",
+      );
+    },
+  });
   const [messageApi, messageContextHolder] = message.useMessage();
   const [modal, contextHolder] = Modal.useModal();
-  const [selectedFile, setSelectedFile] = useState<any>(null);
-  const [formData, setFormData] = useState({
-    title: "",
-    excerpt: "",
-    content: "",
-    categoryId: null,
-    status: "DRAFT" as ArticleStatus,
-    slug: "",
-    coverImageId: null,
-    coverImageUrl: null,
-  });
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  // const [formData, setFormData] = useState({
+  //   // title: "",
+  //   // excerpt: "",
+  //   // content: "",
+  //   categoryId: null,
+  //   // status: "DRAFT" as ArticleStatus,
+  //   // slug: "",
+  //   // coverImageId: null,
+  //   // coverImageUrl: null,
+  // });
 
   const handleAddCategory = async () => {
-    try {
-      await createCategory({
-        variables: {
-          createCategoryInput: {
-            name: name,
-            slug: name.toLowerCase(),
-          },
+    await createCategory({
+      variables: {
+        createCategoryInput: {
+          name: categoryNameInput,
+          slug: categoryNameInput.toLowerCase(),
         },
-        refetchQueries: [GET_ALL_CATEGORIES],
-      });
-      setName("");
-      await messageApi.success("Category added successfully");
-    } catch (error) {
-      console.error("Error adding category:", error);
-      messageApi.error("Failed to add category");
-    }
+      },
+    });
+    setCategoryNameInput("");
   };
 
   const showConfirm = () => {
     modal.confirm({
       title: "Confirm",
-      content: "Are you sure you want to publish this article?",
+      content: "Are you sure you want to save changes for this article?",
       onOk() {
-        handleCreateArticle("PUBLISHED" as ArticleStatus);
+        handleCreateArticle();
       },
       onCancel() {
         console.log("Cancel");
@@ -99,212 +140,282 @@ function RouteComponent() {
     });
   };
 
-  const handleCreateArticle = async (status: ArticleStatus) => {
-    try {
-      let uploadedMediaId = null;
-      const { coverImageId, coverImageUrl, ...actualPayload } = formData;
-      // A. Check if user selected a file but it hasn't been uploaded yet
-      if (selectedFile) {
-        messageApi.loading("Uploading image...", 0); // Show sticky loading
-        const uploadResult = await uploadImage(selectedFile);
-        uploadedMediaId = uploadResult.id;
-        messageApi.destroy(); // Remove loading message
-      }
-
-      // B. Now execute the GraphQL mutation with the ID we just got
-      await createArticle({
-        variables: {
-          payload: {
-            ...actualPayload,
-            categoryId: formData.categoryId || null,
-            status: status,
-            // If we uploaded a file, use its ID. Otherwise, use existing coverImageId.
-            mediaIds: uploadedMediaId ? [uploadedMediaId] : [],
-          },
-        },
-        refetchQueries: [POSTS_PAGE_QUERY],
-      });
-
-      messageApi.success("Article created successfully");
-      navigate({ to: "/all-posts" });
-    } catch (error) {
-      messageApi.destroy();
-      console.error(error);
-      messageApi.error("Failed to create article");
+  const handleCreateArticle = async () => {
+    let uploadedMediaId = null;
+    const { image, ...actualPayload } = form.getFieldsValue();
+    // A. Check if user selected a file but it hasn't been uploaded yet
+    if (selectedFile) {
+      messageApi.loading("Uploading image...", 0); // Show sticky loading
+      const uploadResult = await uploadImage(selectedFile);
+      uploadedMediaId = uploadResult.id;
+      messageApi.destroy(); // Remove loading message
     }
-  };
 
-  // This is now a more generic helper function
-  const uploadImage = async (file: any) => {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/media/upload`,
-      {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          "ngrok-skip-browser-warning": "true",
+    // B. Now execute the GraphQL mutation with the ID we just got
+    await createArticle({
+      variables: {
+        payload: {
+          ...actualPayload,
+          // categoryId: formData.categoryId || null,
+          // status: formData.status,
+          // If we uploaded a file, use its ID. Otherwise, use existing coverImageId.
+          mediaIds: uploadedMediaId ? [uploadedMediaId] : [],
         },
       },
-    );
-
-    if (!response.ok) throw new Error("Upload failed");
-    return await response.json(); // Returns { id, url }
+    });
   };
 
   return (
     <>
-      {messageContextHolder}
-      {contextHolder}
-      {/* Header */}
-      <div className="flex justify-between items-end mb-6">
-        <div className="flex flex-col gap-1">
-          <Title level={2} className="m-0!">
-            Create New Post
-          </Title>
-          <span className="text-gray-500 m-0">
-            Create and publish new posts to the website.
-          </span>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            type="default"
-            icon={<ContainerOutlined />}
-            onClick={() => handleCreateArticle("DRAFT" as ArticleStatus)}
-            disabled={createArticleLoading}
-            loading={createArticleLoading}
-          >
-            Save Draft
-          </Button>
-          <Button
-            type="primary"
-            icon={<SendOutlined />}
-            onClick={showConfirm}
-            disabled={createArticleLoading}
-            loading={createArticleLoading}
-          >
-            Publish Post
-          </Button>
-        </div>
-      </div>
+      <Form form={form} onFinish={showConfirm} layout="vertical">
+        {messageContextHolder}
+        {contextHolder}
 
-      <Divider />
-
-      {/* Post Title, Excerpt, Category, Slug */}
-      <div className="flex gap-6 mb-3">
-        <div className="w-2/3 flex flex-col gap-2">
-          <label className="m-0 text-lg font-semibold" htmlFor="post-title">
-            Post Title
-          </label>
-          <Input
-            id="post-title"
-            placeholder="Enter post title..."
-            value={formData.title}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, title: e.target.value }))
-            }
-          />
-          <label className="m-0 text-lg font-semibold" htmlFor="post-excerpt">
-            Excerpt
-          </label>
-          <TextArea
-            id="post-excerpt"
-            rows={4}
-            placeholder="Enter post excerpt..."
-            value={formData.excerpt}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, excerpt: e.target.value }))
-            }
-          />
+        {/* Header */}
+        <div className="flex justify-between items-end mb-6">
+          <div className="flex flex-col gap-1">
+            <Title level={2} className="m-0!">
+              Create New Post
+            </Title>
+            <span className="text-gray-500 m-0">
+              Create and publish new posts to the website.
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <Form.Item name="status" initialValue={"DRAFT" as ArticleStatus}>
+              <Select
+                style={{ width: 150 }}
+                options={[
+                  {
+                    label: "Draft",
+                    value: "DRAFT" as ArticleStatus,
+                  },
+                  {
+                    label: "Published",
+                    value: "PUBLISHED" as ArticleStatus,
+                  },
+                ]}
+                // value={formData.status}
+                // onChange={(value) =>
+                //   setFormData((prev) => ({ ...prev, status: value }))
+                // }
+              />
+            </Form.Item>
+            <Button
+              type="default"
+              htmlType="button"
+              onClick={() => navigate({ to: "/all-posts" })}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              icon={<SaveOutlined />}
+              disabled={createArticleLoading}
+              loading={createArticleLoading}
+            >
+              Save Changes
+            </Button>
+          </div>
         </div>
-        <div className="w-1/3 flex flex-col gap-2">
-          <label className="m-0 text-lg font-semibold" htmlFor="post-category">
-            Category
-          </label>
-          <Select
-            id="post-category"
-            style={{ width: 350 }}
-            placeholder="None"
-            options={[
-              ...(categoriesData?.categories.map((c) => ({
-                label: c.name,
-                value: c.id,
-              })) || []),
-            ]}
-            value={formData.categoryId || null}
-            onChange={(value) =>
-              setFormData((prev) => ({ ...prev, categoryId: value }))
-            }
-            popupRender={(menu) => (
-              <>
-                {menu}
-                <Divider style={{ margin: "8px 0" }} />
-                <Space style={{ padding: "0 8px 4px" }}>
-                  <Input
-                    id="post-category-input"
-                    placeholder="Add New Category"
-                    ref={inputRef}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    onKeyDown={(e) => e.stopPropagation()}
-                  />
-                  <Button
-                    type="text"
-                    icon={<PlusOutlined />}
-                    onClick={handleAddCategory}
+
+        <Divider />
+
+        {/* Main Layout Area */}
+        <div className="flex gap-8 mb-3">
+          {/* Left Column (Main Content) */}
+          <div className="w-2/3 flex flex-col gap-4">
+            <Form.Item
+              name="title"
+              label={
+                <span className="font-medium text-gray-700">Post Title</span>
+              }
+              rules={[
+                {
+                  required: true,
+                  message: "Please enter a post title",
+                },
+              ]}
+              className="mb-0!"
+            >
+              <Input placeholder="Enter post title..." size="large" />
+            </Form.Item>
+
+            <Form.Item
+              name="content"
+              label={<span className="font-medium text-gray-700">Content</span>}
+              rules={[
+                {
+                  required: true,
+                  message: "Please enter post content",
+                },
+              ]}
+              className="mb-0!"
+            >
+              <SimpleEditor
+                className="border rounded-md"
+                style={{ height: 500 }}
+                // content={formData.content}
+                // onChange={(content) =>
+                //   setFormData((prev) => ({ ...prev, content }))
+                // }
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="excerpt"
+              label={<span className="font-medium text-gray-700">Excerpt</span>}
+              rules={[
+                {
+                  required: true,
+                  message: "Please enter a post excerpt",
+                },
+              ]}
+              className="mb-0!"
+            >
+              <TextArea rows={4} placeholder="Enter post excerpt..." />
+            </Form.Item>
+          </div>
+
+          {/* Right Column (Meta Settings) */}
+          <div className="w-1/3 flex flex-col gap-4">
+            <Form.Item
+              name="image"
+              label={
+                <span className="font-medium text-gray-700">Cover Image</span>
+              }
+              rules={[
+                {
+                  validator: () => {
+                    if (!selectedFile && !previewUrl) {
+                      return Promise.reject(
+                        new Error("Please upload gallery image"),
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+              className="mb-0!"
+            >
+              <div className="flex flex-col items-center gap-4">
+                {/* Preview */}
+                <div className="w-full aspect-video rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 shadow-inner">
+                  {previewUrl ? (
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <div className="text-center text-gray-400">
+                      <PictureTwoTone className="text-5xl mb-2" />
+                      <p>No Image Uploaded</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Upload Controls */}
+                <div className="flex gap-2 w-full">
+                  <Upload
+                    beforeUpload={(file) => {
+                      setSelectedFile(file);
+                      const url = URL.createObjectURL(file);
+                      setPreviewUrl(url);
+                      return false;
+                    }}
+                    onRemove={() => {
+                      setSelectedFile(null);
+                      setPreviewUrl(null);
+                    }}
+                    maxCount={1}
+                    showUploadList={false}
                   >
-                    Add Category
-                  </Button>
-                </Space>
-              </>
-            )}
-          />
-          <label className="m-0 text-lg font-semibold" htmlFor="post-slug">
-            Slug
-          </label>
-          <Input
-            id="post-slug"
-            placeholder="/post-slug"
-            value={formData.slug}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, slug: e.target.value }))
-            }
-          />
-          <label className="m-0 text-lg font-semibold" htmlFor="post-cover">
-            Cover Image
-          </label>
-          <Upload
-            beforeUpload={(file) => {
-              setSelectedFile(file); // Capture the file binary
-              return false; // Crucial: This stops the automatic upload
-            }}
-            onRemove={() => setSelectedFile(null)} // Clear if user deletes it
-            maxCount={1}
-            listType="picture"
-          >
-            {!selectedFile && (
-              <Button icon={<UploadOutlined />}>
-                Click to Upload Cover Image
-              </Button>
-            )}
-          </Upload>
-        </div>
-      </div>
+                    <Button icon={<UploadOutlined />} className="w-full">
+                      {previewUrl ? "Change Image" : "Upload Image"}
+                    </Button>
+                  </Upload>
+                  {previewUrl && (
+                    <Button
+                      danger
+                      className="flex-1"
+                      onClick={() => {
+                        setSelectedFile(null);
+                        setPreviewUrl(null);
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </Form.Item>
 
-      {/* Content */}
-      <div className="flex flex-col gap-2">
-        <label className="m-0 text-lg font-semibold">Content</label>
-        <SimpleEditor
-          className="border rounded-md"
-          style={{ height: 500 }}
-          content={formData.content}
-          onChange={(content) => setFormData((prev) => ({ ...prev, content }))}
-        />
-      </div>
+            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 flex flex-col gap-4">
+              <Form.Item
+                name="categoryId"
+                label={
+                  <span className="font-medium text-gray-700">Category</span>
+                }
+                rules={[
+                  {
+                    required: true,
+                    message: "Please select a category",
+                  },
+                ]}
+                className="mb-0!"
+              >
+                <Select
+                  className="w-full"
+                  placeholder="None"
+                  options={[
+                    ...(categoriesData?.categories.map((c) => ({
+                      label: c.name,
+                      value: c.id,
+                    })) || []),
+                  ]}
+                  // value={formData.categoryId || null}
+                  // onChange={(value) =>
+                  //   setFormData((prev) => ({ ...prev, categoryId: value }))
+                  // }
+                  popupRender={(menu) => (
+                    <>
+                      {menu}
+                      <Divider style={{ margin: "8px 0" }} />
+                      <Space style={{ padding: "0 8px 4px" }}>
+                        <Input
+                          id="post-category-input"
+                          placeholder="Add New Category"
+                          ref={inputRef}
+                          value={categoryNameInput}
+                          onChange={(e) => setCategoryNameInput(e.target.value)}
+                          onKeyDown={(e) => e.stopPropagation()}
+                        />
+                        <Button
+                          type="text"
+                          icon={<PlusOutlined />}
+                          onClick={handleAddCategory}
+                        >
+                          Add Category
+                        </Button>
+                      </Space>
+                    </>
+                  )}
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="slug"
+                label={<span className="font-medium text-gray-700">Slug</span>}
+                className="mb-0!"
+              >
+                <Input placeholder="/post-slug" />
+              </Form.Item>
+            </div>
+          </div>
+        </div>
+      </Form>
     </>
   );
 }
