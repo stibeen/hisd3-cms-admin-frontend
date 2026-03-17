@@ -12,6 +12,8 @@ import {
   Form,
   Popconfirm,
   Modal,
+  Empty,
+  Card,
 } from "antd";
 import type { TableProps } from "antd";
 import {
@@ -401,21 +403,27 @@ function RouteComponent() {
       <div className="flex justify-center gap-6">
         {/* Table */}
         <div className="w-2/3">
-          <Table
-            pagination={
-              teamData?.teamMembers?.length > 10
-                ? {
-                    pageSize: 10,
-                    showTotal: (total) => `${total} team members`,
-                  }
-                : false
-            }
-            columns={columns}
-            dataSource={teamData?.teamMembers || []}
-            bordered
-            // style={{ border: "1px solid #1280ED", borderRadius: "12px" }}
-            rowKey="id"
-          />
+          <Card className="shadow-sm border-gray-200">
+            {(teamData?.teamMembers?.length ?? 0) > 0 ? (
+              <Table
+                pagination={
+                  teamData?.teamMembers?.length > 10
+                    ? {
+                        pageSize: 10,
+                        showTotal: (total) => `${total} team members`,
+                      }
+                    : false
+                }
+                columns={columns}
+                dataSource={teamData?.teamMembers || []}
+                bordered
+                // style={{ border: "1px solid #1280ED", borderRadius: "12px" }}
+                rowKey="id"
+              />
+            ) : (
+              <Empty description="No team members found" />
+            )}
+          </Card>
         </div>
 
         {/* Form */}

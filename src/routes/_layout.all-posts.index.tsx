@@ -21,6 +21,7 @@ import {
   Empty,
   Modal,
   message,
+  Card,
 } from "antd";
 import type { TableProps } from "antd";
 import { POSTS_PAGE_QUERY } from "@/graphql/queries";
@@ -300,54 +301,55 @@ function RouteComponent() {
 
       <Divider />
 
-      {/* Table */}
-      {articleData?.adminArticles?.length > 0 ? (
-        <Table
-          columns={columns}
-          dataSource={filteredData}
-          rowKey="id"
-          bordered
-          style={{
-            border: "1px solid #f0f0f0",
-            borderRadius: "8px",
-            overflow: "hidden",
-          }}
-          title={() => (
-            <div className="flex gap-4">
-              <Search
-                id="post-search"
-                placeholder="Search titles or categories..."
-                allowClear
-                onChange={(e) => setSearchText(e.target.value)}
-                style={{ width: 300 }}
-              />
-              <Select
-                id="post-category"
-                defaultValue="all"
-                style={{ width: 200 }}
-                onChange={setCategoryFilter}
-                options={[
-                  { value: "all", label: "All Categories" },
-                  ...(articleData?.categories?.map((c: any) => ({
-                    value: c.name,
-                    label: c.name,
-                  })) || []),
-                ]}
-              />
-            </div>
-          )}
-          pagination={
-            articleData?.adminArticles?.length > 5
-              ? {
-                  pageSize: 5,
-                  showTotal: (total: number) => `${total} articles`,
-                }
-              : false
-          }
-        />
-      ) : (
-        <Empty description="No posts found" />
-      )}
+      <Card className="shadow-sm border-gray-200">
+        {/* Table */}
+        {(articleData?.adminArticles?.length ?? 0) > 0 ? (
+          <Table
+            columns={columns}
+            dataSource={filteredData}
+            rowKey="id"
+            bordered
+            style={{
+              borderRadius: "8px",
+              overflow: "hidden",
+            }}
+            title={() => (
+              <div className="flex gap-4">
+                <Search
+                  id="post-search"
+                  placeholder="Search titles or categories..."
+                  allowClear
+                  onChange={(e) => setSearchText(e.target.value)}
+                  style={{ width: 300 }}
+                />
+                <Select
+                  id="post-category"
+                  defaultValue="all"
+                  style={{ width: 200 }}
+                  onChange={setCategoryFilter}
+                  options={[
+                    { value: "all", label: "All Categories" },
+                    ...(articleData?.categories?.map((c: any) => ({
+                      value: c.name,
+                      label: c.name,
+                    })) || []),
+                  ]}
+                />
+              </div>
+            )}
+            pagination={
+              articleData?.adminArticles?.length > 5
+                ? {
+                    pageSize: 5,
+                    showTotal: (total: number) => `${total} articles`,
+                  }
+                : false
+            }
+          />
+        ) : (
+          <Empty description="No posts found" />
+        )}
+      </Card>
     </div>
   );
 }

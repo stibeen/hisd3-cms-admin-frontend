@@ -26,6 +26,13 @@ export const HOME_PAGE_QUERY = graphql(`
         name
       }
     }
+    meQuery {
+      user {
+        profile {
+          firstName
+        }
+      }
+    }
     adminArticles {  
     id
     createdAt

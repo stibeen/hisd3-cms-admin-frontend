@@ -106,8 +106,6 @@ function DashboardApp() {
     },
   ];
 
-  // console.log(error);
-
   return (
     <div className="p-1 space-y-8">
       {/* Header Section */}
@@ -115,7 +113,8 @@ function DashboardApp() {
         {/* Welcome Back, Admin! */}
         <div>
           <Title level={2} className="m-0!">
-            Welcome back, Admin! 👋
+            Welcome back, {data?.meQuery?.user?.profile?.firstName || "Admin"}!
+            👋
           </Title>
           <Title level={5} className="m-0! text-gray-500! font-normal!">
             Here's what's happening with your content today.

@@ -11,6 +11,7 @@ import {
   Modal,
   message,
   Empty,
+  Card,
 } from "antd";
 import type { TableProps } from "antd";
 import {
@@ -197,7 +198,8 @@ function RouteComponent() {
             Products
           </Title>
           <span className="text-gray-500 m-0">
-            Showcase your offerings with detailed descriptions and organized categories.
+            Showcase your offerings with detailed descriptions and organized
+            categories.
           </span>
         </div>
         <div className="flex items-center">
@@ -210,54 +212,57 @@ function RouteComponent() {
       </div>
 
       <Divider />
-      {/* Table */}
-      {productsData?.adminProducts?.length === 0 ? (
-        <Empty description="No products found" />
-      ) : (
-        <Table
-          pagination={
-            productsData?.adminProducts?.length > 5
-              ? {
-                  pageSize: 5,
-                  showTotal: (total) => `${total} products`,
-                }
-              : false
-          }
-          columns={columns}
-          dataSource={filteredData}
-          bordered
-          style={{ border: "1px solid #1280ED", borderRadius: "12px" }}
-          rowKey="id"
-          title={() => (
-            <div className="flex gap-2 items-center">
-              <Search
-                id="search"
-                placeholder="Search products..."
-                allowClear
-                onSearch={handleSearch}
-                // Also filter on change if you want "live" search
-                onChange={(e) => handleSearch(e.target.value)}
-                enterButton
-                style={{ width: 300 }}
-              />
-              <Select
-                id="status"
-                defaultValue="all"
-                style={{ width: 200 }}
-                onChange={handleStatusChange}
-                placeholder="Filter Status"
-                options={[
-                  { value: "all", label: "All" },
-                  ...productsData?.categories.map((category) => ({
-                    value: category.name,
-                    label: category.name,
-                  })),
-                ]}
-              />
-            </div>
-          )}
-        />
-      )}
+
+      <Card className="shadow-sm border-gray-200">
+        {/* Table */}
+        {(productsData?.adminProducts?.length ?? 0) > 0 ? (
+          <Table
+            pagination={
+              productsData?.adminProducts?.length > 5
+                ? {
+                    pageSize: 5,
+                    showTotal: (total) => `${total} products`,
+                  }
+                : false
+            }
+            columns={columns}
+            dataSource={filteredData}
+            bordered
+            style={{ borderRadius: "12px", overflow: "hidden" }}
+            rowKey="id"
+            title={() => (
+              <div className="flex gap-2 items-center">
+                <Search
+                  id="search"
+                  placeholder="Search products..."
+                  allowClear
+                  onSearch={handleSearch}
+                  // Also filter on change if you want "live" search
+                  onChange={(e) => handleSearch(e.target.value)}
+                  enterButton
+                  style={{ width: 300 }}
+                />
+                <Select
+                  id="status"
+                  defaultValue="all"
+                  style={{ width: 200 }}
+                  onChange={handleStatusChange}
+                  placeholder="Filter Status"
+                  options={[
+                    { value: "all", label: "All" },
+                    ...productsData?.categories.map((category) => ({
+                      value: category.name,
+                      label: category.name,
+                    })),
+                  ]}
+                />
+              </div>
+            )}
+          />
+        ) : (
+          <Empty description="No products found" />
+        )}
+      </Card>
     </>
   );
 }

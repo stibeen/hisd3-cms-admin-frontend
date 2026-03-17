@@ -375,10 +375,6 @@ function RouteComponent() {
                       value: c.id,
                     })) || []),
                   ]}
-                  // value={formData.categoryId || null}
-                  // onChange={(value) =>
-                  //   setFormData((prev) => ({ ...prev, categoryId: value }))
-                  // }
                   popupRender={(menu) => (
                     <>
                       {menu}

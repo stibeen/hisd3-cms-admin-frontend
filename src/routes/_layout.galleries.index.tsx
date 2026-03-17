@@ -18,6 +18,7 @@ import {
   message,
   Card,
   Divider,
+  Empty,
 } from "antd";
 import type { TableProps } from "antd";
 import { GALLERIES_PAGE_QUERY } from "@/graphql/queries";
@@ -194,16 +195,20 @@ function RouteComponent() {
       <Divider />
 
       <Card className="shadow-sm border-gray-200">
-        <Table
-          columns={columns}
-          dataSource={galleriesData?.adminGalleries || []}
-          rowKey="id"
-          bordered
-          pagination={{
-            pageSize: 10,
-            showTotal: (total: number) => `${total} galleries`,
-          }}
-        />
+        {(galleriesData?.adminGalleries?.length ?? 0) > 0 ? (
+          <Table
+            columns={columns}
+            dataSource={galleriesData?.adminGalleries || []}
+            rowKey="id"
+            bordered
+            pagination={{
+              pageSize: 10,
+              showTotal: (total: number) => `${total} galleries`,
+            }}
+          />
+        ) : (
+          <Empty description="No galleries found" />
+        )}
       </Card>
     </div>
   );

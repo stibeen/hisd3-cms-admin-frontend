@@ -15,6 +15,7 @@ import {
   Avatar,
   Input,
   Tag,
+  Card,
 } from "antd";
 import { useMemo, useState } from "react";
 import {
@@ -227,39 +228,42 @@ function RouteComponent() {
 
       <Divider />
 
-      {testimoniesData.adminTestimonies?.length === 0 ? (
-        <Empty />
-      ) : (
-        <Table
-          pagination={
-            testimoniesData?.adminTestimonies?.length > 5
-              ? {
-                  pageSize: 5,
-                  showTotal: (total) => `${total} testimonies`,
-                }
-              : false
-          }
-          columns={columns}
-          dataSource={filteredData}
-          bordered
-          style={{ border: "1px solid #1280ED", borderRadius: "12px" }}
-          rowKey="id"
-          title={() => (
-            <div className="flex gap-2 items-center">
-              <Search
-                id="search"
-                placeholder="Search testimonies..."
-                allowClear
-                onSearch={handleSearch}
-                // Also filter on change if you want "live" search
-                onChange={(e) => handleSearch(e.target.value)}
-                enterButton
-                style={{ width: 300 }}
-              />
-            </div>
-          )}
-        />
-      )}
+      <Card className="shadow-sm border-gray-200">
+        {/* Table */}
+        {(testimoniesData.adminTestimonies?.length ?? 0) > 0 ? (
+          <Table
+            pagination={
+              testimoniesData?.adminTestimonies?.length > 5
+                ? {
+                    pageSize: 5,
+                    showTotal: (total) => `${total} testimonies`,
+                  }
+                : false
+            }
+            columns={columns}
+            dataSource={filteredData}
+            bordered
+            style={{ borderRadius: "12px", overflow: "hidden" }}
+            rowKey="id"
+            title={() => (
+              <div className="flex gap-2 items-center">
+                <Search
+                  id="search"
+                  placeholder="Search testimonies..."
+                  allowClear
+                  onSearch={handleSearch}
+                  // Also filter on change if you want "live" search
+                  onChange={(e) => handleSearch(e.target.value)}
+                  enterButton
+                  style={{ width: 300 }}
+                />
+              </div>
+            )}
+          />
+        ) : (
+          <Empty description="No testimonies found" />
+        )}
+      </Card>
     </>
   );
 }
