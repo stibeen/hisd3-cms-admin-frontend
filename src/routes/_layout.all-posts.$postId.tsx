@@ -1,9 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { GET_ARTICLE_BY_ID } from "@/graphql/queries";
-import {
-  CREATE_CATEGORY_MUTATION,
-  UPDATE_ARTICLE_BY_ID_MUTATION,
-} from "@/graphql/mutations";
+import { UPDATE_ARTICLE_BY_ID_MUTATION } from "@/graphql/mutations";
 import { useMutation, useReadQuery } from "@apollo/client/react";
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
 import {
@@ -17,16 +14,17 @@ import {
   Typography,
   Upload,
   Form,
+  Tooltip,
 } from "antd";
 import {
-  PlusOutlined,
   UploadOutlined,
   SaveOutlined,
   PictureTwoTone,
+  SettingOutlined,
 } from "@ant-design/icons";
-import { useEffect, useState, useRef } from "react";
-import type { InputRef } from "antd";
+import { useEffect, useState } from "react";
 import { ArticleStatus } from "@/graphql/generated/graphql";
+import CategoryModal from "@/components/CategoryModal";
 
 const { TextArea } = Input;
 const { Title } = Typography;
@@ -66,12 +64,6 @@ function RouteComponent() {
   const { data: articleData, error: articleError } = useReadQuery(queryRef);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
-  const [categoryNameInput, setCategoryNameInput] = useState("");
-  const inputRef = useRef<InputRef>(null);
-  const [createCategory, { loading: createCategoryLoading }] = useMutation(
-    CREATE_CATEGORY_MUTATION,
-  );
   const [updateArticle, { loading: updateArticleLoading }] = useMutation(
     UPDATE_ARTICLE_BY_ID_MUTATION,
     {
@@ -90,7 +82,14 @@ function RouteComponent() {
   );
   const [messageApi, messageContextHolder] = message.useMessage();
   const [modal, modalContextHolder] = Modal.useModal();
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const onOk = () => {
+    setCategoryModalOpen(false);
+  };
 
+  const onCancel = () => {
+    setCategoryModalOpen(false);
+  };
   // Sync form data with article data when it loads
   useEffect(() => {
     if (articleData?.adminArticle) {
@@ -110,26 +109,6 @@ function RouteComponent() {
       );
     }
   }, [articleData]);
-
-  const handleAddCategory = async () => {
-    if (!categoryNameInput.trim()) return;
-    try {
-      await createCategory({
-        variables: {
-          createCategoryInput: {
-            name: categoryNameInput,
-            slug: categoryNameInput.toLowerCase().replace(/\s+/g, "-"),
-          },
-        },
-        refetchQueries: [GET_ARTICLE_BY_ID],
-      });
-      setCategoryNameInput("");
-      messageApi.success("Category added successfully");
-    } catch (error) {
-      console.error("Error adding category:", error);
-      messageApi.error("Failed to add category");
-    }
-  };
 
   const handleUpdateArticle = async () => {
     try {
@@ -189,6 +168,11 @@ function RouteComponent() {
       <Form form={form} onFinish={showConfirm} layout="vertical">
         {messageContextHolder}
         {modalContextHolder}
+        <CategoryModal
+          open={categoryModalOpen}
+          onOk={onOk}
+          onCancel={onCancel}
+        />
         {/* Header */}
         <div className="flex justify-between items-end mb-6">
           <div className="flex flex-col gap-1">
@@ -373,7 +357,7 @@ function RouteComponent() {
                   className="w-full"
                   placeholder="None"
                   options={[
-                    ...(articleData?.categories.map((c) => ({
+                    ...(articleData?.categoriesAdmin.map((c) => ({
                       label: c.name,
                       value: c.id,
                     })) || []),
@@ -383,23 +367,15 @@ function RouteComponent() {
                       {menu}
                       <Divider style={{ margin: "8px 0" }} />
                       <Space style={{ padding: "0 8px 4px" }}>
-                        <Input
-                          id="post-category-input"
-                          placeholder="Add New Category"
-                          ref={inputRef}
-                          value={categoryNameInput}
-                          onChange={(e) => setCategoryNameInput(e.target.value)}
-                          onKeyDown={(e) => e.stopPropagation()}
-                        />
-                        <Button
-                          type="text"
-                          icon={<PlusOutlined />}
-                          onClick={handleAddCategory}
-                          disabled={createCategoryLoading}
-                          loading={createCategoryLoading}
-                        >
-                          Add Category
-                        </Button>
+                        <Tooltip title="Manage Categories">
+                          <Button
+                            type="text"
+                            icon={<SettingOutlined />}
+                            onClick={() => setCategoryModalOpen(true)}
+                          >
+                            Manage Categories
+                          </Button>
+                        </Tooltip>
                       </Space>
                     </>
                   )}

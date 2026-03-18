@@ -200,9 +200,9 @@ export const SETTINGS_PAGE_QUERY = graphql(`
 
 export const GET_ARTICLE_BY_ID = graphql(`
   query getArticleById($id: String!) {
-    categories {
-      id
-      name
+    categoriesAdmin {
+    id
+    name
     }
     adminArticle(id: $id) {
     id
@@ -226,9 +226,10 @@ export const GET_ARTICLE_BY_ID = graphql(`
 
 export const GET_ALL_CATEGORIES = graphql(`
   query getAllCategories {
-    categories {
+    categoriesAdmin {
     id
     name
+    description
   }
 }
 `);
@@ -249,9 +250,9 @@ export const GET_INQUIRY_BY_ID = graphql(`
 
 export const GET_PRODUCT_BY_ID = graphql(`
   query AdminProduct($adminProductId: String!) {
-    categories {
-      id
-      name
+    categoriesAdmin {
+    id
+    name
     }
     adminProduct(id: $adminProductId) {
     id

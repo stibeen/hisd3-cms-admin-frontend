@@ -17,6 +17,8 @@ type Documents = {
     "\n  mutation SignIn($signInInput: SignInInput!) {\n    signin(signInInput: $signInInput) {\n      isSignedIn\n      accessToken\n      refreshToken\n    }\n  }\n": typeof types.SignInDocument,
     "\n  mutation LogOut {\n    logOut {\n      message\n    }\n  }\n": typeof types.LogOutDocument,
     "\n  mutation CreateCategory($createCategoryInput: CreateCategoryInput!) {\n    createCategory(createCategoryInput: $createCategoryInput) {\n      slug\n      name\n    }\n  }\n": typeof types.CreateCategoryDocument,
+    "\n  mutation UpdateCategory($updateCategoryInput: UpdateCategoryInput!) {\n  updateCategory(updateCategoryInput: $updateCategoryInput) {\n    id\n    name\n    description\n    slug\n  }\n}\n": typeof types.UpdateCategoryDocument,
+    "\n  mutation RemoveCategory($removeCategoryId: String!) {\n    removeCategory(id: $removeCategoryId) {\n      id\n      name\n    }\n  }\n": typeof types.RemoveCategoryDocument,
     "\n  mutation UpdateArticleById(\n    $updateArticleId: String!\n    $payload: UpdateArticleDto!\n  ) {\n    updateArticle(id: $updateArticleId, payload: $payload) {\n      category {\n        name\n      }\n      media {\n        id\n        url\n      }\n      title\n      slug\n      excerpt\n      content\n      status\n    }\n  }\n": typeof types.UpdateArticleByIdDocument,
     "\n  mutation RestoreArticleById($restoreArticleId: String!) {\n    restoreArticle(id: $restoreArticleId) {\n      id\n      title\n    }\n  }\n": typeof types.RestoreArticleByIdDocument,
     "\n  mutation HardDeleteArticleById($hardDeleteArticleId: String!) {\n    hardDeleteArticle(id: $hardDeleteArticleId) {\n      id\n      title\n    }\n  }\n": typeof types.HardDeleteArticleByIdDocument,
@@ -48,10 +50,10 @@ type Documents = {
     "\n  query AdminGalleries {\n  adminGalleries {\n    id\n    title\n    createdAt\n    updatedAt\n    status\n    media {\n    id\n    url\n    }\n  }\n}\n": typeof types.AdminGalleriesDocument,
     "\n  query AdminGallery($id: String!) {\n  adminGallery(id: $id) {\n    id\n    title\n    status\n    media {\n      id\n      url\n    }\n    createdAt\n    updatedAt\n  }\n}\n": typeof types.AdminGalleryDocument,
     "\n  query getSettings {\n  companyProfile {\n    id\n    address\n    email\n    phone\n    socials\n  }\n}\n": typeof types.GetSettingsDocument,
-    "\n  query getArticleById($id: String!) {\n    categories {\n      id\n      name\n    }\n    adminArticle(id: $id) {\n    id\n    category {\n      name\n      id\n    }\n    updatedAt\n    content\n    slug\n    title\n    excerpt\n    status\n    media {\n    id\n    url\n    }\n    }\n  }\n": typeof types.GetArticleByIdDocument,
-    "\n  query getAllCategories {\n    categories {\n    id\n    name\n  }\n}\n": typeof types.GetAllCategoriesDocument,
+    "\n  query getArticleById($id: String!) {\n    categoriesAdmin {\n    id\n    name\n    }\n    adminArticle(id: $id) {\n    id\n    category {\n      name\n      id\n    }\n    updatedAt\n    content\n    slug\n    title\n    excerpt\n    status\n    media {\n    id\n    url\n    }\n    }\n  }\n": typeof types.GetArticleByIdDocument,
+    "\n  query getAllCategories {\n    categoriesAdmin {\n    id\n    name\n    description\n  }\n}\n": typeof types.GetAllCategoriesDocument,
     "\n  query getInquiryById($inquiryId: String!) {\n    inquiry(id: $inquiryId) {\n    id\n    createdAt\n    email\n    message\n    name\n    phone\n    status\n  }\n}\n": typeof types.GetInquiryByIdDocument,
-    "\n  query AdminProduct($adminProductId: String!) {\n    categories {\n      id\n      name\n    }\n    adminProduct(id: $adminProductId) {\n    id\n    category {\n      id\n      name\n    }\n    icon\n    name\n    tagline\n    description\n    isActive\n    media {\n    id\n    url\n    }\n    createdAt\n    updatedAt\n    slug\n    order\n  }\n}\n": typeof types.AdminProductDocument,
+    "\n  query AdminProduct($adminProductId: String!) {\n    categoriesAdmin {\n    id\n    name\n    }\n    adminProduct(id: $adminProductId) {\n    id\n    category {\n      id\n      name\n    }\n    icon\n    name\n    tagline\n    description\n    isActive\n    media {\n    id\n    url\n    }\n    createdAt\n    updatedAt\n    slug\n    order\n  }\n}\n": typeof types.AdminProductDocument,
     "\n  query AdminTestimony($adminTestimonyId: String!) {\n    adminTestimony(id: $adminTestimonyId) {\n    id\n    name\n    content\n    createdAt\n    updatedAt\n    company\n    avatarUrl\n    isActive\n    position\n  }\n}\n": typeof types.AdminTestimonyDocument,
     "\n  mutation RefreshToken {\n    refreshToken {\n      user { id }\n    }\n  }\n": typeof types.RefreshTokenDocument,
     "\n  query MeQuery {\n    meQuery {\n      isSignedIn\n      user {\n        id\n        username\n      }\n    }\n  }\n": typeof types.MeQueryDocument,
@@ -60,6 +62,8 @@ const documents: Documents = {
     "\n  mutation SignIn($signInInput: SignInInput!) {\n    signin(signInInput: $signInInput) {\n      isSignedIn\n      accessToken\n      refreshToken\n    }\n  }\n": types.SignInDocument,
     "\n  mutation LogOut {\n    logOut {\n      message\n    }\n  }\n": types.LogOutDocument,
     "\n  mutation CreateCategory($createCategoryInput: CreateCategoryInput!) {\n    createCategory(createCategoryInput: $createCategoryInput) {\n      slug\n      name\n    }\n  }\n": types.CreateCategoryDocument,
+    "\n  mutation UpdateCategory($updateCategoryInput: UpdateCategoryInput!) {\n  updateCategory(updateCategoryInput: $updateCategoryInput) {\n    id\n    name\n    description\n    slug\n  }\n}\n": types.UpdateCategoryDocument,
+    "\n  mutation RemoveCategory($removeCategoryId: String!) {\n    removeCategory(id: $removeCategoryId) {\n      id\n      name\n    }\n  }\n": types.RemoveCategoryDocument,
     "\n  mutation UpdateArticleById(\n    $updateArticleId: String!\n    $payload: UpdateArticleDto!\n  ) {\n    updateArticle(id: $updateArticleId, payload: $payload) {\n      category {\n        name\n      }\n      media {\n        id\n        url\n      }\n      title\n      slug\n      excerpt\n      content\n      status\n    }\n  }\n": types.UpdateArticleByIdDocument,
     "\n  mutation RestoreArticleById($restoreArticleId: String!) {\n    restoreArticle(id: $restoreArticleId) {\n      id\n      title\n    }\n  }\n": types.RestoreArticleByIdDocument,
     "\n  mutation HardDeleteArticleById($hardDeleteArticleId: String!) {\n    hardDeleteArticle(id: $hardDeleteArticleId) {\n      id\n      title\n    }\n  }\n": types.HardDeleteArticleByIdDocument,
@@ -91,10 +95,10 @@ const documents: Documents = {
     "\n  query AdminGalleries {\n  adminGalleries {\n    id\n    title\n    createdAt\n    updatedAt\n    status\n    media {\n    id\n    url\n    }\n  }\n}\n": types.AdminGalleriesDocument,
     "\n  query AdminGallery($id: String!) {\n  adminGallery(id: $id) {\n    id\n    title\n    status\n    media {\n      id\n      url\n    }\n    createdAt\n    updatedAt\n  }\n}\n": types.AdminGalleryDocument,
     "\n  query getSettings {\n  companyProfile {\n    id\n    address\n    email\n    phone\n    socials\n  }\n}\n": types.GetSettingsDocument,
-    "\n  query getArticleById($id: String!) {\n    categories {\n      id\n      name\n    }\n    adminArticle(id: $id) {\n    id\n    category {\n      name\n      id\n    }\n    updatedAt\n    content\n    slug\n    title\n    excerpt\n    status\n    media {\n    id\n    url\n    }\n    }\n  }\n": types.GetArticleByIdDocument,
-    "\n  query getAllCategories {\n    categories {\n    id\n    name\n  }\n}\n": types.GetAllCategoriesDocument,
+    "\n  query getArticleById($id: String!) {\n    categoriesAdmin {\n    id\n    name\n    }\n    adminArticle(id: $id) {\n    id\n    category {\n      name\n      id\n    }\n    updatedAt\n    content\n    slug\n    title\n    excerpt\n    status\n    media {\n    id\n    url\n    }\n    }\n  }\n": types.GetArticleByIdDocument,
+    "\n  query getAllCategories {\n    categoriesAdmin {\n    id\n    name\n    description\n  }\n}\n": types.GetAllCategoriesDocument,
     "\n  query getInquiryById($inquiryId: String!) {\n    inquiry(id: $inquiryId) {\n    id\n    createdAt\n    email\n    message\n    name\n    phone\n    status\n  }\n}\n": types.GetInquiryByIdDocument,
-    "\n  query AdminProduct($adminProductId: String!) {\n    categories {\n      id\n      name\n    }\n    adminProduct(id: $adminProductId) {\n    id\n    category {\n      id\n      name\n    }\n    icon\n    name\n    tagline\n    description\n    isActive\n    media {\n    id\n    url\n    }\n    createdAt\n    updatedAt\n    slug\n    order\n  }\n}\n": types.AdminProductDocument,
+    "\n  query AdminProduct($adminProductId: String!) {\n    categoriesAdmin {\n    id\n    name\n    }\n    adminProduct(id: $adminProductId) {\n    id\n    category {\n      id\n      name\n    }\n    icon\n    name\n    tagline\n    description\n    isActive\n    media {\n    id\n    url\n    }\n    createdAt\n    updatedAt\n    slug\n    order\n  }\n}\n": types.AdminProductDocument,
     "\n  query AdminTestimony($adminTestimonyId: String!) {\n    adminTestimony(id: $adminTestimonyId) {\n    id\n    name\n    content\n    createdAt\n    updatedAt\n    company\n    avatarUrl\n    isActive\n    position\n  }\n}\n": types.AdminTestimonyDocument,
     "\n  mutation RefreshToken {\n    refreshToken {\n      user { id }\n    }\n  }\n": types.RefreshTokenDocument,
     "\n  query MeQuery {\n    meQuery {\n      isSignedIn\n      user {\n        id\n        username\n      }\n    }\n  }\n": types.MeQueryDocument,
@@ -126,6 +130,14 @@ export function graphql(source: "\n  mutation LogOut {\n    logOut {\n      mess
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation CreateCategory($createCategoryInput: CreateCategoryInput!) {\n    createCategory(createCategoryInput: $createCategoryInput) {\n      slug\n      name\n    }\n  }\n"): (typeof documents)["\n  mutation CreateCategory($createCategoryInput: CreateCategoryInput!) {\n    createCategory(createCategoryInput: $createCategoryInput) {\n      slug\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation UpdateCategory($updateCategoryInput: UpdateCategoryInput!) {\n  updateCategory(updateCategoryInput: $updateCategoryInput) {\n    id\n    name\n    description\n    slug\n  }\n}\n"): (typeof documents)["\n  mutation UpdateCategory($updateCategoryInput: UpdateCategoryInput!) {\n  updateCategory(updateCategoryInput: $updateCategoryInput) {\n    id\n    name\n    description\n    slug\n  }\n}\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation RemoveCategory($removeCategoryId: String!) {\n    removeCategory(id: $removeCategoryId) {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  mutation RemoveCategory($removeCategoryId: String!) {\n    removeCategory(id: $removeCategoryId) {\n      id\n      name\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -253,11 +265,11 @@ export function graphql(source: "\n  query getSettings {\n  companyProfile {\n  
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query getArticleById($id: String!) {\n    categories {\n      id\n      name\n    }\n    adminArticle(id: $id) {\n    id\n    category {\n      name\n      id\n    }\n    updatedAt\n    content\n    slug\n    title\n    excerpt\n    status\n    media {\n    id\n    url\n    }\n    }\n  }\n"): (typeof documents)["\n  query getArticleById($id: String!) {\n    categories {\n      id\n      name\n    }\n    adminArticle(id: $id) {\n    id\n    category {\n      name\n      id\n    }\n    updatedAt\n    content\n    slug\n    title\n    excerpt\n    status\n    media {\n    id\n    url\n    }\n    }\n  }\n"];
+export function graphql(source: "\n  query getArticleById($id: String!) {\n    categoriesAdmin {\n    id\n    name\n    }\n    adminArticle(id: $id) {\n    id\n    category {\n      name\n      id\n    }\n    updatedAt\n    content\n    slug\n    title\n    excerpt\n    status\n    media {\n    id\n    url\n    }\n    }\n  }\n"): (typeof documents)["\n  query getArticleById($id: String!) {\n    categoriesAdmin {\n    id\n    name\n    }\n    adminArticle(id: $id) {\n    id\n    category {\n      name\n      id\n    }\n    updatedAt\n    content\n    slug\n    title\n    excerpt\n    status\n    media {\n    id\n    url\n    }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query getAllCategories {\n    categories {\n    id\n    name\n  }\n}\n"): (typeof documents)["\n  query getAllCategories {\n    categories {\n    id\n    name\n  }\n}\n"];
+export function graphql(source: "\n  query getAllCategories {\n    categoriesAdmin {\n    id\n    name\n    description\n  }\n}\n"): (typeof documents)["\n  query getAllCategories {\n    categoriesAdmin {\n    id\n    name\n    description\n  }\n}\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -265,7 +277,7 @@ export function graphql(source: "\n  query getInquiryById($inquiryId: String!) {
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query AdminProduct($adminProductId: String!) {\n    categories {\n      id\n      name\n    }\n    adminProduct(id: $adminProductId) {\n    id\n    category {\n      id\n      name\n    }\n    icon\n    name\n    tagline\n    description\n    isActive\n    media {\n    id\n    url\n    }\n    createdAt\n    updatedAt\n    slug\n    order\n  }\n}\n"): (typeof documents)["\n  query AdminProduct($adminProductId: String!) {\n    categories {\n      id\n      name\n    }\n    adminProduct(id: $adminProductId) {\n    id\n    category {\n      id\n      name\n    }\n    icon\n    name\n    tagline\n    description\n    isActive\n    media {\n    id\n    url\n    }\n    createdAt\n    updatedAt\n    slug\n    order\n  }\n}\n"];
+export function graphql(source: "\n  query AdminProduct($adminProductId: String!) {\n    categoriesAdmin {\n    id\n    name\n    }\n    adminProduct(id: $adminProductId) {\n    id\n    category {\n      id\n      name\n    }\n    icon\n    name\n    tagline\n    description\n    isActive\n    media {\n    id\n    url\n    }\n    createdAt\n    updatedAt\n    slug\n    order\n  }\n}\n"): (typeof documents)["\n  query AdminProduct($adminProductId: String!) {\n    categoriesAdmin {\n    id\n    name\n    }\n    adminProduct(id: $adminProductId) {\n    id\n    category {\n      id\n      name\n    }\n    icon\n    name\n    tagline\n    description\n    isActive\n    media {\n    id\n    url\n    }\n    createdAt\n    updatedAt\n    slug\n    order\n  }\n}\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

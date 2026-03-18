@@ -27,6 +27,26 @@ export const CREATE_CATEGORY_MUTATION = graphql(`
   }
 `);
 
+export const UPDATE_CATEGORY_MUTATION = graphql(`
+  mutation UpdateCategory($updateCategoryInput: UpdateCategoryInput!) {
+  updateCategory(updateCategoryInput: $updateCategoryInput) {
+    id
+    name
+    description
+    slug
+  }
+}
+`);
+
+export const REMOVE_CATEGORY_MUTATION = graphql(`
+  mutation RemoveCategory($removeCategoryId: String!) {
+    removeCategory(id: $removeCategoryId) {
+      id
+      name
+    }
+  }
+`);
+
 export const UPDATE_ARTICLE_BY_ID_MUTATION = graphql(`
   mutation UpdateArticleById(
     $updateArticleId: String!

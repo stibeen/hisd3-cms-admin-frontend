@@ -74,7 +74,7 @@ function DashboardApp() {
   );
   const displayedInquiries = filteredInquiries.slice(
     (inquiriesCurrentPage - 1) * inquiriesPageSize,
-    inquiriesPageSize,
+    inquiriesPageSize * inquiriesCurrentPage,
   );
   const postStat = [
     {
@@ -337,7 +337,7 @@ function DashboardApp() {
           </div>
           {/* Pagination */}
           <div className="p-4 flex justify-end border-t border-gray-100">
-            {(filteredInquiries.length ?? 0) > 6 && (
+            {filteredInquiries.length > 6 && (
               <Pagination
                 size="small"
                 total={filteredInquiries.length ?? 0}
