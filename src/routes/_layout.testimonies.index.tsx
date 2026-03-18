@@ -16,6 +16,8 @@ import {
   Input,
   Tag,
   Card,
+  Space,
+  Image,
 } from "antd";
 import { useMemo, useState } from "react";
 import {
@@ -44,6 +46,8 @@ function RouteComponent() {
   const [messageApi, contextHolder] = message.useMessage();
   const [modal, modalContextHolder] = Modal.useModal();
   const [searchText, setSearchText] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalPreviewUrl, setModalPreviewUrl] = useState("");
 
   const [removeTestimony, { loading: loadingRemoveTestimony }] = useMutation(
     REMOVE_TESTIMONY_MUTATION,
@@ -92,25 +96,48 @@ function RouteComponent() {
     });
   };
 
+  const modalPreviewAvatar = (id: string) => {
+    const member = testimoniesData?.adminTestimonies?.find((m) => m.id === id);
+    if (!member) return;
+    const url = member.avatarUrl || "";
+    setModalPreviewUrl(url);
+    setIsModalOpen(true);
+  };
+
   const columns: TableProps["columns"] = useMemo(
     () => [
+      {
+        title: "Profile",
+        dataIndex: "avatarUrl",
+        key: "avatarUrl",
+        width: 100,
+        align: "center",
+        render: (_, record: any) => {
+          return (
+            <div className="flex justify-center gap-2">
+              {record.avatarUrl ? (
+                <Tooltip title={`View Profile Image of ${record.name}`}>
+                  <Avatar
+                    src={record.avatarUrl}
+                    onClick={() => modalPreviewAvatar(record.id)}
+                    className="cursor-pointer"
+                  />
+                </Tooltip>
+              ) : (
+                <Avatar
+                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${record.name}`}
+                />
+              )}
+            </div>
+          );
+        },
+      },
       {
         title: "Name",
         dataIndex: "name",
         key: "name",
-        render: (text: string, record: any) => {
-          return (
-            <div className="flex items-center gap-2">
-              {record.avatarUrl ? (
-                <Avatar src={record.avatarUrl} />
-              ) : (
-                <Avatar
-                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${text}`}
-                />
-              )}
-              <span className="text-m font-semibold">{text}</span>
-            </div>
-          );
+        render: (text: string) => {
+          return <span className="text-m font-semibold">{text}</span>;
         },
       },
       {
@@ -207,6 +234,28 @@ function RouteComponent() {
     <>
       {contextHolder}
       {modalContextHolder}
+      <Modal
+        title="Profile Image Preview"
+        open={isModalOpen}
+        onOk={() => setIsModalOpen(false)}
+        onCancel={() => setIsModalOpen(false)}
+      >
+        <div className="flex items-center justify-center">
+          <Image
+            src={modalPreviewUrl}
+            alt="Profile Image Preview"
+            className="max-w-full"
+            preview={{
+              open: false,
+              cover: (
+                <Space vertical align="center">
+                  {`Profile Image`}
+                </Space>
+              ),
+            }}
+          />
+        </div>
+      </Modal>
       {/* Header */}
       <div className="flex justify-between items-end mb-6">
         <div className="flex flex-col gap-1">

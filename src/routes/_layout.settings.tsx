@@ -12,14 +12,19 @@ import {
 } from "@ant-design/icons";
 import { createFileRoute } from "@tanstack/react-router";
 import {
+  Avatar,
   Button,
   Card,
   Divider,
   Form,
   Input,
+  Tooltip,
   Typography,
   Upload,
   message,
+  Modal,
+  Image,
+  Space,
 } from "antd";
 import { useState, useEffect } from "react";
 import { useMutation, useReadQuery } from "@apollo/client/react";
@@ -100,6 +105,7 @@ function RouteComponent() {
   const [userProfileForm] = Form.useForm();
   const [updatePasswordForm] = Form.useForm();
   const [companyProfileForm] = Form.useForm();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [updateProfile, { loading: updateProfileLoading }] = useMutation(
     UPDATE_USER_PROFILE_MUTATION,
@@ -218,6 +224,28 @@ function RouteComponent() {
   return (
     <>
       {contextHolder}
+      <Modal
+        title="Profile Image Preview"
+        open={isModalOpen}
+        onOk={() => setIsModalOpen(false)}
+        onCancel={() => setIsModalOpen(false)}
+      >
+        <div className="flex items-center justify-center">
+          <Image
+            src={previewUrl || ""}
+            alt="Profile Image Preview"
+            className="w-full"
+            preview={{
+              open: false,
+              cover: (
+                <Space vertical align="center">
+                  {`Your Profile Image`}
+                </Space>
+              ),
+            }}
+          />
+        </div>
+      </Modal>
       {/* Header */}
       <div className="flex justify-between items-end mb-6">
         <div className="flex flex-col gap-1">
@@ -261,15 +289,15 @@ function RouteComponent() {
               <div className="flex gap-2">
                 <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border border-gray-300">
                   {previewUrl ? (
-                    <img
-                      src={previewUrl}
-                      alt="avatar"
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
+                    <Tooltip title={`View Profile Image`}>
+                      <Avatar
+                        src={previewUrl}
+                        alt="avatar"
+                        size={80}
+                        className="cursor-pointer"
+                        onClick={() => setIsModalOpen(true)}
+                      />
+                    </Tooltip>
                   ) : (
                     <CameraTwoTone className="text-4xl" />
                   )}

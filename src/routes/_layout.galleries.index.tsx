@@ -19,11 +19,13 @@ import {
   Card,
   Divider,
   Empty,
+  Image,
+  Space,
 } from "antd";
 import type { TableProps } from "antd";
 import { GALLERIES_PAGE_QUERY } from "@/graphql/queries";
 import { REMOVE_GALLERY_MUTATION } from "@/graphql/mutations";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 
 const { Title } = Typography;
@@ -41,6 +43,8 @@ function RouteComponent() {
   const { data: galleriesData } = useReadQuery(queryRef);
   const [messageApi, messageContextHolder] = message.useMessage();
   const [modal, modalContextHolder] = Modal.useModal();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalPreviewUrl, setModalPreviewUrl] = useState("");
 
   const [removeGallery, { loading: removeGalleryLoading }] = useMutation(
     REMOVE_GALLERY_MUTATION,
@@ -73,6 +77,14 @@ function RouteComponent() {
     });
   };
 
+  const modalPreviewGalleryImage = (id: string) => {
+    const member = galleriesData?.adminGalleries?.find((m) => m.id === id);
+    if (!member) return;
+    const url = member.media?.[0]?.url || "";
+    setModalPreviewUrl(url);
+    setIsModalOpen(true);
+  };
+
   const columns: TableProps["columns"] = useMemo(
     () => [
       {
@@ -80,16 +92,31 @@ function RouteComponent() {
         dataIndex: "media",
         key: "preview",
         width: 100,
-        render: (media: any[]) => {
+        align: "center",
+        render: (media: any[], record: any) => {
           const url = media?.[0]?.url;
           return url ? (
-            <img
-              src={url}
-              alt="Preview"
-              width={50}
-              height={50}
-              className="object-cover rounded"
-            />
+            <div className="flex justify-center gap-2">
+              <Tooltip title="View Gallery Image">
+                <Image
+                  src={url}
+                  alt="Preview"
+                  width={150}
+                  height={100}
+                  className="object-cover rounded cursor-pointer"
+                  onClick={() => modalPreviewGalleryImage(record.id)}
+                  preview={{
+                    mask: { blur: true },
+                    cover: (
+                      <Space vertical align="center">
+                        {record.title}
+                      </Space>
+                    ),
+                    open: false,
+                  }}
+                />
+              </Tooltip>
+            </div>
           ) : (
             <div className="w-[50px] h-[50px] bg-gray-100 flex items-center justify-center rounded">
               <PictureTwoTone />
@@ -174,6 +201,29 @@ function RouteComponent() {
     <div className="p-1">
       {messageContextHolder}
       {modalContextHolder}
+      <Modal
+        title="Gallery Image Preview"
+        open={isModalOpen}
+        onOk={() => setIsModalOpen(false)}
+        onCancel={() => setIsModalOpen(false)}
+      >
+        <div className="flex items-center justify-center">
+          <Image
+            src={modalPreviewUrl}
+            alt="Gallery Image Preview"
+            className="max-w-full"
+            preview={{
+              mask: { blur: true },
+              cover: (
+                <Space vertical align="center">
+                  Gallery Image Preview
+                </Space>
+              ),
+              open: false,
+            }}
+          />
+        </div>
+      </Modal>
 
       {/* Header */}
       <div className="flex justify-between items-end mb-6">

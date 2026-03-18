@@ -14,6 +14,8 @@ import {
   Modal,
   Empty,
   Card,
+  Space,
+  Image,
 } from "antd";
 import type { TableProps } from "antd";
 import {
@@ -71,9 +73,10 @@ function RouteComponent() {
   const [messageApi, contextHolder] = message.useMessage();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [modalPreviewUrl, setModalPreviewUrl] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
-  const [modal, modalContextHolder] = Modal.useModal();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [createTeamMember, { loading: createTeamMemberLoading }] = useMutation(
     CREATE_TEAM_MEMBER_MUTATION,
@@ -232,51 +235,47 @@ function RouteComponent() {
     }
   };
 
-  const handlePreviewAvatar = (id: string) => {
+  const modalPreviewAvatar = (id: string) => {
     const member = teamData?.teamMembers?.find((m) => m.id === id);
     if (!member) return;
     const url = member.image || "";
-    modal.info({
-      title: `${member.name}'s Profile Image`,
-      content: (
-        <div className="flex items-center">
-          {url ? (
-            <img src={url} alt="Profile Image Preview" className="max-w-full" />
-          ) : (
-            <Avatar
-              src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${member.name}`}
-            />
-          )}
-        </div>
-      ),
-      mask: { blur: true },
-    });
+    setIsModalOpen(true);
+    setModalPreviewUrl(url);
   };
 
   const columns: TableProps["columns"] = [
     {
-      title: "Member Name",
-      dataIndex: "name",
-      key: "name",
-      render: (text: string, record: any) => {
+      title: "Profile Image",
+      dataIndex: "image",
+      key: "image",
+      width: 100,
+      align: "center",
+      render: (_, record: any) => {
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex justify-center gap-2">
             {record.image ? (
-              <Tooltip title={`View Profile Image of ${text}`}>
+              <Tooltip title={`View Profile Image of ${record.name}`}>
                 <Avatar
                   src={record.image}
-                  onClick={() => handlePreviewAvatar(record.id)}
+                  onClick={() => modalPreviewAvatar(record.id)}
                   className="cursor-pointer"
                 />
               </Tooltip>
             ) : (
               <Avatar
-                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${text}`}
+                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${record.name}`}
               />
             )}
-            <span className="text-m font-semibold">{text}</span>
           </div>
         );
+      },
+    },
+    {
+      title: "Member Name",
+      dataIndex: "name",
+      key: "name",
+      render: (text: string) => {
+        return <span className="text-m font-semibold">{text}</span>;
       },
     },
     {
@@ -385,7 +384,28 @@ function RouteComponent() {
   return (
     <>
       {contextHolder}
-      {modalContextHolder}
+      <Modal
+        title="Profile Image Preview"
+        open={isModalOpen}
+        onOk={() => setIsModalOpen(false)}
+        onCancel={() => setIsModalOpen(false)}
+      >
+        <div className="flex items-center justify-center">
+          <Image
+            src={modalPreviewUrl}
+            alt="Profile Image Preview"
+            className="max-w-full"
+            preview={{
+              open: false,
+              cover: (
+                <Space vertical align="center">
+                  {`Profile Image`}
+                </Space>
+              ),
+            }}
+          />
+        </div>
+      </Modal>
       {/* Header */}
       <div className="flex justify-between items-end mb-6">
         <div className="flex flex-col gap-1">
