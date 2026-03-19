@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { Avatar, Button, Card, Empty, Pagination, Tag, Typography } from "antd";
+import { Avatar, Button, Card, Empty, Pagination, Typography } from "antd";
 import {
   FileText,
   Package,
@@ -63,19 +63,41 @@ function DashboardApp() {
   const [articleCurrentPage, setArticleCurrentPage] = useState(1);
   const [articlePageSize, setArticlePageSize] = useState(5);
   const [inquiriesCurrentPage, setInquiriesCurrentPage] = useState(1);
-  const [inquiriesPageSize, setInquiriesPageSize] = useState(6);
+  const [inquiriesPageSize, setInquiriesPageSize] = useState(4);
+  // --- OPTIMIZED DATA PROCESSING ---
+  const processedArticles = useMemo(() => {
+    if (!data?.adminArticles) return [];
 
-  const displayedArticles = data?.adminArticles.slice(
-    (articleCurrentPage - 1) * articlePageSize,
-    articleCurrentPage * articlePageSize,
-  );
-  const filteredInquiries = data?.inquiries.filter(
-    (item) => item.status === "UNREAD",
-  );
-  const displayedInquiries = filteredInquiries.slice(
-    (inquiriesCurrentPage - 1) * inquiriesPageSize,
-    inquiriesPageSize * inquiriesCurrentPage,
-  );
+    // 1. We only sort here. Removing the 'cutoffDate' filter ensures
+    // the list is never unexpectedly empty.
+    return [...data.adminArticles].sort(
+      (a, b) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+    );
+  }, [data?.adminArticles]);
+
+  // 2. Slice based on the ACTUAL processed list length
+  const displayedArticles = useMemo(() => {
+    const start = (articleCurrentPage - 1) * articlePageSize;
+    const end = start + articlePageSize;
+    return processedArticles.slice(start, end);
+  }, [processedArticles, articleCurrentPage, articlePageSize]);
+
+  // --- INQUIRIES LOGIC ---
+  const filteredInquiries = useMemo(() => {
+    return data?.inquiries?.filter((item) => item.status === "UNREAD") ?? [];
+  }, [data?.inquiries]);
+
+  const displayedInquiries = useMemo(() => {
+    const start = (inquiriesCurrentPage - 1) * inquiriesPageSize;
+    const end = start + inquiriesPageSize;
+    return filteredInquiries.slice(start, end);
+  }, [filteredInquiries, inquiriesCurrentPage, inquiriesPageSize]);
+
+  // const displayedInquiries = filteredInquiries.slice(
+  //   (inquiriesCurrentPage - 1) * inquiriesPageSize,
+  //   inquiriesPageSize * inquiriesCurrentPage,
+  // );
   const postStat = [
     {
       title: "Total Post",
@@ -92,7 +114,7 @@ function DashboardApp() {
       bgClass: "bg-emerald-50",
     },
     {
-      title: "New Inquiries",
+      title: "Unread Inquiries",
       length:
         data?.inquiries.filter((item) => item.status === "UNREAD").length ?? 0,
       icon: <MessageSquare className="w-6 h-6 text-amber-600" />,
@@ -161,7 +183,7 @@ function DashboardApp() {
           <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
             <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
               <FileText className="w-5 h-5 text-gray-500" />
-              Recent Articles
+              Recently Updated Articles
             </h2>
             <Link
               to="/all-posts"
@@ -190,7 +212,8 @@ function DashboardApp() {
                   >
                     <li
                       key={article.id}
-                      className="p-6 flex items-center justify-between hover:bg-gray-50 transition-colors group"
+                      // className="p-6 flex items-center justify-between hover:bg-gray-50 transition-colors group"
+                      className="p-5 flex items-center justify-between gap-4 hover:bg-blue-50/50 transition-all cursor-pointer border-l-4 border-transparent hover:border-blue-500 group"
                     >
                       <div className="flex gap-4">
                         <div>
@@ -221,37 +244,30 @@ function DashboardApp() {
                           </div>
                         </div>
                       </div>
-                      <Tag
-                        color={
-                          article.status === `PUBLISHED` ? "success" : "default"
-                        }
-                        variant="solid"
-                        icon={
-                          article.status === `PUBLISHED` ? (
-                            <CheckCircleFilled />
+                      <div className="flex items-center">
+                        <span
+                          className={`
+                            inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider
+                            ${
+                              article.status === "PUBLISHED"
+                                ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                                : "bg-slate-100 text-slate-600 border border-slate-200"
+                            }
+                          `}
+                        >
+                          {article.status === "PUBLISHED" ? (
+                            <>
+                              <CheckCircleFilled className="text-emerald-500" />
+                              Published
+                            </>
                           ) : (
-                            <ContainerOutlined />
-                          )
-                        }
-                        style={{
-                          padding: "4px 16px",
-                          borderRadius: "20px",
-                          backgroundColor:
-                            article.status === `PUBLISHED`
-                              ? "#E8F8F3"
-                              : "#F1F5F9", // Subtle background
-                          color:
-                            article.status === `PUBLISHED`
-                              ? "#10B981"
-                              : "#64748B", // Tailwind emerald-500 or slate-500
-                          border: "none",
-                          textTransform: "capitalize",
-                          fontWeight: 600,
-                          fontSize: "12px",
-                        }}
-                      >
-                        {article.status === `PUBLISHED` ? `Published` : `Draft`}
-                      </Tag>
+                            <>
+                              <ContainerOutlined className="text-slate-400 animate-pulse" />
+                              Draft
+                            </>
+                          )}
+                        </span>
+                      </div>
                     </li>
                   </Link>
                 ))
@@ -262,9 +278,9 @@ function DashboardApp() {
           </div>
           {/* Pagination */}
           <div className="p-4 flex justify-end border-t border-gray-100">
-            {data.adminArticles.length > 5 && (
+            {processedArticles.length > 5 && (
               <Pagination
-                total={data?.adminArticles?.length ?? 0}
+                total={processedArticles.length}
                 showTotal={(total) => `${total} items`}
                 pageSize={articlePageSize}
                 current={articleCurrentPage}
@@ -283,7 +299,7 @@ function DashboardApp() {
           <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
             <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-gray-500" />
-              New Inquiries
+              Unread Inquiries
             </h2>
             <Link
               to="/inquiries"
@@ -312,20 +328,43 @@ function DashboardApp() {
                   >
                     <li
                       key={inquiry.id}
-                      className="p-5 flex items-start gap-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                      className="p-5 flex items-start gap-4 hover:bg-blue-50/50 transition-all cursor-pointer border-l-4 border-transparent hover:border-blue-500 group"
                     >
-                      <div className="w-10 h-10 rounded-full bg-linear-to-tr from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold shrink-0">
-                        {inquiry.name?.charAt(0)}
+                      {/* Avatar with Online/Unread indicator */}
+                      <div className="relative shrink-0">
+                        <div className="w-12 h-12 rounded-full bg-linear-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold shadow-sm group-hover:scale-105 transition-transform">
+                          {inquiry.name?.charAt(0).toUpperCase()}
+                        </div>
+                        {/* The "New" Notification Dot */}
+                        <span className="absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-red-500 border-2 border-white"></span>
+                        </span>
                       </div>
-                      <div>
-                        <h4 className="text-sm font-semibold text-gray-900">
-                          {inquiry.name}
-                        </h4>
-                        <p className="text-sm text-gray-500 line-clamp-1 mt-0.5">
-                          {formatDistanceToNow(new Date(inquiry.createdAt), {
-                            addSuffix: true,
-                          })}
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-center">
+                          <h4 className="text-sm font-bold text-gray-900 truncate group-hover:text-blue-700">
+                            {inquiry.name}
+                          </h4>
+                          <span className="text-[10px] font-black uppercase px-1.5 py-0.5 bg-red-100 text-red-600 rounded">
+                            New
+                          </span>
+                        </div>
+
+                        {/* Preview of the message (if available in your data) */}
+                        <p className="text-xs text-gray-600 line-clamp-1 mt-1 italic">
+                          "{inquiry.message || "No message"}"
                         </p>
+
+                        <div className="flex items-center gap-1.5 mt-2 text-gray-400">
+                          <Clock className="w-3 h-3" />
+                          <span className="text-[11px] font-medium">
+                            {formatDistanceToNow(new Date(inquiry.createdAt), {
+                              addSuffix: true,
+                            })}
+                          </span>
+                        </div>
                       </div>
                     </li>
                   </Link>
@@ -337,7 +376,7 @@ function DashboardApp() {
           </div>
           {/* Pagination */}
           <div className="p-4 flex justify-end border-t border-gray-100">
-            {filteredInquiries.length > 6 && (
+            {filteredInquiries.length > 4 && (
               <Pagination
                 size="small"
                 total={filteredInquiries.length ?? 0}

@@ -59,6 +59,7 @@ export const HOME_PAGE_QUERY = graphql(`
     inquiries {
     id
     name
+    message
     status
     createdAt
     }

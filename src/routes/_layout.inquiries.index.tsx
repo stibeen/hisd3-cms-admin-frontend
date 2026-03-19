@@ -10,6 +10,8 @@ import {
   Select,
   Card,
   Empty,
+  Modal,
+  message,
 } from "antd";
 import {
   CheckCircleFilled,
@@ -19,10 +21,12 @@ import {
   MailOutlined,
   RightOutlined,
   FileZipOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import { useState, useMemo } from "react";
 import { INQUIRIES_PAGE_QUERY } from "@/graphql/queries";
-import { useReadQuery } from "@apollo/client/react";
+import { REMOVE_MANY_INQUIRIES_MUTATION } from "@/graphql/mutations";
+import { useReadQuery, useMutation } from "@apollo/client/react";
 import { format } from "date-fns";
 const { Title } = Typography;
 const { Search } = Input;
@@ -146,8 +150,24 @@ function RouteComponent() {
   const { data: inquiriesData, error: inquiriesError } = useReadQuery(queryRef);
   // 1. Initialize logic state
   const [searchText, setSearchText] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-
+  const [statusFilter, setStatusFilter] = useState("UNREAD");
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [modal, contextHolder] = Modal.useModal();
+  const [messageApi, messageContextHolder] = message.useMessage();
+  const [removeManyInquiries, { loading: removeManyInquiriesLoading }] =
+    useMutation(REMOVE_MANY_INQUIRIES_MUTATION, {
+      refetchQueries: [INQUIRIES_PAGE_QUERY],
+      onCompleted: () => {
+        setSelectedRowKeys([]);
+        messageApi.success("Inquiries deleted successfully");
+      },
+      onError: (error) => {
+        messageApi.error(
+          "Failed to remove inquiry. Check console for more details.",
+        );
+        console.error(error);
+      },
+    });
   // 2. Filter logic using useMemo to ensure it updates when inquiriesData changes
   const filteredData = useMemo(() => {
     return (
@@ -200,8 +220,33 @@ function RouteComponent() {
     },
   ];
 
+  const showConfirmDeleteMany = () => {
+    modal.confirm({
+      title: "Confirm",
+      content: `Are you sure you want to delete ${selectedRowKeys.length > 1 ? "these" : "this"} ${selectedRowKeys.length > 1 ? "inquiries" : "inquiry"}?`,
+      onOk() {
+        handleDeleteMany();
+      },
+      onCancel() {
+        console.log("Cancel");
+      },
+    });
+  };
+
+  const handleDeleteMany = () => {
+    removeManyInquiries({
+      variables: {
+        removeManyInquiriesInput: {
+          ids: selectedRowKeys as string[],
+        },
+      },
+    });
+  };
+
   return (
     <>
+      {contextHolder}
+      {messageContextHolder}
       {/* Header */}
       <div className="flex justify-between items-end">
         <div className="flex flex-col gap-1">
@@ -238,6 +283,17 @@ function RouteComponent() {
         )}
         {(inquiriesData?.inquiries?.length ?? 0) > 0 ? (
           <Table
+            rowSelection={{
+              type: "checkbox",
+              onChange: (selectedRowKeys, selectedRows) => {
+                console.log(
+                  `selectedRowKeys: ${selectedRowKeys}`,
+                  "selectedRows: ",
+                  selectedRows,
+                );
+                setSelectedRowKeys(selectedRowKeys);
+              },
+            }}
             pagination={
               inquiriesData?.inquiries?.length > 5
                 ? { pageSize: 5, showTotal: (total) => `${total} inquiries` }
@@ -261,7 +317,7 @@ function RouteComponent() {
                 />
                 <Select
                   id="status"
-                  defaultValue="all"
+                  defaultValue="UNREAD"
                   style={{ width: 200 }}
                   onChange={handleStatusChange}
                   placeholder="Filter Status"
@@ -272,6 +328,18 @@ function RouteComponent() {
                     { value: "ARCHIVED", label: "Archived" },
                   ]}
                 />
+                <Divider orientation="vertical" />
+                {selectedRowKeys.length > 0 && (
+                  <Button
+                    icon={<DeleteOutlined />}
+                    danger
+                    onClick={showConfirmDeleteMany}
+                    disabled={removeManyInquiriesLoading}
+                    loading={removeManyInquiriesLoading}
+                  >
+                    {selectedRowKeys.length > 1 ? "Delete Many" : "Delete"}
+                  </Button>
+                )}
               </div>
             )}
           />

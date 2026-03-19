@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useReadQuery, useMutation } from "@apollo/client/react";
+import { useReadQuery, useMutation, useQuery } from "@apollo/client/react";
 import {
   Typography,
   Divider,
@@ -20,7 +20,7 @@ import {
   FieldTimeOutlined,
   FileZipOutlined,
 } from "@ant-design/icons";
-import { GET_INQUIRY_BY_ID } from "@/graphql/queries";
+import { GET_INQUIRY_BY_ID, INQUIRIES_PAGE_QUERY } from "@/graphql/queries";
 import {
   UPDATE_INQUIRY_STATUS_MUTATION,
   REMOVE_INQUIRY_MUTATION,
@@ -45,10 +45,28 @@ function RouteComponent() {
   const { data: inquiryData, error: inquiryError } = useReadQuery(
     getInquiryByIdQueryRef,
   );
+  useQuery(INQUIRIES_PAGE_QUERY);
   const [updateInquiryStatus, { loading: updateInquiryStatusLoading }] =
-    useMutation(UPDATE_INQUIRY_STATUS_MUTATION);
+    useMutation(UPDATE_INQUIRY_STATUS_MUTATION, {
+      onCompleted: () => {
+        navigate({ to: "/inquiries" });
+      },
+    });
   const [removeInquiry, { loading: removeInquiryLoading }] = useMutation(
     REMOVE_INQUIRY_MUTATION,
+    {
+      refetchQueries: [INQUIRIES_PAGE_QUERY],
+      onCompleted: () => {
+        messageApi.success("Inquiry removed successfully");
+        navigate({ to: "/inquiries" });
+      },
+      onError: (error) => {
+        messageApi.error(
+          "Failed to remove inquiry. Check console for more details.",
+        );
+        console.error(error);
+      },
+    },
   );
   const [messageApi, messageContextHolder] = message.useMessage();
   const [modal, contextHolder] = Modal.useModal();
@@ -74,7 +92,6 @@ function RouteComponent() {
         },
       });
       messageApi.success("Inquiry archived successfully");
-      navigate({ to: "/inquiries" });
     } catch (error) {
       messageApi.error("Failed to archive inquiry");
     }
@@ -94,17 +111,11 @@ function RouteComponent() {
   };
 
   const handleRemoveButton = async (id: string) => {
-    try {
-      await removeInquiry({
-        variables: {
-          removeInquiryId: id,
-        },
-      });
-      messageApi.success("Inquiry removed successfully");
-      navigate({ to: "/inquiries" });
-    } catch (error) {
-      messageApi.error("Failed to remove inquiry");
-    }
+    await removeInquiry({
+      variables: {
+        removeInquiryId: id,
+      },
+    });
   };
 
   const handleMarkAsReadButton = async (id: string) => {
@@ -118,7 +129,6 @@ function RouteComponent() {
         },
       });
       messageApi.success("Inquiry marked as read successfully");
-      navigate({ to: "/inquiries" });
     } catch (error) {
       messageApi.error("Failed to mark inquiry as read");
     }

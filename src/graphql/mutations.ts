@@ -130,6 +130,14 @@ export const REMOVE_INQUIRY_MUTATION = graphql(`
   }
 `);
 
+export const REMOVE_MANY_INQUIRIES_MUTATION = graphql(`
+  mutation RemoveManyInquiries($removeManyInquiriesInput: RemoveManyInquiriesInput!) {
+    removeManyInquiries(removeManyInquiriesInput: $removeManyInquiriesInput) {
+      count
+    }
+  }
+`);
+
 export const CREATE_PRODUCT_MUTATION = graphql(`
   mutation CreateProduct($createProductInput: CreateProductInput!) {
   createProduct(createProductInput: $createProductInput) {
