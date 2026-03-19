@@ -25,6 +25,8 @@ import {
 import { useEffect, useState } from "react";
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
 import CategoryModal from "@/components/CategoryModal";
+import ImagePreviewModal from "@/components/ImagePreviewModal";
+
 const { TextArea } = Input;
 const { Title } = Typography;
 
@@ -86,14 +88,7 @@ function RouteComponent() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
-
-  const onOk = () => {
-    setCategoryModalOpen(false);
-  };
-
-  const onCancel = () => {
-    setCategoryModalOpen(false);
-  };
+  const [imagePreviewModalOpen, setImagePreviewModalOpen] = useState(false);
 
   // Initialize/Sync form data when product data is available
   useEffect(() => {
@@ -167,8 +162,15 @@ function RouteComponent() {
         {modalContextHolder}
         <CategoryModal
           open={categoryModalOpen}
-          onOk={onOk}
-          onCancel={onCancel}
+          onOk={() => setCategoryModalOpen(false)}
+          onCancel={() => setCategoryModalOpen(false)}
+        />
+        <ImagePreviewModal
+          title="Product Cover Image"
+          open={imagePreviewModalOpen}
+          onOk={() => setImagePreviewModalOpen(false)}
+          onCancel={() => setImagePreviewModalOpen(false)}
+          previewUrl={previewUrl}
         />
         {/* Header */}
         <div className="flex justify-between items-end mb-6">
@@ -296,7 +298,8 @@ function RouteComponent() {
                     <img
                       src={previewUrl}
                       alt="Preview"
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-contain cursor-pointer"
+                      onClick={() => setImagePreviewModalOpen(true)}
                     />
                   ) : (
                     <div className="text-center text-gray-400">

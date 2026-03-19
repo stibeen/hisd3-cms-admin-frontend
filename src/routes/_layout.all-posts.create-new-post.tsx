@@ -25,6 +25,7 @@ import { CREATE_ARTICLE_MUTATION } from "@/graphql/mutations";
 import { GET_ALL_CATEGORIES, POSTS_PAGE_QUERY } from "@/graphql/queries";
 import { ArticleStatus } from "@/graphql/generated/graphql";
 import CategoryModal from "@/components/CategoryModal";
+import ImagePreviewModal from "@/components/ImagePreviewModal";
 
 const { TextArea } = Input;
 const { Title } = Typography;
@@ -86,6 +87,9 @@ function RouteComponent() {
   const [modal, contextHolder] = Modal.useModal();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const [imagePreviewModalOpen, setImagePreviewModalOpen] = useState(false);
+
   const showConfirm = () => {
     modal.confirm({
       title: "Confirm",
@@ -124,16 +128,6 @@ function RouteComponent() {
     });
   };
 
-  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
-
-  const onOk = () => {
-    setCategoryModalOpen(false);
-  };
-
-  const onCancel = () => {
-    setCategoryModalOpen(false);
-  };
-
   return (
     <>
       <Form form={form} onFinish={showConfirm} layout="vertical">
@@ -141,8 +135,15 @@ function RouteComponent() {
         {contextHolder}
         <CategoryModal
           open={categoryModalOpen}
-          onOk={onOk}
-          onCancel={onCancel}
+          onOk={() => setCategoryModalOpen(false)}
+          onCancel={() => setCategoryModalOpen(false)}
+        />
+        <ImagePreviewModal
+          open={imagePreviewModalOpen}
+          onOk={() => setImagePreviewModalOpen(false)}
+          onCancel={() => setImagePreviewModalOpen(false)}
+          previewUrl={previewUrl}
+          title="Cover Image Preview"
         />
 
         {/* Header */}
@@ -280,7 +281,8 @@ function RouteComponent() {
                     <img
                       src={previewUrl}
                       alt="Preview"
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-contain hover:cursor-pointer"
+                      onClick={() => setImagePreviewModalOpen(true)}
                     />
                   ) : (
                     <div className="text-center text-gray-400">

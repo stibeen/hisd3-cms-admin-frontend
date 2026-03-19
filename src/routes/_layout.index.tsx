@@ -415,7 +415,10 @@ function StatCard({
   to: string;
 }) {
   return (
-    <Card className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:cursor-pointer transition-shadow group">
+    <Card
+      hoverable
+      className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:cursor-pointer transition-shadow group"
+    >
       <Link to={to}>
         <div className="flex justify-between items-start">
           <div>

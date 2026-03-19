@@ -16,6 +16,7 @@ import {
 import { CameraTwoTone, PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import { UPDATE_TESTIMONY_BY_ID_MUTATION } from "@/graphql/mutations";
 import { useEffect, useState } from "react";
+import ImagePreviewModal from "@/components/ImagePreviewModal";
 const { Title } = Typography;
 const { TextArea } = Input;
 
@@ -63,6 +64,7 @@ function RouteComponent() {
   const [isActive, setIsActive] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [imagePreviewModalOpen, setImagePreviewModalOpen] = useState(false);
 
   const [updateTestimony, { loading: updateTestimonyLoading }] = useMutation(
     UPDATE_TESTIMONY_BY_ID_MUTATION,
@@ -129,7 +131,13 @@ function RouteComponent() {
     <>
       {contextHolder}
       {modalContextHolder}
-
+      <ImagePreviewModal
+        title="Profile Image Preview"
+        open={imagePreviewModalOpen}
+        onOk={() => setImagePreviewModalOpen(false)}
+        onCancel={() => setImagePreviewModalOpen(false)}
+        previewUrl={previewUrl}
+      />
       <Form
         form={form}
         layout="vertical"
@@ -187,7 +195,8 @@ function RouteComponent() {
                         <img
                           src={previewUrl}
                           alt="avatar"
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover cursor-pointer"
+                          onClick={() => setImagePreviewModalOpen(true)}
                         />
                       ) : (
                         <CameraTwoTone className="text-5xl" />

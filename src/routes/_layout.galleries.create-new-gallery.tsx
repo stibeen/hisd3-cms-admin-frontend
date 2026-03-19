@@ -1,3 +1,4 @@
+import ImagePreviewModal from "@/components/ImagePreviewModal";
 import { CREATE_GALLERY_MUTATION } from "@/graphql/mutations";
 import { GALLERIES_PAGE_QUERY } from "@/graphql/queries";
 import {
@@ -53,6 +54,7 @@ function RouteComponent() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [messageApi, contextHolder] = message.useMessage();
   const [modal, contextHolderModal] = Modal.useModal();
+  const [imagePreviewModalOpen, setImagePreviewModalOpen] = useState(false);
 
   const [createGallery, { loading: createGalleryLoading }] = useMutation(
     CREATE_GALLERY_MUTATION,
@@ -108,6 +110,13 @@ function RouteComponent() {
 
   return (
     <>
+      <ImagePreviewModal
+        title="Gallery Image Preview"
+        open={imagePreviewModalOpen}
+        onOk={() => setImagePreviewModalOpen(false)}
+        onCancel={() => setImagePreviewModalOpen(false)}
+        previewUrl={previewUrl}
+      />
       <Form
         form={form}
         layout="vertical"
@@ -208,7 +217,8 @@ function RouteComponent() {
                       <img
                         src={previewUrl}
                         alt="Preview"
-                        className="w-full h-full object-contain"
+                        className="w-full h-full object-contain cursor-pointer"
+                        onClick={() => setImagePreviewModalOpen(true)}
                       />
                     ) : (
                       <div className="text-center text-gray-400">

@@ -25,6 +25,7 @@ import { useMutation, useReadQuery } from "@apollo/client/react";
 import { CREATE_PRODUCT_MUTATION } from "@/graphql/mutations";
 import { GET_ALL_CATEGORIES, PRODUCTS_PAGE_QUERY } from "@/graphql/queries";
 import CategoryModal from "@/components/CategoryModal";
+import ImagePreviewModal from "@/components/ImagePreviewModal";
 const { Title } = Typography;
 const { TextArea } = Input;
 
@@ -87,14 +88,7 @@ function RouteComponent() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isActive, setIsActive] = useState(false);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
-
-  const onOk = () => {
-    setCategoryModalOpen(false);
-  };
-
-  const onCancel = () => {
-    setCategoryModalOpen(false);
-  };
+  const [imagePreviewModalOpen, setImagePreviewModalOpen] = useState(false);
 
   const showConfirmAddProduct = () => {
     modal.confirm({
@@ -138,8 +132,15 @@ function RouteComponent() {
         {modalContextHolder}
         <CategoryModal
           open={categoryModalOpen}
-          onOk={onOk}
-          onCancel={onCancel}
+          onOk={() => setCategoryModalOpen(false)}
+          onCancel={() => setCategoryModalOpen(false)}
+        />
+        <ImagePreviewModal
+          title="Product Cover Image"
+          open={imagePreviewModalOpen}
+          onOk={() => setImagePreviewModalOpen(false)}
+          onCancel={() => setImagePreviewModalOpen(false)}
+          previewUrl={previewUrl}
         />
         {/* Header */}
         <div className="flex justify-between items-end mb-6">
@@ -277,7 +278,8 @@ function RouteComponent() {
                     <img
                       src={previewUrl}
                       alt="Preview"
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-contain cursor-pointer"
+                      onClick={() => setImagePreviewModalOpen(true)}
                     />
                   ) : (
                     <div className="text-center text-gray-400">

@@ -11,11 +11,8 @@ import {
   message,
   Form,
   Popconfirm,
-  Modal,
   Empty,
   Card,
-  Space,
-  Image,
 } from "antd";
 import type { TableProps } from "antd";
 import {
@@ -38,6 +35,7 @@ import {
   REMOVE_TEAM_MEMBER_MUTATION,
   UPDATE_TEAM_MEMBER_MUTATION,
 } from "@/graphql/mutations";
+import ImagePreviewModal from "@/components/ImagePreviewModal";
 const { Title } = Typography;
 
 const uploadImage = async (file: File) => {
@@ -384,28 +382,13 @@ function RouteComponent() {
   return (
     <>
       {contextHolder}
-      <Modal
+      <ImagePreviewModal
         title="Profile Image Preview"
         open={isModalOpen}
         onOk={() => setIsModalOpen(false)}
         onCancel={() => setIsModalOpen(false)}
-      >
-        <div className="flex items-center justify-center">
-          <Image
-            src={modalPreviewUrl}
-            alt="Profile Image Preview"
-            className="max-w-full"
-            preview={{
-              open: false,
-              cover: (
-                <Space vertical align="center">
-                  {`Profile Image`}
-                </Space>
-              ),
-            }}
-          />
-        </div>
-      </Modal>
+        previewUrl={modalPreviewUrl}
+      />
       {/* Header */}
       <div className="flex justify-between items-end mb-6">
         <div className="flex flex-col gap-1">

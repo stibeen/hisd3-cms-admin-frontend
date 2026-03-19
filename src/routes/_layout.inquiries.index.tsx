@@ -363,7 +363,10 @@ function StatCard({
   bgClass: string;
 }) {
   return (
-    <Card className="bg-white p-4 rounded-xl border flex-1 border-gray-200 shadow-sm hover:shadow-md transition-shadow group">
+    <Card
+      hoverable
+      className="bg-white p-4 rounded-xl border flex-1 border-gray-200 shadow-sm hover:shadow-md transition-shadow group"
+    >
       <div className="flex justify-between items-start">
         <div>
           <Title

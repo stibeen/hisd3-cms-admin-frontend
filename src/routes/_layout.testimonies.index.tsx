@@ -16,8 +16,6 @@ import {
   Input,
   Tag,
   Card,
-  Space,
-  Image,
 } from "antd";
 import { useMemo, useState } from "react";
 import {
@@ -27,6 +25,7 @@ import {
   EyeFilled,
   EyeInvisibleFilled,
 } from "@ant-design/icons";
+import ImagePreviewModal from "@/components/ImagePreviewModal";
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -234,28 +233,13 @@ function RouteComponent() {
     <>
       {contextHolder}
       {modalContextHolder}
-      <Modal
+      <ImagePreviewModal
         title="Profile Image Preview"
         open={isModalOpen}
         onOk={() => setIsModalOpen(false)}
         onCancel={() => setIsModalOpen(false)}
-      >
-        <div className="flex items-center justify-center">
-          <Image
-            src={modalPreviewUrl}
-            alt="Profile Image Preview"
-            className="max-w-full"
-            preview={{
-              open: false,
-              cover: (
-                <Space vertical align="center">
-                  {`Profile Image`}
-                </Space>
-              ),
-            }}
-          />
-        </div>
-      </Modal>
+        previewUrl={modalPreviewUrl}
+      />
       {/* Header */}
       <div className="flex justify-between items-end mb-6">
         <div className="flex flex-col gap-1">

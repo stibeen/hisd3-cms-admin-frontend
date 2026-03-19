@@ -27,6 +27,7 @@ import { GALLERIES_PAGE_QUERY } from "@/graphql/queries";
 import { REMOVE_GALLERY_MUTATION } from "@/graphql/mutations";
 import { useMemo, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
+import ImagePreviewModal from "@/components/ImagePreviewModal";
 
 const { Title } = Typography;
 
@@ -201,29 +202,13 @@ function RouteComponent() {
     <div className="p-1">
       {messageContextHolder}
       {modalContextHolder}
-      <Modal
+      <ImagePreviewModal
         title="Gallery Image Preview"
         open={isModalOpen}
         onOk={() => setIsModalOpen(false)}
         onCancel={() => setIsModalOpen(false)}
-      >
-        <div className="flex items-center justify-center">
-          <Image
-            src={modalPreviewUrl}
-            alt="Gallery Image Preview"
-            className="max-w-full"
-            preview={{
-              mask: { blur: true },
-              cover: (
-                <Space vertical align="center">
-                  Gallery Image Preview
-                </Space>
-              ),
-              open: false,
-            }}
-          />
-        </div>
-      </Modal>
+        previewUrl={modalPreviewUrl}
+      />
 
       {/* Header */}
       <div className="flex justify-between items-end mb-6">

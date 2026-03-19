@@ -22,9 +22,6 @@ import {
   Typography,
   Upload,
   message,
-  Modal,
-  Image,
-  Space,
 } from "antd";
 import { useState, useEffect } from "react";
 import { useMutation, useReadQuery } from "@apollo/client/react";
@@ -34,6 +31,7 @@ import {
   UPDATE_COMPANY_PROFILE_MUTATION,
   UPDATE_USER_PROFILE_MUTATION,
 } from "@/graphql/mutations";
+import ImagePreviewModal from "@/components/ImagePreviewModal";
 const { Title } = Typography;
 
 const uploadImage = async (file: File) => {
@@ -224,28 +222,13 @@ function RouteComponent() {
   return (
     <>
       {contextHolder}
-      <Modal
+      <ImagePreviewModal
         title="Profile Image Preview"
         open={isModalOpen}
         onOk={() => setIsModalOpen(false)}
         onCancel={() => setIsModalOpen(false)}
-      >
-        <div className="flex items-center justify-center">
-          <Image
-            src={previewUrl || ""}
-            alt="Profile Image Preview"
-            className="w-full"
-            preview={{
-              open: false,
-              cover: (
-                <Space vertical align="center">
-                  {`Your Profile Image`}
-                </Space>
-              ),
-            }}
-          />
-        </div>
-      </Modal>
+        previewUrl={previewUrl}
+      />
       {/* Header */}
       <div className="flex justify-between items-end mb-6">
         <div className="flex flex-col gap-1">

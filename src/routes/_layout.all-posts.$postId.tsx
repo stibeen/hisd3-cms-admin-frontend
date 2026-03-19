@@ -25,6 +25,7 @@ import {
 import { useEffect, useState } from "react";
 import { ArticleStatus } from "@/graphql/generated/graphql";
 import CategoryModal from "@/components/CategoryModal";
+import ImagePreviewModal from "@/components/ImagePreviewModal";
 
 const { TextArea } = Input;
 const { Title } = Typography;
@@ -83,13 +84,8 @@ function RouteComponent() {
   const [messageApi, messageContextHolder] = message.useMessage();
   const [modal, modalContextHolder] = Modal.useModal();
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
-  const onOk = () => {
-    setCategoryModalOpen(false);
-  };
+  const [imagePreviewModalOpen, setImagePreviewModalOpen] = useState(false);
 
-  const onCancel = () => {
-    setCategoryModalOpen(false);
-  };
   // Sync form data with article data when it loads
   useEffect(() => {
     if (articleData?.adminArticle) {
@@ -170,9 +166,18 @@ function RouteComponent() {
         {modalContextHolder}
         <CategoryModal
           open={categoryModalOpen}
-          onOk={onOk}
-          onCancel={onCancel}
+          onOk={() => setCategoryModalOpen(false)}
+          onCancel={() => setCategoryModalOpen(false)}
         />
+        <ImagePreviewModal
+          open={imagePreviewModalOpen}
+          onOk={() => setImagePreviewModalOpen(false)}
+          onCancel={() => setImagePreviewModalOpen(false)}
+          previewUrl={previewUrl}
+          title="Cover Image Preview"
+        />
+
+        {/* <Modal  */}
         {/* Header */}
         <div className="flex justify-between items-end mb-6">
           <div className="flex flex-col gap-1">
@@ -293,7 +298,8 @@ function RouteComponent() {
                     <img
                       src={previewUrl}
                       alt="Preview"
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-contain hover:cursor-pointer"
+                      onClick={() => setImagePreviewModalOpen(true)}
                     />
                   ) : (
                     <div className="text-center text-gray-400">

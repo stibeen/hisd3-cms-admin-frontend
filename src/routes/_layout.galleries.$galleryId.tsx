@@ -19,6 +19,7 @@ import {
   Divider,
 } from "antd";
 import { useState, useEffect } from "react";
+import ImagePreviewModal from "@/components/ImagePreviewModal";
 
 const { Title } = Typography;
 
@@ -59,6 +60,7 @@ function RouteComponent() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [messageApi, contextHolder] = message.useMessage();
+  const [imagePreviewModalOpen, setImagePreviewModalOpen] = useState(false);
 
   const [updateGallery, { loading: updateLoading }] = useMutation(
     UPDATE_GALLERY_BY_ID_MUTATION,
@@ -115,6 +117,13 @@ function RouteComponent() {
 
   return (
     <>
+      <ImagePreviewModal
+        title="Gallery Image Preview"
+        open={imagePreviewModalOpen}
+        onOk={() => setImagePreviewModalOpen(false)}
+        onCancel={() => setImagePreviewModalOpen(false)}
+        previewUrl={previewUrl}
+      />
       <Form form={form} layout="vertical" onFinish={onFinish}>
         {contextHolder}
 
@@ -196,7 +205,8 @@ function RouteComponent() {
                       <img
                         src={previewUrl}
                         alt="Preview"
-                        className="w-full h-full object-contain"
+                        className="w-full h-full object-contain cursor-pointer"
+                        onClick={() => setImagePreviewModalOpen(true)}
                       />
                     ) : (
                       <div className="text-center text-gray-400">

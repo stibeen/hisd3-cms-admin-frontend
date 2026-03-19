@@ -16,6 +16,7 @@ import { TESTIMONIES_PAGE_QUERY } from "@/graphql/queries";
 import { CREATE_TESTIMONY_MUTATION } from "@/graphql/mutations";
 import { useState } from "react";
 import { useMutation, useQuery } from "@apollo/client/react";
+import ImagePreviewModal from "@/components/ImagePreviewModal";
 const { Title } = Typography;
 const { TextArea } = Input;
 
@@ -52,6 +53,7 @@ function RouteComponent() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isActive, setIsActive] = useState<boolean>(false);
+  const [imagePreviewModalOpen, setImagePreviewModalOpen] = useState(false);
   const [createTestimony, { loading: createTestimonyLoading }] = useMutation(
     CREATE_TESTIMONY_MUTATION,
     {
@@ -99,7 +101,13 @@ function RouteComponent() {
     <>
       {contextHolder}
       {modalContextHolder}
-
+      <ImagePreviewModal
+        title="Profile Image Preview"
+        open={imagePreviewModalOpen}
+        onOk={() => setImagePreviewModalOpen(false)}
+        onCancel={() => setImagePreviewModalOpen(false)}
+        previewUrl={previewUrl}
+      />
       <Form
         form={form}
         layout="vertical"
@@ -157,7 +165,8 @@ function RouteComponent() {
                         <img
                           src={previewUrl}
                           alt="avatar"
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover cursor-pointer"
+                          onClick={() => setImagePreviewModalOpen(true)}
                         />
                       ) : (
                         <CameraTwoTone className="text-5xl" />
