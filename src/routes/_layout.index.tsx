@@ -104,6 +104,7 @@ function DashboardApp() {
       length: data?.adminArticles?.length ?? 0,
       icon: <FileText className="w-6 h-6 text-[#f54936]" />,
       bgClass: "bg-blue-50",
+      to: "/all-posts",
     },
     {
       title: "Active Products",
@@ -112,6 +113,7 @@ function DashboardApp() {
         0,
       icon: <Package className="w-6 h-6 text-emerald-600" />,
       bgClass: "bg-emerald-50",
+      to: "/products",
     },
     {
       title: "Unread Inquiries",
@@ -119,12 +121,14 @@ function DashboardApp() {
         data?.inquiries.filter((item) => item.status === "UNREAD").length ?? 0,
       icon: <MessageSquare className="w-6 h-6 text-amber-600" />,
       bgClass: "bg-amber-50",
+      to: "/inquiries",
     },
     {
       title: "Team Members",
       length: data?.teamMembers?.length ?? 0,
       icon: <Users className="w-6 h-6 text-purple-600" />,
       bgClass: "bg-purple-50",
+      to: "/team",
     },
   ];
 
@@ -170,6 +174,7 @@ function DashboardApp() {
               label={item.title}
               value={item.length}
               bgClass={item.bgClass}
+              to={item.to}
             />
           );
         })}
@@ -401,32 +406,36 @@ function StatCard({
   label,
   value,
   bgClass,
+  to,
 }: {
   icon: React.ReactNode;
   label: string;
   value: number;
   bgClass: string;
+  to: string;
 }) {
   return (
-    <Card className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow group">
-      <div className="flex justify-between items-start">
-        <div>
-          <Title level={5} className="text-sm! font-medium! text-gray-500!">
-            {label}
-          </Title>
-          <Title
-            level={3}
-            className="text-3xl! font-bold! text-[#1280ED]! mt-2!"
+    <Card className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:cursor-pointer transition-shadow group">
+      <Link to={to}>
+        <div className="flex justify-between items-start">
+          <div>
+            <Title level={5} className="text-sm! font-medium! text-gray-500!">
+              {label}
+            </Title>
+            <Title
+              level={3}
+              className="text-3xl! font-bold! text-[#1280ED]! mt-2!"
+            >
+              {value}
+            </Title>
+          </div>
+          <div
+            className={`p-3 rounded-xl ${bgClass} group-hover:scale-110 transition-transform duration-300`}
           >
-            {value}
-          </Title>
+            {icon}
+          </div>
         </div>
-        <div
-          className={`p-3 rounded-xl ${bgClass} group-hover:scale-110 transition-transform duration-300`}
-        >
-          {icon}
-        </div>
-      </div>
+      </Link>
     </Card>
   );
 }
