@@ -115,6 +115,8 @@ export const PRODUCTS_PAGE_QUERY = graphql(`
     isActive
     name
     description
+    updatedAt
+    createdAt
     category {
       id
       name

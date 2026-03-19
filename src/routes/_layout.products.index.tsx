@@ -25,6 +25,7 @@ import { useMemo, useState } from "react";
 import { PRODUCTS_PAGE_QUERY } from "@/graphql/queries";
 import { REMOVE_PRODUCT_MUTATION } from "@/graphql/mutations";
 import { useMutation, useReadQuery } from "@apollo/client/react";
+import { formatDistanceToNow } from "date-fns";
 
 const { Search } = Input;
 const { Title } = Typography;
@@ -108,11 +109,20 @@ function RouteComponent() {
         title: "Category",
         dataIndex: "category",
         key: "category",
-        width: "40%",
         render: (category: any) => (
           <Tag color="geekblue" className="capitalize">
             {category?.name || "Uncategorized"}
           </Tag>
+        ),
+      },
+      {
+        title: "Last Updated",
+        dataIndex: "updatedAt",
+        key: "updatedAt",
+        render: (text: string) => (
+          <span>
+            {formatDistanceToNow(new Date(text), { addSuffix: true })}
+          </span>
         ),
       },
       {
