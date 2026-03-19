@@ -3,15 +3,14 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   FileTextOutlined,
-  SettingOutlined,
   QuestionCircleOutlined,
   ShoppingOutlined,
   TeamOutlined,
-  LogoutOutlined,
   HomeOutlined,
   ExclamationCircleFilled,
   CommentOutlined,
   PictureOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import {
   Button,
@@ -22,14 +21,19 @@ import {
   Breadcrumb,
   Modal,
   message,
+  Avatar,
+  Space,
+  Dropdown,
 } from "antd";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { useMutation } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { LOG_OUT_MUTATION } from "../graphql/mutations";
+import { ME_QUERY } from "../graphql/queries";
 
 const { Header, Sider, Content, Footer } = Layout;
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
+  const { data: meData } = useQuery(ME_QUERY);
   const [collapsed, setCollapsed] = useState(false);
   const [modal, contextHolder] = Modal.useModal();
   const location = useLocation();
@@ -193,23 +197,23 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                 icon: <PictureOutlined />,
                 label: <Link to="/galleries">Galleries</Link>,
               },
-              {
-                key: "8",
-                icon: <SettingOutlined />,
-                label: <Link to="/settings">Settings</Link>,
-              },
-              {
-                key: "9",
-                icon: <LogoutOutlined />,
-                label: "Logout",
-                onClick: showLogoutConfirm,
-              },
+              // {
+              //   key: "8",
+              //   icon: <SettingOutlined />,
+              //   label: <Link to="/settings">Settings</Link>,
+              // },
+              // {
+              //   key: "9",
+              //   icon: <LogoutOutlined />,
+              //   label: "Logout",
+              //   onClick: showLogoutConfirm,
+              // },
             ]}
           />
         </Sider>
         <Layout>
           <Header
-            className="flex items-center"
+            className="flex items-center justify-between"
             style={{
               position: "sticky",
               top: 0,
@@ -218,13 +222,49 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
               background: colorBgContainer,
             }}
           >
-            <Button
-              type="text"
-              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-              onClick={() => setCollapsed(!collapsed)}
-              style={{ fontSize: "16px", width: 64, height: 64 }}
-            />
-            <Breadcrumb items={breadcrumbItems} />
+            {/* Collapse Sidebar Button and Breadcrumb */}
+            <div className="flex items-center">
+              <Button
+                type="text"
+                icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                onClick={() => setCollapsed(!collapsed)}
+                style={{ fontSize: "16px", width: 64, height: 64 }}
+              />
+              <Breadcrumb items={breadcrumbItems} />
+            </div>
+            {/* Icon and Dropdown */}
+            <div className="flex items-center mr-8">
+              <Space>
+                <span className="font-semibold text-md">
+                  {meData?.meQuery?.user?.profile?.firstName}{" "}
+                  {meData?.meQuery?.user?.profile?.lastName}
+                </span>
+                <Dropdown
+                  trigger={["click"]}
+                  menu={{
+                    items: [
+                      {
+                        key: "1",
+                        label: "Settings",
+                        onClick: () => navigate({ to: "/settings" }),
+                      },
+                      {
+                        key: "2",
+                        label: "Logout",
+                        onClick: showLogoutConfirm,
+                      },
+                    ],
+                  }}
+                >
+                  <Avatar
+                    size={35}
+                    icon={<UserOutlined />}
+                    src={meData?.meQuery?.user?.profile?.avatar}
+                    className="cursor-pointer"
+                  />
+                </Dropdown>
+              </Space>
+            </div>
           </Header>
           <Content
             style={{

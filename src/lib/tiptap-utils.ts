@@ -384,7 +384,7 @@ export const handleImageUpload = async (
     body: formData,
     credentials: 'include',
     headers: {
-      'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+      // 'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
       'ngrok-skip-browser-warning': 'true'
     },
     signal: abortSignal, // This allows Tiptap to cancel the upload if the user deletes the block mid-upload

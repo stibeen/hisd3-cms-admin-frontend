@@ -42,7 +42,7 @@ const uploadImage = async (file: File) => {
     body: formData,
     credentials: "include",
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
       "ngrok-skip-browser-warning": "true",
     },
   });
@@ -104,6 +104,7 @@ function RouteComponent() {
   const [updatePasswordForm] = Form.useForm();
   const [companyProfileForm] = Form.useForm();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
 
   const [updateProfile, { loading: updateProfileLoading }] = useMutation(
     UPDATE_USER_PROFILE_MUTATION,
@@ -139,7 +140,6 @@ function RouteComponent() {
       },
     });
 
-  const [messageApi, contextHolder] = message.useMessage();
   const handleUpdateProfile = async (values: any) => {
     let profileUrl = null;
     if (selectedFile) {
@@ -151,6 +151,8 @@ function RouteComponent() {
     await updateProfile({
       variables: {
         input: {
+          firstName: values.firstName,
+          lastName: values.lastName,
           username: values.username,
           email: values.email,
           avatar: profileUrl,
@@ -208,6 +210,8 @@ function RouteComponent() {
   useEffect(() => {
     if (userData?.meQuery) {
       userProfileForm.setFieldsValue({
+        firstName: userData.meQuery.user.profile?.firstName,
+        lastName: userData.meQuery.user.profile?.lastName,
         username: userData.meQuery.user.username,
         email: userData.meQuery.user.email,
       });
@@ -329,6 +333,38 @@ function RouteComponent() {
                       </Button>
                     )}
                   </div>
+                </div>
+              </div>
+              {/* Firstname and Lastname */}
+              <div className="flex justify-between gap-2">
+                <div className="w-1/2">
+                  <Form.Item
+                    name="firstName"
+                    className="mb-0!"
+                    label={
+                      <span className="font-medium text-gray-700">
+                        Firstname
+                      </span>
+                    }
+                  >
+                    <Input
+                      id="firstName"
+                      placeholder="Please enter firstname"
+                    />
+                  </Form.Item>
+                </div>
+                <div className="w-1/2">
+                  <Form.Item
+                    name="lastName"
+                    className="mb-0!"
+                    label={
+                      <span className="font-medium text-gray-700">
+                        Lastname
+                      </span>
+                    }
+                  >
+                    <Input id="lastName" placeholder="Please enter lastname" />
+                  </Form.Item>
                 </div>
               </div>
               {/* Username and Email */}

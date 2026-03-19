@@ -40,7 +40,7 @@ const uploadImage = async (file: any) => {
     body: formData,
     credentials: "include",
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
       "ngrok-skip-browser-warning": "true",
     },
   });
