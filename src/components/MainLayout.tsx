@@ -53,8 +53,8 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         try {
           const { data } = await logout();
           if (data?.logOut?.message) {
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("refreshToken");
+            // localStorage.removeItem("accessToken");
+            // localStorage.removeItem("refreshToken");
             console.log(data);
             messageApi.success(data.logOut.message);
             navigate({ to: "/login" });
@@ -91,16 +91,17 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
     { title: <Link to="/">Home</Link> },
     ...pathSnippets.map((snippet, index) => {
       const url = `/${pathSnippets.slice(0, index + 1).join("/")}`;
-      
+
       // Check if the snippet is a UUID
-      const isId = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(snippet);
-      
+      const isId =
+        /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(
+          snippet,
+        );
+
       const displayName = isId
         ? "Details"
-        : snippet
-            .replace(/-/g, " ")
-            .replace(/\b\w/g, (l) => l.toUpperCase());
-            
+        : snippet.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+
       return { title: <Link to={url as any}>{displayName}</Link> };
     }),
   ];
