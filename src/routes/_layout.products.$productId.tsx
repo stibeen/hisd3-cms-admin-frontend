@@ -26,27 +26,10 @@ import { useEffect, useState } from "react";
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
 import CategoryModal from "@/components/CategoryModal";
 import ImagePreviewModal from "@/components/ImagePreviewModal";
+import uploadImage from "@/utils/uploadImage";
 
 const { TextArea } = Input;
 const { Title } = Typography;
-
-const uploadImage = async (file: File) => {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/media/upload`, {
-    method: "POST",
-    body: formData,
-    credentials: "include",
-    headers: {
-      // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      "ngrok-skip-browser-warning": "true",
-    },
-  });
-
-  if (!response.ok) throw new Error("Upload failed");
-  return await response.json(); // Returns { id, url }
-};
 
 export const Route = createFileRoute("/_layout/products/$productId")({
   component: RouteComponent,
@@ -102,11 +85,7 @@ function RouteComponent() {
         slug: product.slug,
         categoryId: product.category?.id,
       });
-      setPreviewUrl(
-        product.media?.[0]?.url
-          ? `${product.media[0].url}?ngrok-skip-browser-warning=true`
-          : null,
-      );
+      setPreviewUrl(product.media?.[0]?.url ? `${product.media[0].url}` : null);
     }
   }, [productData]);
 

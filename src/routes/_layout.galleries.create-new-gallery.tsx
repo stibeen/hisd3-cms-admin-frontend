@@ -21,26 +21,9 @@ import {
   Modal,
 } from "antd";
 import { useState } from "react";
+import uploadImage from "@/utils/uploadImage";
 
 const { Title } = Typography;
-
-const uploadImage = async (file: File) => {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/media/upload`, {
-    method: "POST",
-    body: formData,
-    credentials: "include",
-    headers: {
-      // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      "ngrok-skip-browser-warning": "true",
-    },
-  });
-
-  if (!response.ok) throw new Error("Upload failed");
-  return await response.json(); // Returns { id, url }
-};
 
 export const Route = createFileRoute("/_layout/galleries/create-new-gallery")({
   component: RouteComponent,

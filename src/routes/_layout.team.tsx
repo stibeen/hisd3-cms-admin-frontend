@@ -36,25 +36,9 @@ import {
   UPDATE_TEAM_MEMBER_MUTATION,
 } from "@/graphql/mutations";
 import ImagePreviewModal from "@/components/ImagePreviewModal";
+import uploadImage from "@/utils/uploadImage";
+
 const { Title } = Typography;
-
-const uploadImage = async (file: File) => {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/media/upload`, {
-    method: "POST",
-    body: formData,
-    credentials: "include",
-    headers: {
-      // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      "ngrok-skip-browser-warning": "true",
-    },
-  });
-
-  if (!response.ok) throw new Error("Upload failed");
-  return await response.json(); // Returns { id, url }
-};
 
 export const Route = createFileRoute("/_layout/team")({
   component: RouteComponent,
@@ -139,7 +123,7 @@ function RouteComponent() {
       if (selectedFile) {
         messageApi.loading("Uploading profile image...", 0);
         const uploadResult = await uploadImage(selectedFile);
-        imageURL = `${import.meta.env.VITE_API_URL}${uploadResult.url}?ngrok-skip-browser-warning=true`;
+        imageURL = `${uploadResult.url}`;
         messageApi.destroy();
       }
 
@@ -213,7 +197,7 @@ function RouteComponent() {
       if (selectedFile) {
         messageApi.loading("Uploading new profile image...", 0);
         const uploadResult = await uploadImage(selectedFile);
-        imageURL = `${import.meta.env.VITE_API_URL}${uploadResult.url}?ngrok-skip-browser-warning=true`;
+        imageURL = `${uploadResult.url}`;
         messageApi.destroy();
       }
 

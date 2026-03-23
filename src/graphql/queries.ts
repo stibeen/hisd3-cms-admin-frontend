@@ -27,8 +27,11 @@ export const HOME_PAGE_QUERY = graphql(`
       }
     }
     meQuery {
+    isSignedIn
       user {
+      id
         profile {
+        id
           firstName
         }
       }

@@ -1,5 +1,6 @@
 // src/lib/auth.ts
 import { GraphQLClient, ClientError, gql } from "graphql-request";
+import { ME_QUERY } from "@/graphql/queries";
 
 // Use your existing VITE_GRAPHQL_API_URL
 const API_URL = `${import.meta.env.VITE_GRAPHQL_API_URL}` || "";
@@ -22,17 +23,17 @@ const REFRESH_MUTATION = gql`
   }
 `;
 
-const ME_QUERY = gql`
-  query MeQuery {
-    meQuery {
-      isSignedIn
-      user {
-        id
-        username
-      }
-    }
-  }
-`;
+// const ME_QUERY = gql`
+//   query MeQuery {
+//     meQuery {
+//       isSignedIn
+//       user {
+//         id
+//         username
+//       }
+//     }
+//   }
+// `;
 
 let isRefreshing = false;
 let refreshPromise: Promise<boolean> | null = null;

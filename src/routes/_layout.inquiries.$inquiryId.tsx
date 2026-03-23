@@ -100,7 +100,8 @@ function RouteComponent() {
   const showConfirmRemove = () => {
     modal.confirm({
       title: "Confirm",
-      content: "Are you sure you want to remove this inquiry?",
+      content:
+        "Are you sure you want to delete this inquiry? This action cannot be undone.",
       onOk() {
         handleRemoveButton(inquiry?.id || "");
       },

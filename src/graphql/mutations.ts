@@ -333,7 +333,6 @@ export const UPDATE_COMPANY_PROFILE_MUTATION = graphql(`
     address
     phone
     socials
-    updatedAt
   }
 }
   `)

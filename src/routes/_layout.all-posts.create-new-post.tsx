@@ -26,28 +26,10 @@ import { GET_ALL_CATEGORIES, POSTS_PAGE_QUERY } from "@/graphql/queries";
 import { ArticleStatus } from "@/graphql/generated/graphql";
 import CategoryModal from "@/components/CategoryModal";
 import ImagePreviewModal from "@/components/ImagePreviewModal";
+import uploadImage from "@/utils/uploadImage";
 
 const { TextArea } = Input;
 const { Title } = Typography;
-
-// This is now a more generic helper function
-const uploadImage = async (file: any) => {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/media/upload`, {
-    method: "POST",
-    body: formData,
-    credentials: "include",
-    headers: {
-      // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      "ngrok-skip-browser-warning": "true",
-    },
-  });
-
-  if (!response.ok) throw new Error("Upload failed");
-  return await response.json(); // Returns { id, url }
-};
 
 export const Route = createFileRoute("/_layout/all-posts/create-new-post")({
   component: RouteComponent,

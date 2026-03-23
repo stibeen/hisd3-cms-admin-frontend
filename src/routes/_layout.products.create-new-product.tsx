@@ -26,26 +26,10 @@ import { CREATE_PRODUCT_MUTATION } from "@/graphql/mutations";
 import { GET_ALL_CATEGORIES, PRODUCTS_PAGE_QUERY } from "@/graphql/queries";
 import CategoryModal from "@/components/CategoryModal";
 import ImagePreviewModal from "@/components/ImagePreviewModal";
+import uploadImage from "@/utils/uploadImage";
+
 const { Title } = Typography;
 const { TextArea } = Input;
-
-const uploadImage = async (file: File) => {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/media/upload`, {
-    method: "POST",
-    body: formData,
-    credentials: "include",
-    headers: {
-      // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      "ngrok-skip-browser-warning": "true",
-    },
-  });
-
-  if (!response.ok) throw new Error("Upload failed");
-  return await response.json(); // Returns { id, url }
-};
 
 export const Route = createFileRoute("/_layout/products/create-new-product")({
   component: RouteComponent,

@@ -1,6 +1,7 @@
 import {
   CameraTwoTone,
   DeleteOutlined,
+  ExclamationCircleOutlined,
   FacebookFilled,
   // GithubFilled,
   HomeOutlined,
@@ -18,6 +19,7 @@ import {
   Divider,
   Form,
   Input,
+  Modal,
   Tooltip,
   Typography,
   Upload,
@@ -32,24 +34,9 @@ import {
   UPDATE_USER_PROFILE_MUTATION,
 } from "@/graphql/mutations";
 import ImagePreviewModal from "@/components/ImagePreviewModal";
+import uploadImage from "@/utils/uploadImage";
+
 const { Title } = Typography;
-
-const uploadImage = async (file: File) => {
-  const formData = new FormData();
-  formData.append("file", file);
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/media/upload`, {
-    method: "POST",
-    body: formData,
-    credentials: "include",
-    headers: {
-      // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      "ngrok-skip-browser-warning": "true",
-    },
-  });
-
-  if (!response.ok) throw new Error("Upload failed");
-  return await response.json(); // Returns { id, url }
-};
 
 export const Route = createFileRoute("/_layout/settings")({
   component: RouteComponent,
@@ -104,13 +91,21 @@ function RouteComponent() {
   const [updatePasswordForm] = Form.useForm();
   const [companyProfileForm] = Form.useForm();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [isUpdatingCompanyProfile, setIsUpdatingCompanyProfile] =
+    useState(false);
   const [messageApi, contextHolder] = message.useMessage();
+  const [modalApi, modalContextHolder] = Modal.useModal();
 
   const [updateProfile, { loading: updateProfileLoading }] = useMutation(
     UPDATE_USER_PROFILE_MUTATION,
     {
       onCompleted: () => {
         messageApi.success("Profile updated successfully");
+        setIsUpdatingProfile(false);
+        setSelectedFile(null);
+        setPreviewUrl(userData?.meQuery.user.profile?.avatar || null);
       },
       onError: (error) => {
         messageApi.error(error.message || "Failed to update profile");
@@ -140,12 +135,37 @@ function RouteComponent() {
       },
     });
 
+  const showConfirmUpdateProfile = (values: any) => {
+    modalApi.confirm({
+      title: "Confirm Update",
+      icon: <ExclamationCircleOutlined />,
+      content: "Are you sure you want to update your profile?",
+      okText: "Yes",
+      cancelText: "No",
+      onOk: () => {
+        handleUpdateProfile(values);
+      },
+    });
+  };
+
+  const handleCancelUpdateProfile = () => {
+    setIsUpdatingProfile(false);
+    userProfileForm.setFieldsValue({
+      firstName: userData?.meQuery.user.profile?.firstName,
+      lastName: userData?.meQuery.user.profile?.lastName,
+      username: userData?.meQuery.user.username,
+      email: userData?.meQuery.user.email,
+    });
+    setSelectedFile(null);
+    setPreviewUrl(userData?.meQuery.user.profile?.avatar || null);
+  };
+
   const handleUpdateProfile = async (values: any) => {
     let profileUrl = null;
     if (selectedFile) {
       messageApi.loading("Uploading current cover image...", 0);
       const uploadResult = await uploadImage(selectedFile);
-      profileUrl = `${import.meta.env.VITE_API_URL}${uploadResult.url}`;
+      profileUrl = `${uploadResult.url}`;
       messageApi.destroy();
     }
     await updateProfile({
@@ -161,6 +181,24 @@ function RouteComponent() {
     });
   };
 
+  const showConfirmUpdatePassword = (values: any) => {
+    modalApi.confirm({
+      title: "Confirm Update",
+      icon: <ExclamationCircleOutlined />,
+      content: "Are you sure you want to update your password?",
+      okText: "Yes",
+      cancelText: "No",
+      onOk: () => {
+        handleUpdatePassword(values);
+      },
+    });
+  };
+
+  const handleCancelUpdatePassword = () => {
+    setIsUpdatingPassword(false);
+    updatePasswordForm.resetFields();
+  };
+
   const handleUpdatePassword = async (values: any) => {
     await updatePassword({
       variables: {
@@ -169,6 +207,32 @@ function RouteComponent() {
           newPassword: values.confirmNewPassword,
         },
       },
+    });
+  };
+
+  const showConfirmUpdateCompanyProfile = (values: any) => {
+    modalApi.confirm({
+      title: "Confirm Update",
+      icon: <ExclamationCircleOutlined />,
+      content: "Are you sure you want to update your company profile?",
+      okText: "Yes",
+      cancelText: "No",
+      onOk: () => {
+        handleUpdateCompanyProfile(values);
+      },
+    });
+  };
+
+  const handleCancelUpdateCompanyProfile = () => {
+    setIsUpdatingCompanyProfile(false);
+    companyProfileForm.setFieldsValue({
+      companyContactNumber: data?.companyProfile?.phone,
+      companyEmail: data?.companyProfile?.email,
+      companyAddress: data?.companyProfile?.address,
+      companyLinkedIn: data?.companyProfile?.socials?.linkedin,
+      companyGithub: data?.companyProfile?.socials?.github,
+      companyX: data?.companyProfile?.socials?.x,
+      companyFacebook: data?.companyProfile?.socials?.facebook,
     });
   };
 
@@ -226,6 +290,7 @@ function RouteComponent() {
   return (
     <>
       {contextHolder}
+      {modalContextHolder}
       <ImagePreviewModal
         title="Profile Image Preview"
         open={isModalOpen}
@@ -253,21 +318,46 @@ function RouteComponent() {
           form={userProfileForm}
           layout="vertical"
           className="flex flex-col gap-5"
-          onFinish={handleUpdateProfile}
+          onFinish={showConfirmUpdateProfile}
         >
           <Card
+            hoverable
             title={ProfileSettingsTitle}
             actions={[
-              <Button
-                key="save"
-                type="primary"
-                className="bg-[#1280ED] text-white"
-                htmlType="submit"
-                loading={updateProfileLoading}
-                disabled={updateProfileLoading}
-              >
-                Save Profile Changes
-              </Button>,
+              isUpdatingProfile && (
+                <Button
+                  key="cancel"
+                  type="default"
+                  className="bg-[#1280ED] text-white"
+                  onClick={handleCancelUpdateProfile}
+                  disabled={updateProfileLoading}
+                >
+                  Cancel
+                </Button>
+              ),
+              isUpdatingProfile ? (
+                <Button
+                  key="save"
+                  type="primary"
+                  className="bg-[#1280ED] text-white"
+                  htmlType="submit"
+                  loading={updateProfileLoading}
+                  disabled={updateProfileLoading}
+                >
+                  Save Changes
+                </Button>
+              ) : (
+                <Button
+                  key="edit"
+                  type="primary"
+                  className="bg-[#1280ED] text-white"
+                  onClick={() => setIsUpdatingProfile(true)}
+                  loading={updateProfileLoading}
+                  disabled={updateProfileLoading}
+                >
+                  Edit Profile
+                </Button>
+              ),
             ]}
             className="shadow-md"
           >
@@ -312,6 +402,7 @@ function RouteComponent() {
                         type="primary"
                         className="bg-[#1280ED] text-white"
                         icon={<UploadOutlined />}
+                        disabled={!isUpdatingProfile}
                       >
                         {previewUrl
                           ? "Change Profile Picture"
@@ -324,6 +415,7 @@ function RouteComponent() {
                         danger
                         className="bg-[#1280ED] text-white"
                         icon={<DeleteOutlined />}
+                        disabled={!isUpdatingProfile}
                         onClick={() => {
                           setSelectedFile(null);
                           setPreviewUrl(null);
@@ -346,10 +438,21 @@ function RouteComponent() {
                         Firstname
                       </span>
                     }
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please enter firstname",
+                      },
+                      {
+                        pattern: /^[A-Za-z]+$/,
+                        message: "Firstname must contain only letters",
+                      },
+                    ]}
                   >
                     <Input
                       id="firstName"
                       placeholder="Please enter firstname"
+                      disabled={!isUpdatingProfile}
                     />
                   </Form.Item>
                 </div>
@@ -362,8 +465,22 @@ function RouteComponent() {
                         Lastname
                       </span>
                     }
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please enter lastname",
+                      },
+                      {
+                        pattern: /^[A-Za-z]+$/,
+                        message: "Lastname must contain only letters",
+                      },
+                    ]}
                   >
-                    <Input id="lastName" placeholder="Please enter lastname" />
+                    <Input
+                      id="lastName"
+                      placeholder="Please enter lastname"
+                      disabled={!isUpdatingProfile}
+                    />
                   </Form.Item>
                 </div>
               </div>
@@ -378,8 +495,18 @@ function RouteComponent() {
                         Username
                       </span>
                     }
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please enter username",
+                      },
+                    ]}
                   >
-                    <Input id="username" placeholder="Please enter username" />
+                    <Input
+                      id="username"
+                      placeholder="Please enter username"
+                      disabled={!isUpdatingProfile}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-1/2">
@@ -389,8 +516,22 @@ function RouteComponent() {
                     label={
                       <span className="font-medium text-gray-700">Email</span>
                     }
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please enter email",
+                      },
+                      {
+                        type: "email",
+                        message: "Please enter a valid email",
+                      },
+                    ]}
                   >
-                    <Input id="email" placeholder="Please enter email" />
+                    <Input
+                      id="email"
+                      placeholder="Please enter email"
+                      disabled={!isUpdatingProfile}
+                    />
                   </Form.Item>
                 </div>
               </div>
@@ -402,26 +543,52 @@ function RouteComponent() {
         <Form
           form={updatePasswordForm}
           layout="vertical"
-          onFinish={handleUpdatePassword}
           className="flex flex-col gap-5"
+          onFinish={showConfirmUpdatePassword}
         >
           <Card
+            hoverable
             title={AccountSettingsTitle}
             actions={[
-              <Button
-                key="save"
-                type="primary"
-                className="bg-[#1280ED] text-white"
-                htmlType="submit"
-                disabled={updatePasswordLoading}
-                loading={updatePasswordLoading}
-              >
-                Update Password
-              </Button>,
+              isUpdatingPassword && (
+                <Button
+                  key="cancel"
+                  type="default"
+                  className="bg-[#1280ED] text-white"
+                  onClick={handleCancelUpdatePassword}
+                  disabled={updatePasswordLoading}
+                >
+                  Cancel
+                </Button>
+              ),
+              isUpdatingPassword ? (
+                <Button
+                  key="save"
+                  type="primary"
+                  className="bg-[#1280ED] text-white"
+                  htmlType="submit"
+                  loading={updatePasswordLoading}
+                  disabled={updatePasswordLoading}
+                >
+                  Save Changes
+                </Button>
+              ) : (
+                <Button
+                  key="edit"
+                  type="primary"
+                  className="bg-[#1280ED] text-white"
+                  onClick={() => setIsUpdatingPassword(true)}
+                  loading={updatePasswordLoading}
+                  disabled={updatePasswordLoading}
+                >
+                  Edit Password
+                </Button>
+              ),
             ]}
             className="shadow-md"
           >
             <div className="flex-col flex justify-center gap-2">
+              {/* Current Password */}
               <div>
                 <Form.Item
                   name="currentPassword"
@@ -441,9 +608,11 @@ function RouteComponent() {
                   <Input.Password
                     id="currentPassword"
                     placeholder="Enter current password..."
+                    disabled={!isUpdatingPassword}
                   />
                 </Form.Item>
               </div>
+              {/* New Password */}
               <div>
                 <Form.Item
                   name="newPassword"
@@ -477,9 +646,11 @@ function RouteComponent() {
                   <Input.Password
                     id="newPassword"
                     placeholder="Enter new password..."
+                    disabled={!isUpdatingPassword}
                   />
                 </Form.Item>
               </div>
+              {/* Confirm New Password */}
               <div>
                 <Form.Item
                   name="confirmNewPassword"
@@ -514,6 +685,7 @@ function RouteComponent() {
                   <Input.Password
                     id="confirmNewPassword"
                     placeholder="Confirm new password..."
+                    disabled={!isUpdatingPassword}
                   />
                 </Form.Item>
               </div>
@@ -525,22 +697,47 @@ function RouteComponent() {
         <Form
           form={companyProfileForm}
           layout="vertical"
-          onFinish={handleUpdateCompanyProfile}
+          onFinish={showConfirmUpdateCompanyProfile}
           className="flex flex-col gap-5"
         >
           <Card
+            hoverable
             title={CompanyProfileSettingsTitle}
             actions={[
-              <Button
-                key="save"
-                type="primary"
-                className="bg-[#1280ED] text-white"
-                htmlType="submit"
-                disabled={updateCompanyProfileLoading}
-                loading={updateCompanyProfileLoading}
-              >
-                Save Changes
-              </Button>,
+              isUpdatingCompanyProfile && (
+                <Button
+                  key="cancel"
+                  type="default"
+                  className="bg-[#1280ED] text-white"
+                  onClick={handleCancelUpdateCompanyProfile}
+                  disabled={updateCompanyProfileLoading}
+                >
+                  Cancel
+                </Button>
+              ),
+              isUpdatingCompanyProfile ? (
+                <Button
+                  key="save"
+                  type="primary"
+                  className="bg-[#1280ED] text-white"
+                  htmlType="submit"
+                  loading={updateCompanyProfileLoading}
+                  disabled={updateCompanyProfileLoading}
+                >
+                  Save Changes
+                </Button>
+              ) : (
+                <Button
+                  key="edit"
+                  type="primary"
+                  className="bg-[#1280ED] text-white"
+                  onClick={() => setIsUpdatingCompanyProfile(true)}
+                  loading={updateCompanyProfileLoading}
+                  disabled={updateCompanyProfileLoading}
+                >
+                  Edit Company Profile
+                </Button>
+              ),
             ]}
             className="shadow-md"
           >
@@ -572,6 +769,7 @@ function RouteComponent() {
                       placeholder="+1 (555) 000-0000"
                       prefix={<PhoneOutlined className="text-[#1280ED]" />}
                       className="rounded-md hover:border-[#1280ED] focus:border-[#1280ED]"
+                      disabled={!isUpdatingCompanyProfile}
                     />
                   </Form.Item>
 
@@ -589,6 +787,7 @@ function RouteComponent() {
                       placeholder="company@example.com"
                       prefix={<MailOutlined className="text-[#1280ED]" />}
                       className="rounded-md hover:border-[#1280ED] focus:border-[#1280ED]"
+                      disabled={!isUpdatingCompanyProfile}
                     />
                   </Form.Item>
 
@@ -606,6 +805,7 @@ function RouteComponent() {
                       placeholder="123 Main St, Anytown, USA"
                       prefix={<HomeOutlined className="text-[#1280ED]" />}
                       className="rounded-md hover:border-[#1280ED] focus:border-[#1280ED]"
+                      disabled={!isUpdatingCompanyProfile}
                     />
                   </Form.Item>
                 </div>
@@ -638,6 +838,7 @@ function RouteComponent() {
                       placeholder="LinkedIn URL"
                       prefix={<LinkedinFilled className="text-[#0077B5]" />}
                       className="rounded-md"
+                      disabled={!isUpdatingCompanyProfile}
                     />
                   </Form.Item>
 
@@ -689,6 +890,7 @@ function RouteComponent() {
                       placeholder="Facebook URL"
                       prefix={<FacebookFilled className="text-[#1877F2]" />}
                       className="rounded-md"
+                      disabled={!isUpdatingCompanyProfile}
                     />
                   </Form.Item>
                 </div>

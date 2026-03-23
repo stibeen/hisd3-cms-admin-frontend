@@ -26,26 +26,10 @@ import { useEffect, useState } from "react";
 import { ArticleStatus } from "@/graphql/generated/graphql";
 import CategoryModal from "@/components/CategoryModal";
 import ImagePreviewModal from "@/components/ImagePreviewModal";
+import uploadImage from "@/utils/uploadImage";
 
 const { TextArea } = Input;
 const { Title } = Typography;
-
-const uploadImage = async (file: File) => {
-  const formData = new FormData();
-  formData.append("file", file);
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/media/upload`, {
-    method: "POST",
-    body: formData,
-    credentials: "include",
-    headers: {
-      // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      "ngrok-skip-browser-warning": "true",
-    },
-  });
-
-  if (!response.ok) throw new Error("Upload failed");
-  return await response.json(); // Returns { id, url }
-};
 
 export const Route = createFileRoute("/_layout/all-posts/$postId")({
   component: RouteComponent,
@@ -98,11 +82,7 @@ function RouteComponent() {
         status: (article.status as ArticleStatus) || ArticleStatus.Draft,
         slug: article.slug || "",
       });
-      setPreviewUrl(
-        article.media?.[0]?.url
-          ? `${article.media[0].url}?ngrok-skip-browser-warning=true`
-          : null,
-      );
+      setPreviewUrl(article.media?.[0]?.url ? `${article.media[0].url}` : null);
     }
   }, [articleData]);
 

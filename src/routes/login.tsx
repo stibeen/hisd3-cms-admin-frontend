@@ -9,8 +9,6 @@ export const Route = createFileRoute("/login")({
   component: Login,
 });
 
-//clone nahu ni
-
 function Login() {
   const navigate = useNavigate();
   const [signin, { loading }] = useMutation(SIGN_IN_MUTATION);
@@ -47,6 +45,7 @@ function Login() {
           <div className="ml-2 flex items-center overflow-hidden whitespace-nowrap">
             <span className="text-black font-bold text-3xl">HIS</span>
             <span className="text-[#F54936] font-bold text-3xl">D3</span>
+            <span className="text-black font-bold text-3xl">CMS</span>
           </div>
         </div>
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
