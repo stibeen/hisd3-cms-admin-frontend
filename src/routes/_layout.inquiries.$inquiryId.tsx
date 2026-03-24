@@ -227,9 +227,13 @@ function RouteComponent() {
             </Tag>
           </div>
         </div>
+        {/* Reply and Archive Buttons */}
         <Space>
           <Button icon={<MailOutlined />} type="primary" size="large">
-            <a href="https://mail.google.com" target="_blank">
+            <a
+              href="https://mail.google.com/mail/u/0/#inbox?compose=new"
+              target="_blank"
+            >
               Reply via Email
             </a>
           </Button>

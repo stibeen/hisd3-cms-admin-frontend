@@ -111,7 +111,7 @@ function RouteComponent() {
         key: "avatarUrl",
         width: 100,
         align: "center",
-        render: (_, record: any) => {
+        render: (_: any, record: any) => {
           return (
             <div className="flex justify-center gap-2">
               {record.avatarUrl ? (
@@ -135,8 +135,8 @@ function RouteComponent() {
         title: "Name",
         dataIndex: "name",
         key: "name",
-        render: (text: string) => {
-          return <span className="text-m font-semibold">{text}</span>;
+        render: (_: any, record: any) => {
+          return <span className="text-m font-semibold">{record.name}</span>;
         },
       },
       {
@@ -171,10 +171,11 @@ function RouteComponent() {
             value: "false",
           },
         ],
-        onFilter: (value, record) => record.isActive.toString() === value,
+        onFilter: (value: any, record: any) =>
+          record.isActive.toString() === value,
         filterSearch: true,
-        render: (text: boolean) => {
-          const isActive = text === true;
+        render: (_: any, record: any) => {
+          const isActive = record.isActive === true;
           return (
             <Tag
               color={isActive ? "success" : "default"}
@@ -202,7 +203,7 @@ function RouteComponent() {
         key: "actions",
         width: 120,
         align: "center",
-        render: (_, record) => (
+        render: (_: any, record: any) => (
           <div className="flex gap-2 justify-center">
             <Tooltip title="Edit">
               <Link
@@ -276,6 +277,16 @@ function RouteComponent() {
             columns={columns}
             dataSource={filteredData}
             bordered
+            expandable={{
+              expandedRowRender: (record) => (
+                <>
+                  <span className="font-semibold">Feedback Message:</span>{" "}
+                  <p className="text-gray-600 line-clamp-1 italic">
+                    "{record.content}"
+                  </p>
+                </>
+              ),
+            }}
             locale={{ emptyText: <Empty description="No testimony found" /> }}
             style={{ borderRadius: "12px", overflow: "hidden" }}
             rowKey="id"

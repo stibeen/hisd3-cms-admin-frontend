@@ -41,7 +41,6 @@ const columns: TableProps["columns"] = [
       <span className="text-m font-semibold">{text}</span>
     ),
   },
-  Table.EXPAND_COLUMN,
   {
     title: "Date",
     dataIndex: "createdAt",
@@ -136,6 +135,7 @@ const columns: TableProps["columns"] = [
       </div>
     ),
   },
+  Table.EXPAND_COLUMN,
 ];
 
 export const Route = createFileRoute("/_layout/inquiries/")({
@@ -298,7 +298,12 @@ function RouteComponent() {
             columns={columns}
             expandable={{
               expandedRowRender: (record) => (
-                <p style={{ margin: 0 }}>{`Message: ${record.message}`}</p>
+                <>
+                  <span className="font-semibold">Message:</span>{" "}
+                  <p className="text-gray-600 line-clamp-1 italic">
+                    "{record.message}"
+                  </p>
+                </>
               ),
             }}
             dataSource={filteredData}
