@@ -277,7 +277,7 @@ function DashboardApp() {
                   </Link>
                 ))
               ) : (
-                <Empty className="py-10" />
+                <Empty className="py-10" description="No articles" />
               )}
             </ul>
           </div>
@@ -375,7 +375,7 @@ function DashboardApp() {
                   </Link>
                 ))
               ) : (
-                <Empty className="py-10" />
+                <Empty className="py-10" description="No unread inquiries" />
               )}
             </ul>
           </div>

@@ -134,6 +134,22 @@ function RouteComponent() {
     }
   };
 
+  const handleRestoreButton = async (id: string) => {
+    try {
+      await updateInquiryStatus({
+        variables: {
+          updateInquiryId: id,
+          updateInquiryInput: {
+            status: "UNREAD" as InquiryStatus,
+          },
+        },
+      });
+      messageApi.success("Inquiry restored successfully");
+    } catch (error) {
+      messageApi.error("Failed to restore inquiry");
+    }
+  };
+
   const getStatusConfig = (status: string) => {
     let config = {
       label: "Pending",
@@ -212,9 +228,11 @@ function RouteComponent() {
           </div>
         </div>
         <Space>
-          {/* <Button icon={<MailOutlined />} type="primary" size="large">
-                        Reply via Email
-                    </Button> */}
+          <Button icon={<MailOutlined />} type="primary" size="large">
+            <a href="https://mail.google.com" target="_blank">
+              Reply via Email
+            </a>
+          </Button>
           {inquiry?.status !== "ARCHIVED" && (
             <Button
               icon={<FileZipOutlined />}
@@ -248,6 +266,7 @@ function RouteComponent() {
 
         {/* Right Column: Contact & Metadata */}
         <div className="w-1/3 flex flex-col gap-6">
+          {/* Contact Details */}
           <Card
             title={<span className="text-lg font-bold">Contact Details</span>}
             className="shadow-sm rounded-xl border-gray-100"
@@ -294,7 +313,7 @@ function RouteComponent() {
               </Descriptions.Item>
             </Descriptions>
           </Card>
-
+          {/* Quick Actions */}
           <Card className="bg-blue-50 border-blue-100 rounded-xl">
             <Title level={5} className="mt-0! mb-2!">
               Quick Actions
@@ -303,7 +322,7 @@ function RouteComponent() {
               Manage this inquiry directly.
             </Text>
             <div className="flex flex-col gap-2">
-              {inquiry?.status !== "READ" && (
+              {inquiry?.status !== "READ" && inquiry?.status !== "ARCHIVED" && (
                 <Button
                   block
                   ghost
@@ -312,6 +331,17 @@ function RouteComponent() {
                   onClick={() => handleMarkAsReadButton(inquiry?.id || "")}
                 >
                   Mark as Read
+                </Button>
+              )}
+              {inquiry?.status === "ARCHIVED" && (
+                <Button
+                  block
+                  ghost
+                  type="primary"
+                  disabled={updateInquiryStatusLoading}
+                  onClick={() => handleRestoreButton(inquiry?.id || "")}
+                >
+                  Restore
                 </Button>
               )}
               <Button

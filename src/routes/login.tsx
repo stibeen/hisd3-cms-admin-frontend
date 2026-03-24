@@ -55,13 +55,15 @@ function Login() {
         <div className="flex justify-center items-center mb-8 bg-white rounded-lg p-2">
           <img src="/hisd3-logo.svg" alt="HISD3 Logo" className="h-12 w-auto" />
           <div className="ml-2 flex items-center overflow-hidden whitespace-nowrap">
-            <span className="text-black font-bold text-3xl">HIS</span>
-            <span className="text-[#F54936] font-bold text-3xl">D3</span>
-            <span className="text-black font-bold text-3xl">CMS</span>
+            <p className="text-center">
+              <span className="text-black font-bold text-3xl">HIS</span>
+              <span className="text-[#F54936] font-bold text-3xl">D3</span>{" "}
+              <span className="text-black font-bold text-3xl">CMS</span>
+            </p>
           </div>
         </div>
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
-          Welcome Back
+          Welcome Back, Admin!
         </h2>
         <Form
           name="normal_login"
