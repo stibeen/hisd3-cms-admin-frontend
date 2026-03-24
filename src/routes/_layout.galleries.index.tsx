@@ -229,6 +229,7 @@ function RouteComponent() {
 
       <Divider />
 
+      {/* Table */}
       <Card className="shadow-sm border-gray-200">
         {(galleriesData?.adminGalleries?.length ?? 0) > 0 ? (
           <Table

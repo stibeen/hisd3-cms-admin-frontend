@@ -141,6 +141,7 @@ function RouteComponent() {
         <Card className="shadow-sm border-gray-200">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="flex flex-col gap-4">
+              {/* Title */}
               <Form.Item
                 label={
                   <span className="font-medium text-gray-700">
@@ -155,6 +156,7 @@ function RouteComponent() {
                 <Input placeholder="Enter gallery title" size="large" />
               </Form.Item>
 
+              {/* Status */}
               <Form.Item
                 label={
                   <span className="font-medium text-gray-700">Status</span>
@@ -174,6 +176,7 @@ function RouteComponent() {
             </div>
 
             <div className="flex flex-col gap-2">
+              {/* Gallery Image */}
               <Form.Item
                 label={
                   <span className="font-medium text-gray-700">

@@ -261,8 +261,8 @@ function RouteComponent() {
 
       <Divider />
 
+      {/* Table */}
       <Card className="shadow-sm border-gray-200">
-        {/* Table */}
         {(testimoniesData.adminTestimonies?.length ?? 0) > 0 ? (
           <Table
             pagination={

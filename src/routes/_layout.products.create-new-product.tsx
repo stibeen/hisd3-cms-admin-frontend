@@ -311,6 +311,7 @@ function RouteComponent() {
             </Form.Item>
 
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 flex flex-col gap-4">
+              {/* Category */}
               <Form.Item
                 name="categoryId"
                 label={
@@ -353,6 +354,7 @@ function RouteComponent() {
                 />
               </Form.Item>
 
+              {/* Slug */}
               <Form.Item
                 name="slug"
                 label={<span className="font-medium text-gray-700">Slug</span>}

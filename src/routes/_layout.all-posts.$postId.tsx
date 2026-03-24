@@ -158,7 +158,6 @@ function RouteComponent() {
           title="Cover Image Preview"
         />
 
-        {/* <Modal  */}
         {/* Header */}
         <div className="flex justify-between items-end mb-6">
           <div className="flex flex-col gap-1">
@@ -209,6 +208,7 @@ function RouteComponent() {
         {/* Form */}
         <div className="flex gap-8 mb-3">
           <div className="w-2/3 flex flex-col gap-4">
+            {/* Title */}
             <Form.Item
               name="title"
               label={
@@ -220,6 +220,7 @@ function RouteComponent() {
               <Input placeholder="Enter post title..." size="large" />
             </Form.Item>
 
+            {/* Content */}
             <Form.Item
               name="content"
               valuePropName="content"
@@ -238,6 +239,7 @@ function RouteComponent() {
               />
             </Form.Item>
 
+            {/* Excerpt */}
             <Form.Item
               name="excerpt"
               label={<span className="font-medium text-gray-700">Excerpt</span>}
@@ -253,6 +255,7 @@ function RouteComponent() {
             </Form.Item>
           </div>
           <div className="w-1/3 flex flex-col gap-4">
+            {/* Cover Image */}
             <Form.Item
               name="image"
               label={
@@ -327,6 +330,7 @@ function RouteComponent() {
             </Form.Item>
 
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 flex flex-col gap-4">
+              {/* Category */}
               <Form.Item
                 name="categoryId"
                 label={
@@ -369,6 +373,7 @@ function RouteComponent() {
                 />
               </Form.Item>
 
+              {/* Slug */}
               <Form.Item
                 name="slug"
                 label={<span className="font-medium text-gray-700">Slug</span>}

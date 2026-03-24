@@ -274,8 +274,8 @@ function RouteComponent() {
         ))}
       </div>
 
+      {/* Table */}
       <Card className="shadow-sm border-gray-200">
-        {/* Table */}
         {inquiriesError && (
           <div className="p-4 text-center text-red-500">
             Error loading inquiries: {inquiriesError.message}
