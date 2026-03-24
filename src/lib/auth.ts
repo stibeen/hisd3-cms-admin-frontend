@@ -91,7 +91,7 @@ export async function fetchMe() {
         try {
           const { data: retryData }: any = await apolloClient.query({ 
             query: ME_QUERY,
-            fetchPolicy: 'network-only' 
+            fetchPolicy: 'cache-first' 
           });
           return retryData.meQuery;
         } catch {

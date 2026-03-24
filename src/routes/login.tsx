@@ -4,6 +4,8 @@ import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { useNavigate } from "@tanstack/react-router";
 import { useMutation } from "@apollo/client/react";
 import { SIGN_IN_MUTATION } from "../graphql/mutations";
+import ReCAPTCHA from "react-google-recaptcha";
+import { useRef } from "react";
 
 export const Route = createFileRoute("/login")({
   component: Login,
@@ -13,14 +15,22 @@ function Login() {
   const navigate = useNavigate();
   const [signin, { loading }] = useMutation(SIGN_IN_MUTATION);
   const [messageApi, contextHolder] = message.useMessage();
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   const onFinish = async (values: { username: string; password: string }) => {
+    // Guard: require the CAPTCHA to be completed
+    const captchaToken = recaptchaRef.current?.getValue();
+    if (!captchaToken) {
+      messageApi.error("Please complete the CAPTCHA verification.");
+      return;
+    }
     try {
       const { data } = await signin({
         variables: {
           signInInput: {
             username: values.username,
             password: values.password,
+            captchaToken,
           },
         },
       });
@@ -33,6 +43,8 @@ function Login() {
     } catch (error: any) {
       console.error("Sign in error:", error);
       messageApi.error(error.message || "An error occurred during sign in.");
+      // Always reset CAPTCHA after a failed attempt to prevent token reuse
+      recaptchaRef.current?.reset();
     }
   };
 
@@ -58,6 +70,7 @@ function Login() {
           onFinish={onFinish}
           layout="vertical"
         >
+          {/* Username */}
           <Form.Item
             name="username"
             rules={[{ required: true, message: "Please input your Username!" }]}
@@ -70,6 +83,7 @@ function Login() {
               size="large"
             />
           </Form.Item>
+          {/* Password */}
           <Form.Item
             name="password"
             rules={[{ required: true, message: "Please input your Password!" }]}
@@ -83,6 +97,7 @@ function Login() {
               size="large"
             />
           </Form.Item>
+          {/* Remember me and Forgot password */}
           <Form.Item>
             <Form.Item name="remember" valuePropName="checked" noStyle>
               <Checkbox>Remember me</Checkbox>
@@ -92,7 +107,16 @@ function Login() {
               Forgot password
             </a>
           </Form.Item>
-
+          {/* ReCAPTCHA */}
+          <Form.Item>
+            <div className="flex justify-center">
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+              />
+            </div>
+          </Form.Item>
+          {/* Login button */}
           <Form.Item>
             <Button
               type="primary"

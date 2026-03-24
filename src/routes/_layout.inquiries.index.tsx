@@ -285,12 +285,7 @@ function RouteComponent() {
           <Table
             rowSelection={{
               type: "checkbox",
-              onChange: (selectedRowKeys, selectedRows) => {
-                console.log(
-                  `selectedRowKeys: ${selectedRowKeys}`,
-                  "selectedRows: ",
-                  selectedRows,
-                );
+              onChange: (selectedRowKeys) => {
                 setSelectedRowKeys(selectedRowKeys);
               },
             }}

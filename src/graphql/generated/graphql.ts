@@ -248,6 +248,7 @@ export type CreateGalleryDto = {
 };
 
 export type CreateInquiryInput = {
+  captchaToken: Scalars['String']['input'];
   email?: InputMaybe<Scalars['String']['input']>;
   hospitalOrClinic?: InputMaybe<Scalars['String']['input']>;
   message?: InputMaybe<Scalars['String']['input']>;
@@ -1175,6 +1176,7 @@ export enum Role {
 }
 
 export type SignInInput = {
+  captchaToken: Scalars['String']['input'];
   email?: InputMaybe<Scalars['String']['input']>;
   password: Scalars['String']['input'];
   username?: InputMaybe<Scalars['String']['input']>;
