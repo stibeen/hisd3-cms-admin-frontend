@@ -104,7 +104,11 @@ const MainToolbarContent = ({
       <ToolbarGroup>
         <HeadingDropdownMenu levels={[1, 2, 3, 4]} portal={isMobile} />
         <ListDropdownMenu
-          types={["bulletList", "orderedList", "taskList"]}
+          types={[
+            "bulletList",
+            "orderedList",
+            // "taskList"
+          ]}
           portal={isMobile}
         />
         <BlockquoteButton />
