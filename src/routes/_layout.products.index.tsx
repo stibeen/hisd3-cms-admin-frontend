@@ -238,6 +238,7 @@ function RouteComponent() {
             columns={columns}
             dataSource={filteredData}
             bordered
+            locale={{ emptyText: <Empty description="No product found" /> }}
             style={{ borderRadius: "12px", overflow: "hidden" }}
             rowKey="id"
             title={() => (

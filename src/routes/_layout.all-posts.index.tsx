@@ -309,6 +309,7 @@ function RouteComponent() {
             dataSource={filteredData}
             rowKey="id"
             bordered
+            locale={{ emptyText: <Empty description="No article found" /> }}
             style={{
               borderRadius: "8px",
               overflow: "hidden",

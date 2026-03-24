@@ -41,6 +41,7 @@ const columns: TableProps["columns"] = [
       <span className="text-m font-semibold">{text}</span>
     ),
   },
+  Table.EXPAND_COLUMN,
   {
     title: "Date",
     dataIndex: "createdAt",
@@ -295,8 +296,14 @@ function RouteComponent() {
                 : false
             }
             columns={columns}
+            expandable={{
+              expandedRowRender: (record) => (
+                <p style={{ margin: 0 }}>{`Message: ${record.message}`}</p>
+              ),
+            }}
             dataSource={filteredData}
             bordered
+            locale={{ emptyText: <Empty description="No inquiries found" /> }}
             style={{ borderRadius: "12px", overflow: "hidden" }}
             rowKey="id"
             title={() => (
