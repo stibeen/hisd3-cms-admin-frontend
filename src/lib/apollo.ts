@@ -35,6 +35,15 @@ export const apolloClient = new ApolloClient({
             },
         },
     }),
+    defaultOptions: {
+        watchQuery: {
+            fetchPolicy: 'cache-first',
+            nextFetchPolicy: 'cache-first',
+        },
+        query: {
+            fetchPolicy: 'cache-first',
+        },
+    },
 });
 
 // src/lib/apollo.ts

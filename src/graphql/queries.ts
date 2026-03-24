@@ -38,6 +38,7 @@ export const HOME_PAGE_QUERY = graphql(`
     }
     adminArticles {  
     id
+    slug
     createdAt
     title
     status
@@ -209,6 +210,7 @@ export const GET_ARTICLE_BY_ID = graphql(`
     categoriesAdmin {
     id
     name
+    description
     }
     adminArticle(id: $id) {
     id
@@ -259,6 +261,7 @@ export const GET_PRODUCT_BY_ID = graphql(`
     categoriesAdmin {
     id
     name
+    description
     }
     adminProduct(id: $adminProductId) {
     id

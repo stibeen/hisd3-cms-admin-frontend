@@ -6,7 +6,7 @@ import {
   PlusOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useMutation } from "@apollo/client/react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   Typography,
@@ -32,7 +32,6 @@ export const Route = createFileRoute("/_layout/galleries/create-new-gallery")({
 function RouteComponent() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
-  useQuery(GALLERIES_PAGE_QUERY);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [messageApi, contextHolder] = message.useMessage();

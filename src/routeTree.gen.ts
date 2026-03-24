@@ -27,6 +27,7 @@ import { Route as LayoutInquiriesInquiryIdRouteImport } from './routes/_layout.i
 import { Route as LayoutGalleriesCreateNewGalleryRouteImport } from './routes/_layout.galleries.create-new-gallery'
 import { Route as LayoutGalleriesGalleryIdRouteImport } from './routes/_layout.galleries.$galleryId'
 import { Route as LayoutAllPostsCreateNewPostRouteImport } from './routes/_layout.all-posts.create-new-post'
+import { Route as LayoutAllPostsSlugRouteImport } from './routes/_layout.all-posts.$slug'
 import { Route as LayoutAllPostsPostIdRouteImport } from './routes/_layout.all-posts.$postId'
 
 const LoginRoute = LoginRouteImport.update({
@@ -125,6 +126,11 @@ const LayoutAllPostsCreateNewPostRoute =
     path: '/all-posts/create-new-post',
     getParentRoute: () => LayoutRoute,
   } as any)
+const LayoutAllPostsSlugRoute = LayoutAllPostsSlugRouteImport.update({
+  id: '/all-posts/$slug',
+  path: '/all-posts/$slug',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutAllPostsPostIdRoute = LayoutAllPostsPostIdRouteImport.update({
   id: '/all-posts/$postId',
   path: '/all-posts/$postId',
@@ -137,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof LayoutSettingsRoute
   '/team': typeof LayoutTeamRoute
   '/all-posts/$postId': typeof LayoutAllPostsPostIdRoute
+  '/all-posts/$slug': typeof LayoutAllPostsSlugRoute
   '/all-posts/create-new-post': typeof LayoutAllPostsCreateNewPostRoute
   '/galleries/$galleryId': typeof LayoutGalleriesGalleryIdRoute
   '/galleries/create-new-gallery': typeof LayoutGalleriesCreateNewGalleryRoute
@@ -157,6 +164,7 @@ export interface FileRoutesByTo {
   '/team': typeof LayoutTeamRoute
   '/': typeof LayoutIndexRoute
   '/all-posts/$postId': typeof LayoutAllPostsPostIdRoute
+  '/all-posts/$slug': typeof LayoutAllPostsSlugRoute
   '/all-posts/create-new-post': typeof LayoutAllPostsCreateNewPostRoute
   '/galleries/$galleryId': typeof LayoutGalleriesGalleryIdRoute
   '/galleries/create-new-gallery': typeof LayoutGalleriesCreateNewGalleryRoute
@@ -179,6 +187,7 @@ export interface FileRoutesById {
   '/_layout/team': typeof LayoutTeamRoute
   '/_layout/': typeof LayoutIndexRoute
   '/_layout/all-posts/$postId': typeof LayoutAllPostsPostIdRoute
+  '/_layout/all-posts/$slug': typeof LayoutAllPostsSlugRoute
   '/_layout/all-posts/create-new-post': typeof LayoutAllPostsCreateNewPostRoute
   '/_layout/galleries/$galleryId': typeof LayoutGalleriesGalleryIdRoute
   '/_layout/galleries/create-new-gallery': typeof LayoutGalleriesCreateNewGalleryRoute
@@ -201,6 +210,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/team'
     | '/all-posts/$postId'
+    | '/all-posts/$slug'
     | '/all-posts/create-new-post'
     | '/galleries/$galleryId'
     | '/galleries/create-new-gallery'
@@ -221,6 +231,7 @@ export interface FileRouteTypes {
     | '/team'
     | '/'
     | '/all-posts/$postId'
+    | '/all-posts/$slug'
     | '/all-posts/create-new-post'
     | '/galleries/$galleryId'
     | '/galleries/create-new-gallery'
@@ -242,6 +253,7 @@ export interface FileRouteTypes {
     | '/_layout/team'
     | '/_layout/'
     | '/_layout/all-posts/$postId'
+    | '/_layout/all-posts/$slug'
     | '/_layout/all-posts/create-new-post'
     | '/_layout/galleries/$galleryId'
     | '/_layout/galleries/create-new-gallery'
@@ -390,6 +402,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAllPostsCreateNewPostRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/all-posts/$slug': {
+      id: '/_layout/all-posts/$slug'
+      path: '/all-posts/$slug'
+      fullPath: '/all-posts/$slug'
+      preLoaderRoute: typeof LayoutAllPostsSlugRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/all-posts/$postId': {
       id: '/_layout/all-posts/$postId'
       path: '/all-posts/$postId'
@@ -405,6 +424,7 @@ interface LayoutRouteChildren {
   LayoutTeamRoute: typeof LayoutTeamRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
   LayoutAllPostsPostIdRoute: typeof LayoutAllPostsPostIdRoute
+  LayoutAllPostsSlugRoute: typeof LayoutAllPostsSlugRoute
   LayoutAllPostsCreateNewPostRoute: typeof LayoutAllPostsCreateNewPostRoute
   LayoutGalleriesGalleryIdRoute: typeof LayoutGalleriesGalleryIdRoute
   LayoutGalleriesCreateNewGalleryRoute: typeof LayoutGalleriesCreateNewGalleryRoute
@@ -425,6 +445,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutTeamRoute: LayoutTeamRoute,
   LayoutIndexRoute: LayoutIndexRoute,
   LayoutAllPostsPostIdRoute: LayoutAllPostsPostIdRoute,
+  LayoutAllPostsSlugRoute: LayoutAllPostsSlugRoute,
   LayoutAllPostsCreateNewPostRoute: LayoutAllPostsCreateNewPostRoute,
   LayoutGalleriesGalleryIdRoute: LayoutGalleriesGalleryIdRoute,
   LayoutGalleriesCreateNewGalleryRoute: LayoutGalleriesCreateNewGalleryRoute,

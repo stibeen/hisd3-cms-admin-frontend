@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useMutation } from "@apollo/client/react";
 import {
   Button,
   Input,
@@ -27,13 +27,13 @@ export default function CategoryModal({
   open,
   onOk,
   onCancel,
+  categories,
 }: {
   open: boolean;
   onOk: () => void;
   onCancel: () => void;
+  categories: any[];
 }) {
-  const { data: categoriesData, loading: categoriesLoading } =
-    useQuery(GET_ALL_CATEGORIES);
   const [messageApi, messageContextHolder] = message.useMessage();
   const [form] = Form.useForm();
   const [isEditing, setIsEditing] = useState(false);
@@ -182,7 +182,7 @@ export default function CategoryModal({
         onOk={onOk}
         onCancel={onCancel}
       >
-        <Spin spinning={categoriesLoading}>
+        <Spin spinning={false}>
           {/* Create Category */}
           <Form form={form} onFinish={showConfirmAdd} layout="vertical">
             <div className="flex flex-col gap-2 mb-4">
@@ -239,7 +239,7 @@ export default function CategoryModal({
           <Divider />
           {/* Categories List */}
           <div className="flex flex-col gap-2">
-            {categoriesData?.categoriesAdmin.map((category) => (
+            {categories?.map((category) => (
               <div
                 key={category.id}
                 className="flex justify-between items-center mb-2 border border-gray-200 p-2 rounded-md"

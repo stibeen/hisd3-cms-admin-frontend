@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useReadQuery, useMutation, useQuery } from "@apollo/client/react";
+import { useReadQuery, useMutation } from "@apollo/client/react";
 import {
   Typography,
   Divider,
@@ -45,7 +45,6 @@ function RouteComponent() {
   const { data: inquiryData, error: inquiryError } = useReadQuery(
     getInquiryByIdQueryRef,
   );
-  useQuery(INQUIRIES_PAGE_QUERY);
   const [updateInquiryStatus, { loading: updateInquiryStatusLoading }] =
     useMutation(UPDATE_INQUIRY_STATUS_MUTATION, {
       onCompleted: () => {

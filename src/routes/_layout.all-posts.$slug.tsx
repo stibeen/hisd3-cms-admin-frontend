@@ -1,199 +1,203 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { GET_PRODUCT_BY_ID, PRODUCTS_PAGE_QUERY } from "@/graphql/queries";
-import { UPDATE_PRODUCT_BY_ID_MUTATION } from "@/graphql/mutations";
+import { GET_ARTICLE_BY_ID } from "@/graphql/queries";
 import { useMutation, useReadQuery } from "@apollo/client/react";
 import {
-  Button,
-  Divider,
-  Input,
-  Select,
-  Space,
-  Switch,
-  Typography,
+  Form,
   message,
   Modal,
+  Input,
+  Select,
+  Button,
+  Divider,
   Upload,
-  Form,
   Tooltip,
+  Space,
+  Typography,
 } from "antd";
+import { useState, useEffect } from "react";
+import { UPDATE_ARTICLE_BY_ID_MUTATION } from "@/graphql/mutations";
+import CategoryModal from "@/components/CategoryModal";
+import uploadImage from "@/utils/uploadImage";
+import { ArticleStatus } from "@/graphql/generated/graphql";
+import ImagePreviewModal from "@/components/ImagePreviewModal";
+import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
 import {
+  SaveOutlined,
   PictureTwoTone,
-  PlusOutlined,
   SettingOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { useEffect, useState } from "react";
-import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
-import CategoryModal from "@/components/CategoryModal";
-import ImagePreviewModal from "@/components/ImagePreviewModal";
-import uploadImage from "@/utils/uploadImage";
 
-const { TextArea } = Input;
 const { Title } = Typography;
+const { TextArea } = Input;
 
-export const Route = createFileRoute("/_layout/products/$productId")({
+export const Route = createFileRoute("/_layout/all-posts/$slug")({
   component: RouteComponent,
   loader: ({ context: { preloadQuery }, params }) => {
-    const queryRef = preloadQuery(GET_PRODUCT_BY_ID, {
-      variables: {
-        adminProductId: params.productId,
-      },
+    const queryRef = preloadQuery(GET_ARTICLE_BY_ID, {
+      variables: { id: params.slug },
     });
-    const productsListQueryRef = preloadQuery(PRODUCTS_PAGE_QUERY);
-    return { queryRef, productsListQueryRef };
+    return { queryRef };
   },
 });
 
 function RouteComponent() {
-  const { queryRef, productsListQueryRef } = Route.useLoaderData();
-  const { data: productData } = useReadQuery(queryRef);
-  useReadQuery(productsListQueryRef);
-  const params = Route.useParams();
   const navigate = useNavigate();
-  const [updateProduct, { loading: updateProductLoading }] = useMutation(
-    UPDATE_PRODUCT_BY_ID_MUTATION,
+  const params = Route.useParams();
+  const { queryRef } = Route.useLoaderData();
+  const [form] = Form.useForm();
+  const { data: articleData, error: articleError } = useReadQuery(queryRef);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [updateArticle, { loading: updateArticleLoading }] = useMutation(
+    UPDATE_ARTICLE_BY_ID_MUTATION,
     {
-      refetchQueries: [GET_PRODUCT_BY_ID],
+      refetchQueries: [GET_ARTICLE_BY_ID],
       onCompleted: () => {
-        messageApi.success("Product updated successfully");
-        navigate({ to: "/products" });
+        messageApi.success("Article updated successfully");
+        navigate({ to: "/all-posts" });
       },
       onError: (error) => {
         console.error(error);
-        messageApi.error("Failed to update product");
+        messageApi.error(
+          "Failed to update article. Check console for more details.",
+        );
       },
     },
   );
-  const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
+  const [messageApi, messageContextHolder] = message.useMessage();
   const [modal, modalContextHolder] = Modal.useModal();
-  const [isActive, setIsActive] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [imagePreviewModalOpen, setImagePreviewModalOpen] = useState(false);
 
-  // Initialize/Sync form data when product data is available
+  // Sync form data with article data when it loads
   useEffect(() => {
-    if (productData?.adminProduct) {
-      const product = productData.adminProduct;
+    if (articleData?.adminArticle) {
+      const article = articleData.adminArticle;
       form.setFieldsValue({
-        name: product.name || "",
-        description: product.description || "",
-        tagline: product.tagline,
-        isActive: product.isActive,
-        slug: product.slug,
-        categoryId: product.category?.id,
+        title: article.title || "",
+        excerpt: article.excerpt || "",
+        content: article.content || "",
+        categoryId: article.category?.id || null,
+        status: (article.status as ArticleStatus) || ArticleStatus.Draft,
+        slug: article.slug || "",
       });
-      setPreviewUrl(product.media?.[0]?.url ? `${product.media[0].url}` : null);
+      setPreviewUrl(article.media?.[0]?.url ? `${article.media[0].url}` : null);
     }
-  }, [productData]);
+  }, [articleData]);
 
-  const showConfirmChanges = () => {
+  const handleUpdateArticle = async () => {
+    try {
+      let uploadedMediaId = null;
+      const { image, ...actualPayload } = form.getFieldsValue();
+      if (selectedFile) {
+        messageApi.loading("Uploading current cover image...", 0);
+        const uploadResult = await uploadImage(selectedFile);
+        uploadedMediaId = uploadResult.id;
+        messageApi.destroy();
+      }
+
+      await updateArticle({
+        variables: {
+          updateArticleId: params.slug,
+          payload: {
+            ...actualPayload,
+            mediaIds: uploadedMediaId
+              ? [uploadedMediaId]
+              : articleData?.adminArticle?.media?.[0]?.id
+                ? [articleData.adminArticle.media[0].id]
+                : [],
+          },
+        },
+        refetchQueries: [GET_ARTICLE_BY_ID],
+      });
+      messageApi.success("Article updated successfully");
+      navigate({ to: "/all-posts" });
+    } catch (error) {
+      messageApi.destroy();
+      console.error(error);
+      messageApi.error("Failed to update article");
+    }
+  };
+
+  const showConfirm = () => {
     modal.confirm({
-      title: "Confirm Changes",
-      content: "Are you sure you want to save changes to this product?",
-      okText: "Yes, Save",
+      title: "Save Changes?",
+      content: `Are you sure you want to save changes for this article?`,
+      okText: "Yes",
       cancelText: "Cancel",
       onOk: async () => {
-        await handleUpdateProduct();
+        await handleUpdateArticle();
       },
     });
   };
 
-  const handleUpdateProduct = async () => {
-    //   let iconURL = null;
-    let uploadedMediaId = null;
-    const { image, ...actualPayload } = form.getFieldsValue();
-    if (selectedFile) {
-      messageApi.loading("Uploading current cover image...", 0);
-      const uploadResult = await uploadImage(selectedFile);
-      // iconURL = uploadResult.url;
-      uploadedMediaId = uploadResult.id;
-      messageApi.destroy();
-    }
-
-    await updateProduct({
-      variables: {
-        updateProductInput: {
-          ...actualPayload,
-          id: params.productId,
-          mediaIds: uploadedMediaId
-            ? [uploadedMediaId]
-            : productData?.adminProduct?.media?.[0]?.id
-              ? [productData.adminProduct.media[0].id]
-              : [],
-          // icon: iconURL
-          //   ? `${import.meta.env.VITE_API_URL}${iconURL}`
-          //   : formData.icon,
-          slug: actualPayload.slug.trim()
-            ? actualPayload.slug.toLowerCase().replace(/\s+/g, "-")
-            : actualPayload.name.toLowerCase().replace(/\s+/g, "-"),
-        },
-      },
-    });
-  };
+  if (articleError)
+    return (
+      <div className="p-10 text-center text-red-500">
+        Error: {articleError.message}
+      </div>
+    );
 
   return (
     <>
-      <Form form={form} onFinish={showConfirmChanges} layout="vertical">
-        {contextHolder}
+      <Form form={form} onFinish={showConfirm} layout="vertical">
+        {messageContextHolder}
         {modalContextHolder}
         <CategoryModal
           open={categoryModalOpen}
           onOk={() => setCategoryModalOpen(false)}
           onCancel={() => setCategoryModalOpen(false)}
-          categories={productData?.categoriesAdmin || []}
+          categories={articleData?.categoriesAdmin || []}
         />
         <ImagePreviewModal
-          title="Product Cover Image"
           open={imagePreviewModalOpen}
           onOk={() => setImagePreviewModalOpen(false)}
           onCancel={() => setImagePreviewModalOpen(false)}
           previewUrl={previewUrl}
+          title="Cover Image Preview"
         />
+
+        {/* <Modal  */}
         {/* Header */}
         <div className="flex justify-between items-end mb-6">
           <div className="flex flex-col gap-1">
             <Title level={2} className="m-0!">
-              Edit Product
+              Edit Post
             </Title>
             <span className="text-gray-500 m-0">
-              Edit and upload product to the website.
+              Edit and publish post to the website.
             </span>
           </div>
-          <div className="flex justify-center gap-2">
-            <Form.Item name="isActive" className="mb-0!">
-              <div className="flex justify-between items-center gap-2 border border-gray-300 rounded-md p-2">
-                <span className="text-gray-500 m-0">
-                  {isActive
-                    ? "Visible to the public"
-                    : "Hidden from the public"}
-                </span>
-                <Switch
-                  defaultChecked={productData?.adminProduct?.isActive}
-                  onChange={(checked) => {
-                    setIsActive(checked);
-                    form.setFieldsValue({
-                      isActive: checked,
-                    });
-                  }}
-                />
-              </div>
+          <div className="flex gap-2">
+            <Form.Item name="status" initialValue={"DRAFT" as ArticleStatus}>
+              <Select
+                style={{ width: 150 }}
+                options={[
+                  {
+                    label: "Draft",
+                    value: "DRAFT" as ArticleStatus,
+                  },
+                  {
+                    label: "Published",
+                    value: "PUBLISHED" as ArticleStatus,
+                  },
+                ]}
+              />
             </Form.Item>
             <Button
               type="default"
               htmlType="button"
-              onClick={() => navigate({ to: "/products" })}
+              onClick={() => navigate({ to: "/all-posts" })}
             >
               Cancel
             </Button>
             <Button
               type="primary"
-              icon={<PlusOutlined />}
-              disabled={updateProductLoading}
-              loading={updateProductLoading}
               htmlType="submit"
+              icon={<SaveOutlined />}
+              disabled={updateArticleLoading}
+              loading={updateArticleLoading}
             >
               Save Changes
             </Button>
@@ -203,31 +207,28 @@ function RouteComponent() {
         <Divider />
 
         {/* Form */}
-        <div className="flex gap-6 mb-3">
-          <div className="w-2/3 flex flex-col gap-2">
-            {/* Product Title */}
+        <div className="flex gap-8 mb-3">
+          <div className="w-2/3 flex flex-col gap-4">
             <Form.Item
-              name="name"
-              rules={[{ required: true, message: "Please enter product name" }]}
+              name="title"
               label={
-                <span className="font-medium text-gray-700">Product Name</span>
+                <span className="font-medium text-gray-700">Post Title</span>
               }
+              rules={[{ required: true, message: "Please enter a title" }]}
               className="mb-0!"
             >
-              <Input placeholder="Enter product name..." size="large" />
+              <Input placeholder="Enter post title..." size="large" />
             </Form.Item>
 
-            {/* Product Description */}
             <Form.Item
-              name="description"
+              name="content"
               valuePropName="content"
-              label={
-                <span className="font-medium text-gray-700">
-                  Product Description
-                </span>
-              }
+              label={<span className="font-medium text-gray-700">Content</span>}
               rules={[
-                { required: true, message: "Please enter product description" },
+                {
+                  required: true,
+                  message: "Please enter post content",
+                },
               ]}
               className="mb-0!"
             >
@@ -237,33 +238,33 @@ function RouteComponent() {
               />
             </Form.Item>
 
-            {/* Product Tagline */}
             <Form.Item
-              name="tagline"
+              name="excerpt"
+              label={<span className="font-medium text-gray-700">Excerpt</span>}
               rules={[
-                { required: true, message: "Please enter product tagline" },
+                {
+                  required: true,
+                  message: "Please enter a post excerpt",
+                },
               ]}
-              label={
-                <span className="font-medium text-gray-700">
-                  Product Tagline
-                </span>
-              }
               className="mb-0!"
             >
-              <TextArea rows={4} placeholder="Enter product tagline..." />
+              <TextArea rows={4} placeholder="Enter post excerpt..." />
             </Form.Item>
           </div>
-
-          <div className="w-1/3 flex flex-col gap-2">
-            {/* Product Icon */}
+          <div className="w-1/3 flex flex-col gap-4">
             <Form.Item
               name="image"
-              label={<span className="font-medium text-gray-700">Icon</span>}
+              label={
+                <span className="font-medium text-gray-700">Cover Image</span>
+              }
               rules={[
                 {
                   validator: () => {
                     if (!selectedFile && !previewUrl) {
-                      return Promise.reject(new Error("Please upload icon"));
+                      return Promise.reject(
+                        new Error("Please upload gallery image"),
+                      );
                     }
                     return Promise.resolve();
                   },
@@ -278,7 +279,7 @@ function RouteComponent() {
                     <img
                       src={previewUrl}
                       alt="Preview"
-                      className="w-full h-full object-contain cursor-pointer"
+                      className="w-full h-full object-contain hover:cursor-pointer"
                       onClick={() => setImagePreviewModalOpen(true)}
                     />
                   ) : (
@@ -326,7 +327,6 @@ function RouteComponent() {
             </Form.Item>
 
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 flex flex-col gap-4">
-              {/* Product Category */}
               <Form.Item
                 name="categoryId"
                 label={
@@ -344,7 +344,7 @@ function RouteComponent() {
                   className="w-full"
                   placeholder="None"
                   options={[
-                    ...(productData.categoriesAdmin?.map((c) => ({
+                    ...(articleData?.categoriesAdmin.map((c) => ({
                       label: c.name,
                       value: c.id,
                     })) || []),
@@ -368,7 +368,7 @@ function RouteComponent() {
                   )}
                 />
               </Form.Item>
-              {/* Product Slug */}
+
               <Form.Item
                 name="slug"
                 label={<span className="font-medium text-gray-700">Slug</span>}

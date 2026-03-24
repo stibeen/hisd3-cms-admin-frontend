@@ -1,6 +1,7 @@
 // src/lib/auth.ts
 import { GraphQLClient, ClientError, gql } from "graphql-request";
 import { ME_QUERY } from "@/graphql/queries";
+import { apolloClient } from "./apollo";
 
 // Use your existing VITE_GRAPHQL_API_URL
 const API_URL = `${import.meta.env.VITE_GRAPHQL_API_URL}` || "";
@@ -39,8 +40,15 @@ let isRefreshing = false;
 let refreshPromise: Promise<boolean> | null = null;
 
 function isAuthError(error: any): boolean {
-  if (!(error instanceof ClientError)) return false;
-  const messages = error.response.errors?.map((e) => e.message) ?? [];
+  let messages: string[] = [];
+  if (error instanceof ClientError) {
+    messages = error.response.errors?.map((e) => e.message) ?? [];
+  } else if (error?.graphQLErrors) {
+    messages = error.graphQLErrors.map((e: any) => e.message) ?? [];
+  } else if (error?.message) {
+    messages = [error.message];
+  }
+
   return messages.some(
     (msg) =>
       msg.includes("Unauthorized") ||
@@ -74,14 +82,17 @@ export async function tryRefresh(): Promise<boolean> {
 
 export async function fetchMe() {
   try {
-    const data: any = await baseClient.request(ME_QUERY);
+    const { data }: any = await apolloClient.query({ query: ME_QUERY });
     return data.meQuery;
   } catch (error) {
     if (isAuthError(error)) {
       const refreshed = await tryRefresh();
       if (refreshed) {
         try {
-          const retryData: any = await baseClient.request(ME_QUERY);
+          const { data: retryData }: any = await apolloClient.query({ 
+            query: ME_QUERY,
+            fetchPolicy: 'network-only' 
+          });
           return retryData.meQuery;
         } catch {
           return { isSignedIn: false };

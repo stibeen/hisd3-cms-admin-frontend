@@ -118,6 +118,7 @@ function RouteComponent() {
           open={categoryModalOpen}
           onOk={() => setCategoryModalOpen(false)}
           onCancel={() => setCategoryModalOpen(false)}
+          categories={categoriesData?.categoriesAdmin || []}
         />
         <ImagePreviewModal
           title="Product Cover Image"

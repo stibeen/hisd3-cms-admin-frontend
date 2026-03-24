@@ -15,7 +15,7 @@ import { CameraTwoTone, PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import { TESTIMONIES_PAGE_QUERY } from "@/graphql/queries";
 import { CREATE_TESTIMONY_MUTATION } from "@/graphql/mutations";
 import { useState } from "react";
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useMutation } from "@apollo/client/react";
 import ImagePreviewModal from "@/components/ImagePreviewModal";
 import uploadImage from "@/utils/uploadImage";
 
@@ -30,7 +30,6 @@ export const Route = createFileRoute(
 
 function RouteComponent() {
   const navigate = useNavigate();
-  useQuery(TESTIMONIES_PAGE_QUERY);
   const [messageApi, contextHolder] = message.useMessage();
   const [modal, modalContextHolder] = Modal.useModal();
   const [form] = Form.useForm();

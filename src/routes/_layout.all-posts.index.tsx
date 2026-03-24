@@ -211,7 +211,7 @@ function RouteComponent() {
               (record.status === "PUBLISHED" || record.status === "DRAFT") && (
                 <Tooltip title="Edit">
                   {/* Option A: Use Link (Cleaner) */}
-                  <Link to="/all-posts/$postId" params={{ postId: record.id }}>
+                  <Link to="/all-posts/$slug" params={{ slug: record.slug }}>
                     <Button type="text" icon={<EditOutlined />} />
                   </Link>
                 </Tooltip>

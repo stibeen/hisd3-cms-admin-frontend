@@ -210,9 +210,9 @@ function DashboardApp() {
                 displayedArticles?.map((article) => (
                   <Link
                     key={article.id}
-                    to="/all-posts/$postId"
+                    to="/all-posts/$slug"
                     params={{
-                      postId: article.id,
+                      slug: article.slug!,
                     }}
                   >
                     <li
