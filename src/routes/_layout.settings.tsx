@@ -175,7 +175,9 @@ function RouteComponent() {
           lastName: values.lastName,
           username: values.username,
           email: values.email,
-          avatar: profileUrl,
+          avatar: profileUrl
+            ? profileUrl
+            : userData?.meQuery.user.profile?.avatar,
         },
       },
     });
