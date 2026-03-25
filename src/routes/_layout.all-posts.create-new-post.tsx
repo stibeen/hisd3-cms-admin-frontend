@@ -153,10 +153,6 @@ function RouteComponent() {
                     value: "PUBLISHED" as ArticleStatus,
                   },
                 ]}
-                // value={formData.status}
-                // onChange={(value) =>
-                //   setFormData((prev) => ({ ...prev, status: value }))
-                // }
               />
             </Form.Item>
             <Button
